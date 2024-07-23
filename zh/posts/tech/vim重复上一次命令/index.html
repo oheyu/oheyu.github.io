@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Vim重复上一次命令 | 史玉浩的个人博客</title>
+<meta name="keywords" content="Vim">
+<meta name="description" content="在 Vim 中，我们可以使用重复上一次输入内容的命令来提高编辑效率。以下是几种常用的方法： 一. 使用 . 命令 . 命令是 Vim 中最常用的重复命令。它可以重复上一">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/vim%E9%87%8D%E5%A4%8D%E4%B8%8A%E4%B8%80%E6%AC%A1%E5%91%BD%E4%BB%A4/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/vim%E9%87%8D%E5%A4%8D%E4%B8%8A%E4%B8%80%E6%AC%A1%E5%91%BD%E4%BB%A4/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  
+
+<meta property="og:title" content="Vim重复上一次命令" />
+<meta property="og:description" content="在 Vim 中，我们可以使用重复上一次输入内容的命令来提高编辑效率。以下是几种常用的方法： 一. 使用 . 命令 . 命令是 Vim 中最常用的重复命令。它可以重复上一" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/vim%E9%87%8D%E5%A4%8D%E4%B8%8A%E4%B8%80%E6%AC%A1%E5%91%BD%E4%BB%A4/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-07-12T16:15:16+08:00" />
+<meta property="article:modified_time" content="2023-07-12T16:15:16+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Vim重复上一次命令"/>
+<meta name="twitter:description" content="在 Vim 中，我们可以使用重复上一次输入内容的命令来提高编辑效率。以下是几种常用的方法： 一. 使用 . 命令 . 命令是 Vim 中最常用的重复命令。它可以重复上一"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Vim重复上一次命令",
+      "item": "https://oheyu.github.io/zh/posts/tech/vim%E9%87%8D%E5%A4%8D%E4%B8%8A%E4%B8%80%E6%AC%A1%E5%91%BD%E4%BB%A4/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Vim重复上一次命令",
+  "name": "Vim重复上一次命令",
+  "description": "在 Vim 中，我们可以使用重复上一次输入内容的命令来提高编辑效率。以下是几种常用的方法： 一. 使用 . 命令 . 命令是 Vim 中最常用的重复命令。它可以重复上一",
+  "keywords": [
+    "Vim"
+  ],
+  "articleBody": "\r在 Vim 中，我们可以使用重复上一次输入内容的命令来提高编辑效率。以下是几种常用的方法：\n一. 使用 . 命令 . 命令是 Vim 中最常用的重复命令。它可以重复上一次的普通模式命令。例如，如果在普通模式下删除了一个单词（dw），我们可以按 . 来重复这个操作。\n二. 使用 @: 命令 @: 命令可以重复上一次的命令行模式命令。例如，如果在命令行模式下输入了 :s/foo/bar/ 进行替换，我们可以按 @: 来重复这个替换操作。\n三. 使用 q 和 @ 命令记录和播放宏 我们也可以使用 q 命令开始录制宏，然后使用 @ 命令来播放宏，重复执行录制的命令序列，以下是详细步骤：\n录制宏：\n按 q 开始录制宏，后跟一个寄存器名（例如 a），即 qa。 执行你想录制的命令序列。 按 q 结束录制。 播放宏：\n按 @a 播放存储在寄存器 a 中的宏。 以重复删除某个单词为例：\n1 2 3 4 qa \" 开始录制宏，寄存器名为 a dw \" 删除一个单词 q \" 结束录制 @a \" 播放寄存器 a 中的宏 四. 使用 @@ 命令 @@ 命令可以重复上一次的宏。例如，如果我们刚刚使用了 @a 播放了宏，你可以按 @@ 来再次播放该宏。\n总结 在 Vim 中，有多种方法可以重复上一次的输入内容：\n使用 . 来重复上一次的普通模式命令。 使用 @: 来重复上一次的命令行模式命令。 使用宏（q 和 @）来录制和重复复杂的命令序列。 使用 @@ 来重复上一次播放的宏。 ",
+  "wordCount" : "511",
+  "inLanguage": "zh",
+  "datePublished": "2023-07-12T16:15:16+08:00",
+  "dateModified": "2023-07-12T16:15:16+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/vim%E9%87%8D%E5%A4%8D%E4%B8%8A%E4%B8%80%E6%AC%A1%E5%91%BD%E4%BB%A4/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Vim重复上一次命令
+    </h1>
+    <div class="post-meta"><span title='2023-07-12 16:15:16 +0800 CST'>2023-07-12</span>&nbsp;·&nbsp;2 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80-%e4%bd%bf%e7%94%a8--%e5%91%bd%e4%bb%a4" aria-label="一. 使用 . 命令">一. 使用 <code>.</code> 命令</a></li>
+                    <li>
+                        <a href="#%e4%ba%8c-%e4%bd%bf%e7%94%a8--%e5%91%bd%e4%bb%a4" aria-label="二. 使用 @: 命令">二. 使用 <code>@:</code> 命令</a></li>
+                    <li>
+                        <a href="#%e4%b8%89-%e4%bd%bf%e7%94%a8-q-%e5%92%8c--%e5%91%bd%e4%bb%a4%e8%ae%b0%e5%bd%95%e5%92%8c%e6%92%ad%e6%94%be%e5%ae%8f" aria-label="三. 使用 q 和 @ 命令记录和播放宏">三. 使用 <code>q</code> 和 <code>@</code> 命令记录和播放宏</a></li>
+                    <li>
+                        <a href="#%e5%9b%9b-%e4%bd%bf%e7%94%a8--%e5%91%bd%e4%bb%a4" aria-label="四. 使用 @@ 命令">四. 使用 <code>@@</code> 命令</a></li>
+                    <li>
+                        <a href="#%e6%80%bb%e7%bb%93" aria-label="总结">总结</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>在 Vim 中，我们可以使用重复上一次输入内容的命令来提高编辑效率。以下是几种常用的方法：</p>
+<hr>
+<h3 id="一-使用--命令">一. 使用 <code>.</code> 命令<a hidden class="anchor" aria-hidden="true" href="#一-使用--命令">#</a></h3>
+<p><code>.</code> 命令是 Vim 中最常用的重复命令。它可以重复上一次的普通模式命令。例如，如果在普通模式下删除了一个单词（<code>dw</code>），我们可以按 <code>.</code> 来重复这个操作。</p>
+<hr>
+<h3 id="二-使用--命令">二. 使用 <code>@:</code> 命令<a hidden class="anchor" aria-hidden="true" href="#二-使用--命令">#</a></h3>
+<p><code>@:</code> 命令可以重复上一次的命令行模式命令。例如，如果在命令行模式下输入了 <code>:s/foo/bar/</code> 进行替换，我们可以按 <code>@:</code> 来重复这个替换操作。</p>
+<hr>
+<h3 id="三-使用-q-和--命令记录和播放宏">三. 使用 <code>q</code> 和 <code>@</code> 命令记录和播放宏<a hidden class="anchor" aria-hidden="true" href="#三-使用-q-和--命令记录和播放宏">#</a></h3>
+<p>我们也可以使用 <code>q</code> 命令开始录制宏，然后使用 <code>@</code> 命令来播放宏，重复执行录制的命令序列，以下是详细步骤：</p>
+<ol>
+<li>
+<p><strong>录制宏</strong>：</p>
+<ul>
+<li>按 <code>q</code> 开始录制宏，后跟一个寄存器名（例如 <code>a</code>），即 <code>qa</code>。</li>
+<li>执行你想录制的命令序列。</li>
+<li>按 <code>q</code> 结束录制。</li>
+</ul>
+</li>
+<li>
+<p><strong>播放宏</strong>：</p>
+<ul>
+<li>按 <code>@a</code> 播放存储在寄存器 <code>a</code> 中的宏。</li>
+</ul>
+</li>
+</ol>
+<p>以重复删除某个单词为例：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">qa         &#34; 开始录制宏，寄存器名为 a
+</span></span><span class="line"><span class="cl">dw         &#34; 删除一个单词
+</span></span><span class="line"><span class="cl">q          &#34; 结束录制
+</span></span><span class="line"><span class="cl">@a         &#34; 播放寄存器 a 中的宏
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="四-使用--命令">四. 使用 <code>@@</code> 命令<a hidden class="anchor" aria-hidden="true" href="#四-使用--命令">#</a></h3>
+<p><code>@@</code> 命令可以重复上一次的宏。例如，如果我们刚刚使用了 <code>@a</code> 播放了宏，你可以按 <code>@@</code> 来再次播放该宏。</p>
+<hr>
+<h3 id="总结">总结<a hidden class="anchor" aria-hidden="true" href="#总结">#</a></h3>
+<p>在 Vim 中，有多种方法可以重复上一次的输入内容：</p>
+<ul>
+<li>使用 <code>.</code> 来重复上一次的普通模式命令。</li>
+<li>使用 <code>@:</code> 来重复上一次的命令行模式命令。</li>
+<li>使用宏（<code>q</code> 和 <code>@</code>）来录制和重复复杂的命令序列。</li>
+<li>使用 <code>@@</code> 来重复上一次播放的宏。</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/vim/">Vim</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/ubuntu%E7%B3%BB%E7%BB%9F%E5%BF%AB%E7%85%A7%E6%98%AF%E4%B8%AA%E4%BB%80%E4%B9%88%E7%8E%A9%E6%84%8F%E5%84%BF/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>Ubuntu系统快照是个什么玩意儿</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%9C%A8%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%92%8C%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>理解梯度下降在机器学习、深度学习和强化学习中的应用</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

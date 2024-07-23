@@ -5,11 +5,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Vim如何快速删除括号里的内容 | 史玉浩的个人博客</title>
-<meta name="keywords" content="Vim">
-<meta name="description" content="在 Vim 的普通模式下，我们可以将光标放在括号内的任意位置输入如下命令快速删除括号（圆括号()、方括号[]、花括号{}）里的内容： di(：删除当前">
+<title>👨🏻‍💻 技术 | 史玉浩的个人博客</title>
+<meta name="keywords" content="">
+<meta name="description" content="👨🏻‍💻 技术 - 史玉浩的个人博客">
 <meta name="author" content="史玉浩">
-<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/vim%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%88%A0%E9%99%A4%E6%8B%AC%E5%8F%B7%E9%87%8C%E7%9A%84%E5%86%85%E5%AE%B9/">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://oheyu.github.io/img/logo.svg">
 <link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
@@ -18,7 +18,9 @@
 <link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/vim%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%88%A0%E9%99%A4%E6%8B%AC%E5%8F%B7%E9%87%8C%E7%9A%84%E5%86%85%E5%AE%B9/">
+<link rel="alternate" type="application/rss+xml" href="https://oheyu.github.io/zh/posts/tech/index.xml">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/">
+<link rel="alternate" hreflang="en" href="https://oheyu.github.io/en/posts/tech/">
 <noscript>
     <style>
         #theme-toggle,
@@ -58,16 +60,14 @@
 </noscript>
   
 
-<meta property="og:title" content="Vim如何快速删除括号里的内容" />
-<meta property="og:description" content="在 Vim 的普通模式下，我们可以将光标放在括号内的任意位置输入如下命令快速删除括号（圆括号()、方括号[]、花括号{}）里的内容： di(：删除当前" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/vim%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%88%A0%E9%99%A4%E6%8B%AC%E5%8F%B7%E9%87%8C%E7%9A%84%E5%86%85%E5%AE%B9/" /><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2023-07-06T16:11:50+08:00" />
-<meta property="article:modified_time" content="2023-07-06T16:11:50+08:00" />
+<meta property="og:title" content="👨🏻‍💻 技术" />
+<meta property="og:description" content="哈哈哈" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/" />
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Vim如何快速删除括号里的内容"/>
-<meta name="twitter:description" content="在 Vim 的普通模式下，我们可以将光标放在括号内的任意位置输入如下命令快速删除括号（圆括号()、方括号[]、花括号{}）里的内容： di(：删除当前"/>
+<meta name="twitter:title" content="👨🏻‍💻 技术"/>
+<meta name="twitter:description" content="哈哈哈"/>
 
 
 <script type="application/ld+json">
@@ -86,52 +86,13 @@
       "position":  2 ,
       "name": "👨🏻‍💻 技术",
       "item": "https://oheyu.github.io/zh/posts/tech/"
-    }, 
-    {
-      "@type": "ListItem",
-      "position":  3 ,
-      "name": "Vim如何快速删除括号里的内容",
-      "item": "https://oheyu.github.io/zh/posts/tech/vim%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%88%A0%E9%99%A4%E6%8B%AC%E5%8F%B7%E9%87%8C%E7%9A%84%E5%86%85%E5%AE%B9/"
     }
   ]
 }
 </script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "Vim如何快速删除括号里的内容",
-  "name": "Vim如何快速删除括号里的内容",
-  "description": "在 Vim 的普通模式下，我们可以将光标放在括号内的任意位置输入如下命令快速删除括号（圆括号()、方括号[]、花括号{}）里的内容： di(：删除当前",
-  "keywords": [
-    "Vim"
-  ],
-  "articleBody": "\r在 Vim 的普通模式下，我们可以将光标放在括号内的任意位置输入如下命令快速删除括号（圆括号()、方括号[]、花括号{}）里的内容：\ndi(：删除当前括号对内的内容（但不删除括号本身）。其中，d 是删除命令，i( 表示括号 () 内的内容（i 表示 “inner”，内层）。 da(：删除当前括号对以及括号内的内容。其中，d 是删除命令，a( 表示括号 () 内的内容（a 表示 “around”，包括括号本身）。 对于方括号 [] 、花括号 {} 以及其他配对符号，如\"\"、''、\u003c\u003e等，使用方法与前述类似。 此外，在 Vim 的普通模式下，可以使用 vi* 或 va* 选择括号内的内容，并进入可视模式。\n",
-  "wordCount" : "280",
-  "inLanguage": "zh",
-  "datePublished": "2023-07-06T16:11:50+08:00",
-  "dateModified": "2023-07-06T16:11:50+08:00",
-  "author":[{
-    "@type": "Person",
-    "name": "史玉浩"
-  }],
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://oheyu.github.io/zh/posts/tech/vim%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%88%A0%E9%99%A4%E6%8B%AC%E5%8F%B7%E9%87%8C%E7%9A%84%E5%86%85%E5%AE%B9/"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "史玉浩的个人博客",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://oheyu.github.io/img/logo.svg"
-    }
-  }
-}
-</script>
 </head>
 
-<body class="" id="top">
+<body class="list" id="top">
 <script>
     if (localStorage.getItem("pref-theme") === "dark") {
         document.body.classList.add('dark');
@@ -210,49 +171,59 @@
         </ul>
     </nav>
 </header>
-<main class="main">
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a></div>
+  <h1>
+    👨🏻‍💻 技术
+  </h1>
+</header>
+<div class="post-content"><!-- more -->
 
-<article class="post-single">
-  <header class="post-header">
-    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
-    <h1 class="post-title entry-hint-parent">
-      Vim如何快速删除括号里的内容
-    </h1>
-    <div class="post-meta"><span title='2023-07-06 16:11:50 +0800 CST'>2023-07-06</span>&nbsp;·&nbsp;1 分钟&nbsp;·&nbsp;史玉浩
 
 </div>
-  </header> 
-  <div class="post-content"><!-- more -->
-<p>在 Vim 的普通模式下，我们可以将光标放在括号内的任意位置输入如下命令快速删除括号（圆括号<code>()</code>、方括号<code>[]</code>、花括号<code>{}</code>）里的内容：</p>
-<ul>
-<li><code>di(</code>：删除当前括号对内的内容（但不删除括号本身）。其中，<code>d</code> 是删除命令，<code>i(</code> 表示括号 <code>()</code> 内的内容（<code>i</code> 表示 “inner”，内层）。</li>
-<li><code>da(</code>：删除当前括号对以及括号内的内容。其中，<code>d</code> 是删除命令，<code>a(</code> 表示括号 <code>()</code> 内的内容（<code>a</code> 表示 “around”，包括括号本身）。</li>
-<li>对于方括号 <code>[]</code> 、花括号 <code>{}</code> 以及其他配对符号，如<code>&quot;&quot;</code>、<code>''</code>、<code>&lt;&gt;</code>等，使用方法与前述类似。</li>
-</ul>
-<p>此外，在 Vim 的普通模式下，可以使用 <code>vi*</code> 或 <code>va*</code> 选择括号内的内容，并进入可视模式。</p>
 
-
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">结构体与联合体
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>结构体（Struct） 结构体是一种用户定义的数据类型，允许将不同类型的变量组合在一起作为一个单一的实体进行处理。结构体常用于组织和管理不同类...</p>
   </div>
-
-  <footer class="post-footer">
-    <ul class="post-tags">
-      <li><a href="https://oheyu.github.io/zh/tags/vim/">Vim</a></li>
-    </ul>
-<nav class="paginav">
-  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%89%B9%E9%87%8F%E9%9A%8F%E6%9C%BA%E4%B8%8E%E5%B0%8F%E6%89%B9%E9%87%8F%E7%9A%84%E5%AF%B9%E6%AF%94/">
-    <span class="title">« 上一页</span>
-    <br>
-    <span>理解梯度下降：批量、随机与小批量的对比</span>
-  </a>
-  <a class="next" href="https://oheyu.github.io/zh/posts/tech/%E5%A4%A7%E7%AB%AF%E5%BA%8F%E4%B8%8E%E5%B0%8F%E7%AB%AF%E5%BA%8F/">
-    <span class="title">下一页 »</span>
-    <br>
-    <span>大端序与小端序</span>
-  </a>
-</nav>
-
-  </footer>
+  <footer class="entry-footer"><span title='2023-07-04 19:57:05 +0800 CST'>2023-07-04</span>&nbsp;·&nbsp;2 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to 结构体与联合体" href="https://oheyu.github.io/zh/posts/tech/%E7%BB%93%E6%9E%84%E4%BD%93%E4%B8%8E%E8%81%94%E5%90%88%E4%BD%93/"></a>
 </article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">解释型语言与编译型语言
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>解释型语言 解释型语言是被解释器逐行解释和执行源代码的语言。这意味着程序代码在运行时将被直接翻译为机器代码并执行。 解释型语言有以下三个优点以及...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-07-03 16:03:19 +0800 CST'>2023-07-03</span>&nbsp;·&nbsp;1 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to 解释型语言与编译型语言" href="https://oheyu.github.io/zh/posts/tech/%E8%A7%A3%E9%87%8A%E5%9E%8B%E8%AF%AD%E8%A8%80%E4%B8%8E%E7%BC%96%E8%AF%91%E5%9E%8B%E8%AF%AD%E8%A8%80/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">源文件到可执行文件的过程
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在C、C&#43;&#43;语言中，将源代码文件转换成可执行文件涉及多个步骤，主要包括预处理、编译、汇编和链接。 源代码（Source code）文件 源代码文件...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-07-01 22:12:27 +0800 CST'>2023-07-01</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to 源文件到可执行文件的过程" href="https://oheyu.github.io/zh/posts/tech/%E6%BA%90%E6%96%87%E4%BB%B6%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6%E7%9A%84%E8%BF%87%E7%A8%8B/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="prev" href="https://oheyu.github.io/zh/posts/tech/page/2/">
+      «&nbsp;上一页&nbsp;2/3
+    </a>
+  </nav>
+</footer>
     </main>
     
 <footer class="footer">
@@ -323,53 +294,6 @@
         }
     })
 
-</script>
-<script>
-    document.querySelectorAll('pre > code').forEach((codeblock) => {
-        const container = codeblock.parentNode.parentNode;
-
-        const copybutton = document.createElement('button');
-        copybutton.classList.add('copy-code');
-        copybutton.innerHTML = '复制';
-
-        function copyingDone() {
-            copybutton.innerHTML = '已复制！';
-            setTimeout(() => {
-                copybutton.innerHTML = '复制';
-            }, 2000);
-        }
-
-        copybutton.addEventListener('click', (cb) => {
-            if ('clipboard' in navigator) {
-                navigator.clipboard.writeText(codeblock.textContent);
-                copyingDone();
-                return;
-            }
-
-            const range = document.createRange();
-            range.selectNodeContents(codeblock);
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-            try {
-                document.execCommand('copy');
-                copyingDone();
-            } catch (e) { };
-            selection.removeRange(range);
-        });
-
-        if (container.classList.contains("highlight")) {
-            container.appendChild(copybutton);
-        } else if (container.parentNode.firstChild == container) {
-            
-        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
-            
-            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
-        } else {
-            
-            codeblock.parentNode.appendChild(copybutton);
-        }
-    });
 </script>
 </body>
 

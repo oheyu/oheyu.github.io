@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Linux on 史玉浩的个人博客</title>
+    <link>https://oheyu.github.io/zh/tags/linux/</link>
+    <description>Recent content in Linux on 史玉浩的个人博客</description>
+    <generator>Hugo -- 0.127.0</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 14 Jul 2023 16:24:40 +0800</lastBuildDate>
+    <atom:link href="https://oheyu.github.io/zh/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Ubuntu系统快照是个什么玩意儿</title>
+      <link>https://oheyu.github.io/zh/posts/tech/ubuntu%E7%B3%BB%E7%BB%9F%E5%BF%AB%E7%85%A7%E6%98%AF%E4%B8%AA%E4%BB%80%E4%B9%88%E7%8E%A9%E6%84%8F%E5%84%BF/</link>
+      <pubDate>Fri, 14 Jul 2023 16:24:40 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/ubuntu%E7%B3%BB%E7%BB%9F%E5%BF%AB%E7%85%A7%E6%98%AF%E4%B8%AA%E4%BB%80%E4%B9%88%E7%8E%A9%E6%84%8F%E5%84%BF/</guid>
+      <description>Ubuntu 系统快照是一种用于捕捉和保存系统当前状态的技术。这种技术允许用户在将来某个时间点恢复到快照创建时的系统状态。这对于备份、系统更新前的保护、</description>
+    </item>
+  </channel>
+</rss>

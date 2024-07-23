@@ -16,6 +16,20 @@
       <description>memcpy() 函数是 C 标准库中用于内存操作的一个重要函数，它被广泛用于在内存中复制数据块。在系统编程和低级数据操作中，memcpy() 是一个常用且高效的</description>
     </item>
     <item>
+      <title>理解CPP中的逗号运算符及其在赋值中的应用</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3cpp%E4%B8%AD%E7%9A%84%E9%80%97%E5%8F%B7%E8%BF%90%E7%AE%97%E7%AC%A6%E5%8F%8A%E5%85%B6%E5%9C%A8%E8%B5%8B%E5%80%BC%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/</link>
+      <pubDate>Fri, 21 Jul 2023 17:27:47 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3cpp%E4%B8%AD%E7%9A%84%E9%80%97%E5%8F%B7%E8%BF%90%E7%AE%97%E7%AC%A6%E5%8F%8A%E5%85%B6%E5%9C%A8%E8%B5%8B%E5%80%BC%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/</guid>
+      <description>在 C++ 中，逗号运算符 , 是一个有趣且常见的运算符，它允许在一个语句中计算多个表达式。虽然它的使用相对简单，但在某些情况下可能会引起混淆。 逗号运算</description>
+    </item>
+    <item>
+      <title>理解C语言中的NULL字符</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3c%E8%AF%AD%E8%A8%80%E4%B8%AD%E7%9A%84null%E5%AD%97%E7%AC%A6/</link>
+      <pubDate>Tue, 18 Jul 2023 16:52:00 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3c%E8%AF%AD%E8%A8%80%E4%B8%AD%E7%9A%84null%E5%AD%97%E7%AC%A6/</guid>
+      <description>在C语言编程中，NULL字符（通常表示为 \0）是一个关键的概念，尤其在处理字符串时。它标志着字符串的结束，并在许多函数和算法中起着至关重要的</description>
+    </item>
+    <item>
       <title>结构体与联合体</title>
       <link>https://oheyu.github.io/zh/posts/tech/%E7%BB%93%E6%9E%84%E4%BD%93%E4%B8%8E%E8%81%94%E5%90%88%E4%BD%93/</link>
       <pubDate>Tue, 04 Jul 2023 19:57:05 +0800</pubDate>

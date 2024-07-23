@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>机器学习 on 史玉浩的个人博客</title>
+    <link>https://oheyu.github.io/zh/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/</link>
+    <description>Recent content in 机器学习 on 史玉浩的个人博客</description>
+    <generator>Hugo -- 0.127.0</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 11 Jul 2023 15:53:52 +0800</lastBuildDate>
+    <atom:link href="https://oheyu.github.io/zh/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>理解梯度下降在机器学习、深度学习和强化学习中的应用</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%9C%A8%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%92%8C%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/</link>
+      <pubDate>Tue, 11 Jul 2023 15:53:52 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%9C%A8%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%92%8C%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/</guid>
+      <description>梯度下降是一种核心优化算法，广泛应用于机器学习、深度学习和强化学习中。本文将详细介绍这三者的关系，以及梯度下降在这些领域中的具体应用和实现方</description>
+    </item>
+    <item>
+      <title>理解梯度下降：批量、随机与小批量的对比</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%89%B9%E9%87%8F%E9%9A%8F%E6%9C%BA%E4%B8%8E%E5%B0%8F%E6%89%B9%E9%87%8F%E7%9A%84%E5%AF%B9%E6%AF%94/</link>
+      <pubDate>Mon, 10 Jul 2023 15:39:18 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%89%B9%E9%87%8F%E9%9A%8F%E6%9C%BA%E4%B8%8E%E5%B0%8F%E6%89%B9%E9%87%8F%E7%9A%84%E5%AF%B9%E6%AF%94/</guid>
+      <description>在机器学习和深度学习中，梯度下降是一种广泛使用的优化算法，用于最小化模型的损失函数，从而优化模型参数。梯度下降的三种主要变体是批量梯度下降、</description>
+    </item>
+  </channel>
+</rss>

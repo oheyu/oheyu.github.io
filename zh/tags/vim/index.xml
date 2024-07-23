@@ -6,8 +6,15 @@
     <description>Recent content in Vim on 史玉浩的个人博客</description>
     <generator>Hugo -- 0.127.0</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 06 Jul 2023 16:11:50 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 12 Jul 2023 16:15:16 +0800</lastBuildDate>
     <atom:link href="https://oheyu.github.io/zh/tags/vim/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Vim重复上一次命令</title>
+      <link>https://oheyu.github.io/zh/posts/tech/vim%E9%87%8D%E5%A4%8D%E4%B8%8A%E4%B8%80%E6%AC%A1%E5%91%BD%E4%BB%A4/</link>
+      <pubDate>Wed, 12 Jul 2023 16:15:16 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/vim%E9%87%8D%E5%A4%8D%E4%B8%8A%E4%B8%80%E6%AC%A1%E5%91%BD%E4%BB%A4/</guid>
+      <description>在 Vim 中，我们可以使用重复上一次输入内容的命令来提高编辑效率。以下是几种常用的方法： 一. 使用 . 命令 . 命令是 Vim 中最常用的重复命令。它可以重复上一</description>
+    </item>
     <item>
       <title>Vim如何快速删除括号里的内容</title>
       <link>https://oheyu.github.io/zh/posts/tech/vim%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%88%A0%E9%99%A4%E6%8B%AC%E5%8F%B7%E9%87%8C%E7%9A%84%E5%86%85%E5%AE%B9/</link>
