@@ -6,8 +6,15 @@
     <description>Recent content in Linux on 史玉浩的个人博客</description>
     <generator>Hugo -- 0.127.0</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 14 Jul 2023 16:24:40 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 24 Jul 2023 20:59:07 +0800</lastBuildDate>
     <atom:link href="https://oheyu.github.io/zh/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux手册页指南：了解各章节及其使用场景</title>
+      <link>https://oheyu.github.io/zh/posts/tech/linux%E6%89%8B%E5%86%8C%E9%A1%B5%E6%8C%87%E5%8D%97%E4%BA%86%E8%A7%A3%E5%90%84%E7%AB%A0%E8%8A%82%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/</link>
+      <pubDate>Mon, 24 Jul 2023 20:59:07 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/linux%E6%89%8B%E5%86%8C%E9%A1%B5%E6%8C%87%E5%8D%97%E4%BA%86%E8%A7%A3%E5%90%84%E7%AB%A0%E8%8A%82%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/</guid>
+      <description>Linux 手册页（man pages）是每个 Linux 用户和开发者的重要资源。它们提供了关于各种命令、系统调用、库函数、文件格式等的详细信息。手册页分为多个章</description>
+    </item>
     <item>
       <title>Ubuntu系统快照是个什么玩意儿</title>
       <link>https://oheyu.github.io/zh/posts/tech/ubuntu%E7%B3%BB%E7%BB%9F%E5%BF%AB%E7%85%A7%E6%98%AF%E4%B8%AA%E4%BB%80%E4%B9%88%E7%8E%A9%E6%84%8F%E5%84%BF/</link>

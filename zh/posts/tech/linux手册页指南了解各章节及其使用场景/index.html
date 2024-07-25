@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Linux手册页指南：了解各章节及其使用场景 | 史玉浩的个人博客</title>
+<meta name="keywords" content="Linux">
+<meta name="description" content="Linux 手册页（man pages）是每个 Linux 用户和开发者的重要资源。它们提供了关于各种命令、系统调用、库函数、文件格式等的详细信息。手册页分为多个章">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/linux%E6%89%8B%E5%86%8C%E9%A1%B5%E6%8C%87%E5%8D%97%E4%BA%86%E8%A7%A3%E5%90%84%E7%AB%A0%E8%8A%82%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/linux%E6%89%8B%E5%86%8C%E9%A1%B5%E6%8C%87%E5%8D%97%E4%BA%86%E8%A7%A3%E5%90%84%E7%AB%A0%E8%8A%82%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  
+
+<meta property="og:title" content="Linux手册页指南：了解各章节及其使用场景" />
+<meta property="og:description" content="Linux 手册页（man pages）是每个 Linux 用户和开发者的重要资源。它们提供了关于各种命令、系统调用、库函数、文件格式等的详细信息。手册页分为多个章" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/linux%E6%89%8B%E5%86%8C%E9%A1%B5%E6%8C%87%E5%8D%97%E4%BA%86%E8%A7%A3%E5%90%84%E7%AB%A0%E8%8A%82%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-07-24T20:59:07+08:00" />
+<meta property="article:modified_time" content="2023-07-24T20:59:07+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Linux手册页指南：了解各章节及其使用场景"/>
+<meta name="twitter:description" content="Linux 手册页（man pages）是每个 Linux 用户和开发者的重要资源。它们提供了关于各种命令、系统调用、库函数、文件格式等的详细信息。手册页分为多个章"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Linux手册页指南：了解各章节及其使用场景",
+      "item": "https://oheyu.github.io/zh/posts/tech/linux%E6%89%8B%E5%86%8C%E9%A1%B5%E6%8C%87%E5%8D%97%E4%BA%86%E8%A7%A3%E5%90%84%E7%AB%A0%E8%8A%82%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Linux手册页指南：了解各章节及其使用场景",
+  "name": "Linux手册页指南：了解各章节及其使用场景",
+  "description": "Linux 手册页（man pages）是每个 Linux 用户和开发者的重要资源。它们提供了关于各种命令、系统调用、库函数、文件格式等的详细信息。手册页分为多个章",
+  "keywords": [
+    "Linux"
+  ],
+  "articleBody": "\rLinux 手册页（man pages）是每个 Linux 用户和开发者的重要资源。它们提供了关于各种命令、系统调用、库函数、文件格式等的详细信息。手册页分为多个章节，每个章节涵盖特定类型的内容。\n一. 用户命令（User Commands） 章节编号：1\n内容：普通用户可以运行的命令和程序。\n适用场景：查找和学习日常使用的命令，如 ls、cp、grep 等。\n示例：\n1 man 1 ls 二. 系统调用（System Calls） 章节编号：2\n内容：操作系统内核提供的系统调用。\n适用场景：编写与操作系统内核直接交互的低级程序，例如涉及文件操作、进程控制等。\n示例：\n1 man 2 open 三. 库函数（Library Functions） 章节编号：3\n内容：C 标准库（libc）函数及其他库函数。\n适用场景：使用 C 语言编程时，查找标准库函数的用法和参数，例如字符串处理、数学函数等。\n示例：\n1 man 3 printf 四. 特殊文件（Special Files） 章节编号：4\n内容：设备文件和驱动程序。\n适用场景：与硬件设备交互或开发驱动程序时，查找设备文件的详细信息。\n示例：\n1 man 4 tty 五. 文件格式（File Formats and Conventions） 章节编号：5\n内容：各种文件格式、配置文件和协议描述。\n适用场景：编写或解析特定格式的文件时，了解文件格式的细节。\n示例：\n1 man 5 passwd 六. 游戏和杂项（Games and Screensavers） 章节编号：6\n内容：游戏和屏幕保护程序。\n适用场景：查找和了解系统上安装的游戏或屏幕保护程序。\n示例：\n1 man 6 snake 七. 杂项（Miscellaneous） 章节编号：7\n内容：与系统相关的杂项信息，包括宏包、惯例和协议。\n适用场景：查找与网络协议、文件系统、进程间通信等相关的高级主题。\n示例：\n1 man 7 socket 八. 系统管理命令（System Administration Commands） 章节编号：8\n内容：系统管理员使用的命令。\n适用场景：进行系统维护、配置和管理时，查找管理员级别的命令。\n示例：\n1 man 8 mount 九. 内核例程（Kernel Routines） 章节编号：9\n内容：内核开发和模块编程相关的函数和宏。\n适用场景：进行 Linux 内核开发或编写内核模块时，查找内核函数和数据结构的详细信息。\n示例：\n1 man 9 printk 总结 用户命令：日常使用的命令和工具。 系统调用：与操作系统内核交互的函数。 库函数：标准库和其他库提供的函数。 特殊文件：设备文件和驱动程序信息。 文件格式：配置文件和文件格式描述。 游戏和杂项：系统上的游戏和屏幕保护程序。 杂项：高级主题和系统相关信息。 系统管理命令：管理员使用的命令。 内核例程：内核开发相关的信息。 ",
+  "wordCount" : "1018",
+  "inLanguage": "zh",
+  "datePublished": "2023-07-24T20:59:07+08:00",
+  "dateModified": "2023-07-24T20:59:07+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/linux%E6%89%8B%E5%86%8C%E9%A1%B5%E6%8C%87%E5%8D%97%E4%BA%86%E8%A7%A3%E5%90%84%E7%AB%A0%E8%8A%82%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Linux手册页指南：了解各章节及其使用场景
+    </h1>
+    <div class="post-meta"><span title='2023-07-24 20:59:07 +0800 CST'>2023-07-24</span>&nbsp;·&nbsp;3 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80-%e7%94%a8%e6%88%b7%e5%91%bd%e4%bb%a4user-commands" aria-label="一. 用户命令（User Commands）">一. 用户命令（User Commands）</a></li>
+                    <li>
+                        <a href="#%e4%ba%8c-%e7%b3%bb%e7%bb%9f%e8%b0%83%e7%94%a8system-calls" aria-label="二. 系统调用（System Calls）">二. 系统调用（System Calls）</a></li>
+                    <li>
+                        <a href="#%e4%b8%89-%e5%ba%93%e5%87%bd%e6%95%b0library-functions" aria-label="三. 库函数（Library Functions）">三. 库函数（Library Functions）</a></li>
+                    <li>
+                        <a href="#%e5%9b%9b-%e7%89%b9%e6%ae%8a%e6%96%87%e4%bb%b6special-files" aria-label="四. 特殊文件（Special Files）">四. 特殊文件（Special Files）</a></li>
+                    <li>
+                        <a href="#%e4%ba%94-%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8ffile-formats-and-conventions" aria-label="五. 文件格式（File Formats and Conventions）">五. 文件格式（File Formats and Conventions）</a></li>
+                    <li>
+                        <a href="#%e5%85%ad-%e6%b8%b8%e6%88%8f%e5%92%8c%e6%9d%82%e9%a1%b9games-and-screensavers" aria-label="六. 游戏和杂项（Games and Screensavers）">六. 游戏和杂项（Games and Screensavers）</a></li>
+                    <li>
+                        <a href="#%e4%b8%83-%e6%9d%82%e9%a1%b9miscellaneous" aria-label="七. 杂项（Miscellaneous）">七. 杂项（Miscellaneous）</a></li>
+                    <li>
+                        <a href="#%e5%85%ab-%e7%b3%bb%e7%bb%9f%e7%ae%a1%e7%90%86%e5%91%bd%e4%bb%a4system-administration-commands" aria-label="八. 系统管理命令（System Administration Commands）">八. 系统管理命令（System Administration Commands）</a></li>
+                    <li>
+                        <a href="#%e4%b9%9d-%e5%86%85%e6%a0%b8%e4%be%8b%e7%a8%8bkernel-routines" aria-label="九. 内核例程（Kernel Routines）">九. 内核例程（Kernel Routines）</a></li>
+                    <li>
+                        <a href="#%e6%80%bb%e7%bb%93" aria-label="总结">总结</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>Linux 手册页（man pages）是每个 Linux 用户和开发者的重要资源。它们提供了关于各种命令、系统调用、库函数、文件格式等的详细信息。手册页分为多个章节，每个章节涵盖特定类型的内容。</p>
+<hr>
+<h3 id="一-用户命令user-commands">一. 用户命令（User Commands）<a hidden class="anchor" aria-hidden="true" href="#一-用户命令user-commands">#</a></h3>
+<p><strong>章节编号</strong>：1</p>
+<p><strong>内容</strong>：普通用户可以运行的命令和程序。</p>
+<p><strong>适用场景</strong>：查找和学习日常使用的命令，如 <code>ls</code>、<code>cp</code>、<code>grep</code> 等。</p>
+<p><strong>示例</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">man <span class="m">1</span> ls
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="二-系统调用system-calls">二. 系统调用（System Calls）<a hidden class="anchor" aria-hidden="true" href="#二-系统调用system-calls">#</a></h3>
+<p><strong>章节编号</strong>：2</p>
+<p><strong>内容</strong>：操作系统内核提供的系统调用。</p>
+<p><strong>适用场景</strong>：编写与操作系统内核直接交互的低级程序，例如涉及文件操作、进程控制等。</p>
+<p><strong>示例</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">man <span class="m">2</span> open
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="三-库函数library-functions">三. 库函数（Library Functions）<a hidden class="anchor" aria-hidden="true" href="#三-库函数library-functions">#</a></h3>
+<p><strong>章节编号</strong>：3</p>
+<p><strong>内容</strong>：C 标准库（libc）函数及其他库函数。</p>
+<p><strong>适用场景</strong>：使用 C 语言编程时，查找标准库函数的用法和参数，例如字符串处理、数学函数等。</p>
+<p><strong>示例</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">man <span class="m">3</span> <span class="nb">printf</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="四-特殊文件special-files">四. 特殊文件（Special Files）<a hidden class="anchor" aria-hidden="true" href="#四-特殊文件special-files">#</a></h3>
+<p><strong>章节编号</strong>：4</p>
+<p><strong>内容</strong>：设备文件和驱动程序。</p>
+<p><strong>适用场景</strong>：与硬件设备交互或开发驱动程序时，查找设备文件的详细信息。</p>
+<p><strong>示例</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">man <span class="m">4</span> tty
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="五-文件格式file-formats-and-conventions">五. 文件格式（File Formats and Conventions）<a hidden class="anchor" aria-hidden="true" href="#五-文件格式file-formats-and-conventions">#</a></h3>
+<p><strong>章节编号</strong>：5</p>
+<p><strong>内容</strong>：各种文件格式、配置文件和协议描述。</p>
+<p><strong>适用场景</strong>：编写或解析特定格式的文件时，了解文件格式的细节。</p>
+<p><strong>示例</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">man <span class="m">5</span> passwd
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="六-游戏和杂项games-and-screensavers">六. 游戏和杂项（Games and Screensavers）<a hidden class="anchor" aria-hidden="true" href="#六-游戏和杂项games-and-screensavers">#</a></h3>
+<p><strong>章节编号</strong>：6</p>
+<p><strong>内容</strong>：游戏和屏幕保护程序。</p>
+<p><strong>适用场景</strong>：查找和了解系统上安装的游戏或屏幕保护程序。</p>
+<p><strong>示例</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">man <span class="m">6</span> snake
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="七-杂项miscellaneous">七. 杂项（Miscellaneous）<a hidden class="anchor" aria-hidden="true" href="#七-杂项miscellaneous">#</a></h3>
+<p><strong>章节编号</strong>：7</p>
+<p><strong>内容</strong>：与系统相关的杂项信息，包括宏包、惯例和协议。</p>
+<p><strong>适用场景</strong>：查找与网络协议、文件系统、进程间通信等相关的高级主题。</p>
+<p><strong>示例</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">man <span class="m">7</span> socket
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="八-系统管理命令system-administration-commands">八. 系统管理命令（System Administration Commands）<a hidden class="anchor" aria-hidden="true" href="#八-系统管理命令system-administration-commands">#</a></h3>
+<p><strong>章节编号</strong>：8</p>
+<p><strong>内容</strong>：系统管理员使用的命令。</p>
+<p><strong>适用场景</strong>：进行系统维护、配置和管理时，查找管理员级别的命令。</p>
+<p><strong>示例</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">man <span class="m">8</span> mount
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="九-内核例程kernel-routines">九. 内核例程（Kernel Routines）<a hidden class="anchor" aria-hidden="true" href="#九-内核例程kernel-routines">#</a></h3>
+<p><strong>章节编号</strong>：9</p>
+<p><strong>内容</strong>：内核开发和模块编程相关的函数和宏。</p>
+<p><strong>适用场景</strong>：进行 Linux 内核开发或编写内核模块时，查找内核函数和数据结构的详细信息。</p>
+<p><strong>示例</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">man <span class="m">9</span> printk
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="总结">总结<a hidden class="anchor" aria-hidden="true" href="#总结">#</a></h3>
+<ul>
+<li><strong>用户命令</strong>：日常使用的命令和工具。</li>
+<li><strong>系统调用</strong>：与操作系统内核交互的函数。</li>
+<li><strong>库函数</strong>：标准库和其他库提供的函数。</li>
+<li><strong>特殊文件</strong>：设备文件和驱动程序信息。</li>
+<li><strong>文件格式</strong>：配置文件和文件格式描述。</li>
+<li><strong>游戏和杂项</strong>：系统上的游戏和屏幕保护程序。</li>
+<li><strong>杂项</strong>：高级主题和系统相关信息。</li>
+<li><strong>系统管理命令</strong>：管理员使用的命令。</li>
+<li><strong>内核例程</strong>：内核开发相关的信息。</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/linux/">Linux</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/memcpy%E5%87%BD%E6%95%B0%E8%AF%A6%E8%A7%A3/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>memcpy()函数详解</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/pytorch%E4%B8%AD%E7%9A%84%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%BC%8F%E5%92%8C%E6%8D%9F%E5%A4%B1%E8%AE%A1%E7%AE%97/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>PyTorch中的训练模式和损失计算</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

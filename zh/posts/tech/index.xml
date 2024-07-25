@@ -16,6 +16,13 @@
       <description>memcpy() 函数是 C 标准库中用于内存操作的一个重要函数，它被广泛用于在内存中复制数据块。在系统编程和低级数据操作中，memcpy() 是一个常用且高效的</description>
     </item>
     <item>
+      <title>Linux手册页指南：了解各章节及其使用场景</title>
+      <link>https://oheyu.github.io/zh/posts/tech/linux%E6%89%8B%E5%86%8C%E9%A1%B5%E6%8C%87%E5%8D%97%E4%BA%86%E8%A7%A3%E5%90%84%E7%AB%A0%E8%8A%82%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/</link>
+      <pubDate>Mon, 24 Jul 2023 20:59:07 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/linux%E6%89%8B%E5%86%8C%E9%A1%B5%E6%8C%87%E5%8D%97%E4%BA%86%E8%A7%A3%E5%90%84%E7%AB%A0%E8%8A%82%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/</guid>
+      <description>Linux 手册页（man pages）是每个 Linux 用户和开发者的重要资源。它们提供了关于各种命令、系统调用、库函数、文件格式等的详细信息。手册页分为多个章</description>
+    </item>
+    <item>
       <title>PyTorch中的训练模式和损失计算</title>
       <link>https://oheyu.github.io/zh/posts/tech/pytorch%E4%B8%AD%E7%9A%84%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%BC%8F%E5%92%8C%E6%8D%9F%E5%A4%B1%E8%AE%A1%E7%AE%97/</link>
       <pubDate>Sun, 23 Jul 2023 21:50:42 +0800</pubDate>
