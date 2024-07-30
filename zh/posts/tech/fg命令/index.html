@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Fg命令 | 史玉浩的个人博客</title>
+<meta name="keywords" content="Linux">
+<meta name="description" content="fg 命令是 Unix 和类 Unix 操作系统中的一个重要命令，用于将后台运行的任务（进程）恢复到前台。它的全称是 &ldquo;foreground&rdquo;">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/fg%E5%91%BD%E4%BB%A4/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/fg%E5%91%BD%E4%BB%A4/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="Fg命令" />
+<meta property="og:description" content="fg 命令是 Unix 和类 Unix 操作系统中的一个重要命令，用于将后台运行的任务（进程）恢复到前台。它的全称是 &ldquo;foreground&rdquo;" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/fg%E5%91%BD%E4%BB%A4/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-07-30T15:49:00+08:00" />
+<meta property="article:modified_time" content="2023-07-30T15:49:00+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Fg命令"/>
+<meta name="twitter:description" content="fg 命令是 Unix 和类 Unix 操作系统中的一个重要命令，用于将后台运行的任务（进程）恢复到前台。它的全称是 &ldquo;foreground&rdquo;"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Fg命令",
+      "item": "https://oheyu.github.io/zh/posts/tech/fg%E5%91%BD%E4%BB%A4/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Fg命令",
+  "name": "Fg命令",
+  "description": "fg 命令是 Unix 和类 Unix 操作系统中的一个重要命令，用于将后台运行的任务（进程）恢复到前台。它的全称是 \u0026ldquo;foreground\u0026rdquo;",
+  "keywords": [
+    "Linux"
+  ],
+  "articleBody": "\rfg 命令是 Unix 和类 Unix 操作系统中的一个重要命令，用于将后台运行的任务（进程）恢复到前台。它的全称是 “foreground”。下面将全面介绍 fg 命令，包括所有可能的使用场景和具体示例。\n一、fg 命令概述 fg 命令主要用于以下场景：将后台任务恢复到前台、恢复被挂起的任务以及管理多任务环境中的任务优先级。\n二、基本语法 1 fg [job_spec] 其中 job_spec 是任务的标识符，可以是任务编号、命令名等。job_spec 的常见格式包括：\n%n：任务编号，例如 %1。 %string：任务名，以 string 开头的任务。 %?string：任务名，包含 string 的任务。 三、使用场景及具体例子 3.1 将最近的后台任务恢复到前台 当你有一个或多个任务在后台运行时，可以使用 fg 命令将最近的一个任务恢复到前台。\n1 2 3 4 5 sleep 100 \u0026 # 任务 sleep 100 在后台运行 fg # 将最近的后台任务恢复到前台 3.2 将指定的后台任务恢复到前台 你可以通过任务编号或任务名来指定要恢复到前台的任务。\n1 2 3 4 5 6 7 8 9 10 sleep 100 \u0026 sleep 200 \u0026 # 两个任务在后台运行 jobs # [1]+ Running sleep 100 \u0026 # [2]- Running sleep 200 \u0026 fg %1 # 将任务编号为 1 的任务（sleep 100）恢复到前台 3.3 恢复包含特定字符串的任务 如果你有多个任务，并且不记得具体编号，可以通过任务名的一部分来恢复任务。\n1 2 3 4 5 6 vi file1 \u0026 vi file2 \u0026 # 两个 vi 编辑器任务在后台运行 fg %?file2 # 将包含 'file2' 的任务恢复到前台 3.4 恢复被挂起的任务 有时，你可能会挂起一个正在前台运行的任务，然后将其恢复。\n1 2 3 4 5 6 7 8 sleep 1000 # 按下 Ctrl+Z 挂起任务 jobs # [1]+ Stopped sleep 1000 fg %1 # 将挂起的任务恢复到前台 3.5 在多任务环境中管理任务 在复杂的多任务环境中，可以通过 fg 命令来管理不同任务的优先级。\n1 2 3 4 5 6 7 8 9 10 # 启动几个长时间运行的任务 sleep 1000 \u0026 sleep 2000 \u0026 sleep 3000 \u0026 jobs # 列出所有后台任务 fg %3 # 将任务编号为 3 的任务恢复到前台 四、补充说明 任务编号：\n可以使用 jobs 命令查看所有后台和挂起的任务及其编号。 任务编号在当前 shell 会话中是唯一的，但在不同的 shell 会话中可能会重复。 任务状态：\nRunning：任务正在后台运行。 Stopped：任务被挂起。 Done：任务已完成。 组合使用：\nfg 命令通常与 \u0026（后台运行符）、jobs（查看后台任务）和 bg（将任务放到后台）等命令一起使用，以实现灵活的任务管理。 ",
+  "wordCount" : "907",
+  "inLanguage": "zh",
+  "datePublished": "2023-07-30T15:49:00+08:00",
+  "dateModified": "2023-07-30T15:49:00+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/fg%E5%91%BD%E4%BB%A4/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Fg命令
+    </h1>
+    <div class="post-meta"><span title='2023-07-30 15:49:00 +0800 CST'>2023-07-30</span>&nbsp;·&nbsp;2 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80fg-%e5%91%bd%e4%bb%a4%e6%a6%82%e8%bf%b0" aria-label="一、fg 命令概述">一、<code>fg</code> 命令概述</a></li>
+                    <li>
+                        <a href="#%e4%ba%8c%e5%9f%ba%e6%9c%ac%e8%af%ad%e6%b3%95" aria-label="二、基本语法">二、基本语法</a></li>
+                    <li>
+                        <a href="#%e4%b8%89%e4%bd%bf%e7%94%a8%e5%9c%ba%e6%99%af%e5%8f%8a%e5%85%b7%e4%bd%93%e4%be%8b%e5%ad%90" aria-label="三、使用场景及具体例子">三、使用场景及具体例子</a><ul>
+                            
+                    <li>
+                        <a href="#31-%e5%b0%86%e6%9c%80%e8%bf%91%e7%9a%84%e5%90%8e%e5%8f%b0%e4%bb%bb%e5%8a%a1%e6%81%a2%e5%a4%8d%e5%88%b0%e5%89%8d%e5%8f%b0" aria-label="3.1 将最近的后台任务恢复到前台">3.1 将最近的后台任务恢复到前台</a></li>
+                    <li>
+                        <a href="#32-%e5%b0%86%e6%8c%87%e5%ae%9a%e7%9a%84%e5%90%8e%e5%8f%b0%e4%bb%bb%e5%8a%a1%e6%81%a2%e5%a4%8d%e5%88%b0%e5%89%8d%e5%8f%b0" aria-label="3.2 将指定的后台任务恢复到前台">3.2 将指定的后台任务恢复到前台</a></li>
+                    <li>
+                        <a href="#33-%e6%81%a2%e5%a4%8d%e5%8c%85%e5%90%ab%e7%89%b9%e5%ae%9a%e5%ad%97%e7%ac%a6%e4%b8%b2%e7%9a%84%e4%bb%bb%e5%8a%a1" aria-label="3.3 恢复包含特定字符串的任务">3.3 恢复包含特定字符串的任务</a></li>
+                    <li>
+                        <a href="#34-%e6%81%a2%e5%a4%8d%e8%a2%ab%e6%8c%82%e8%b5%b7%e7%9a%84%e4%bb%bb%e5%8a%a1" aria-label="3.4 恢复被挂起的任务">3.4 恢复被挂起的任务</a></li>
+                    <li>
+                        <a href="#35-%e5%9c%a8%e5%a4%9a%e4%bb%bb%e5%8a%a1%e7%8e%af%e5%a2%83%e4%b8%ad%e7%ae%a1%e7%90%86%e4%bb%bb%e5%8a%a1" aria-label="3.5 在多任务环境中管理任务">3.5 在多任务环境中管理任务</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%9b%9b%e8%a1%a5%e5%85%85%e8%af%b4%e6%98%8e" aria-label="四、补充说明">四、补充说明</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p><code>fg</code> 命令是 Unix 和类 Unix 操作系统中的一个重要命令，用于将后台运行的任务（进程）恢复到前台。它的全称是 &ldquo;foreground&rdquo;。下面将全面介绍 <code>fg</code> 命令，包括所有可能的使用场景和具体示例。</p>
+<hr>
+<h3 id="一fg-命令概述">一、<code>fg</code> 命令概述<a hidden class="anchor" aria-hidden="true" href="#一fg-命令概述">#</a></h3>
+<p><code>fg</code> 命令主要用于以下场景：将后台任务恢复到前台、恢复被挂起的任务以及管理多任务环境中的任务优先级。</p>
+<hr>
+<h3 id="二基本语法">二、基本语法<a hidden class="anchor" aria-hidden="true" href="#二基本语法">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">fg</span> <span class="o">[</span>job_spec<span class="o">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中 <code>job_spec</code> 是任务的标识符，可以是任务编号、命令名等。<code>job_spec</code> 的常见格式包括：</p>
+<ul>
+<li><code>%n</code>：任务编号，例如 <code>%1</code>。</li>
+<li><code>%string</code>：任务名，以 <code>string</code> 开头的任务。</li>
+<li><code>%?string</code>：任务名，包含 <code>string</code> 的任务。</li>
+</ul>
+<hr>
+<h3 id="三使用场景及具体例子">三、使用场景及具体例子<a hidden class="anchor" aria-hidden="true" href="#三使用场景及具体例子">#</a></h3>
+<h4 id="31-将最近的后台任务恢复到前台">3.1 将最近的后台任务恢复到前台<a hidden class="anchor" aria-hidden="true" href="#31-将最近的后台任务恢复到前台">#</a></h4>
+<p>当你有一个或多个任务在后台运行时，可以使用 <code>fg</code> 命令将最近的一个任务恢复到前台。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sleep <span class="m">100</span> <span class="p">&amp;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 任务 sleep 100 在后台运行</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">fg</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 将最近的后台任务恢复到前台</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="32-将指定的后台任务恢复到前台">3.2 将指定的后台任务恢复到前台<a hidden class="anchor" aria-hidden="true" href="#32-将指定的后台任务恢复到前台">#</a></h4>
+<p>你可以通过任务编号或任务名来指定要恢复到前台的任务。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sleep <span class="m">100</span> <span class="p">&amp;</span>
+</span></span><span class="line"><span class="cl">sleep <span class="m">200</span> <span class="p">&amp;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 两个任务在后台运行</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">jobs</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># [1]+  Running                 sleep 100 &amp;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># [2]-  Running                 sleep 200 &amp;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">fg</span> %1
+</span></span><span class="line"><span class="cl"><span class="c1"># 将任务编号为 1 的任务（sleep 100）恢复到前台</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="33-恢复包含特定字符串的任务">3.3 恢复包含特定字符串的任务<a hidden class="anchor" aria-hidden="true" href="#33-恢复包含特定字符串的任务">#</a></h4>
+<p>如果你有多个任务，并且不记得具体编号，可以通过任务名的一部分来恢复任务。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">vi file1 <span class="p">&amp;</span>
+</span></span><span class="line"><span class="cl">vi file2 <span class="p">&amp;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 两个 vi 编辑器任务在后台运行</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">fg</span> %?file2
+</span></span><span class="line"><span class="cl"><span class="c1"># 将包含 &#39;file2&#39; 的任务恢复到前台</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="34-恢复被挂起的任务">3.4 恢复被挂起的任务<a hidden class="anchor" aria-hidden="true" href="#34-恢复被挂起的任务">#</a></h4>
+<p>有时，你可能会挂起一个正在前台运行的任务，然后将其恢复。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sleep <span class="m">1000</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 按下 Ctrl+Z 挂起任务</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">jobs</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># [1]+  Stopped                 sleep 1000</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">fg</span> %1
+</span></span><span class="line"><span class="cl"><span class="c1"># 将挂起的任务恢复到前台</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="35-在多任务环境中管理任务">3.5 在多任务环境中管理任务<a hidden class="anchor" aria-hidden="true" href="#35-在多任务环境中管理任务">#</a></h4>
+<p>在复杂的多任务环境中，可以通过 <code>fg</code> 命令来管理不同任务的优先级。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># 启动几个长时间运行的任务</span>
+</span></span><span class="line"><span class="cl">sleep <span class="m">1000</span> <span class="p">&amp;</span>
+</span></span><span class="line"><span class="cl">sleep <span class="m">2000</span> <span class="p">&amp;</span>
+</span></span><span class="line"><span class="cl">sleep <span class="m">3000</span> <span class="p">&amp;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">jobs</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 列出所有后台任务</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">fg</span> %3
+</span></span><span class="line"><span class="cl"><span class="c1"># 将任务编号为 3 的任务恢复到前台</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="四补充说明">四、补充说明<a hidden class="anchor" aria-hidden="true" href="#四补充说明">#</a></h3>
+<ol>
+<li>
+<p><strong>任务编号</strong>：</p>
+<ul>
+<li>可以使用 <code>jobs</code> 命令查看所有后台和挂起的任务及其编号。</li>
+<li>任务编号在当前 shell 会话中是唯一的，但在不同的 shell 会话中可能会重复。</li>
+</ul>
+</li>
+<li>
+<p><strong>任务状态</strong>：</p>
+<ul>
+<li><code>Running</code>：任务正在后台运行。</li>
+<li><code>Stopped</code>：任务被挂起。</li>
+<li><code>Done</code>：任务已完成。</li>
+</ul>
+</li>
+<li>
+<p><strong>组合使用</strong>：</p>
+<ul>
+<li><code>fg</code> 命令通常与 <code>&amp;</code>（后台运行符）、<code>jobs</code>（查看后台任务）和 <code>bg</code>（将任务放到后台）等命令一起使用，以实现灵活的任务管理。</li>
+</ul>
+</li>
+</ol>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/linux/">Linux</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/memcpy%E5%87%BD%E6%95%B0%E8%AF%A6%E8%A7%A3/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>memcpy()函数详解</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90addrinfo%E7%BB%93%E6%9E%84%E4%BD%93/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>深入剖析addrinfo结构体</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

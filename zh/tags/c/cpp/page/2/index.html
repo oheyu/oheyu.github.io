@@ -56,7 +56,42 @@
         }
 
     </style>
-</noscript>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
   
 
 <meta property="og:title" content="C/CPP" />
@@ -155,6 +190,18 @@
     C/CPP
   </h1>
 </header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">解释型语言与编译型语言
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>解释型语言 解释型语言是被解释器逐行解释和执行源代码的语言。这意味着程序代码在运行时将被直接翻译为机器代码并执行。 解释型语言有以下三个优点以及...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-07-03 16:03:19 +0800 CST'>2023-07-03</span>&nbsp;·&nbsp;1 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to 解释型语言与编译型语言" href="https://oheyu.github.io/zh/posts/tech/%E8%A7%A3%E9%87%8A%E5%9E%8B%E8%AF%AD%E8%A8%80%E4%B8%8E%E7%BC%96%E8%AF%91%E5%9E%8B%E8%AF%AD%E8%A8%80/"></a>
+</article>
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">

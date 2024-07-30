@@ -16,6 +16,34 @@
       <description>memcpy() 函数是 C 标准库中用于内存操作的一个重要函数，它被广泛用于在内存中复制数据块。在系统编程和低级数据操作中，memcpy() 是一个常用且高效的</description>
     </item>
     <item>
+      <title>Fg命令</title>
+      <link>https://oheyu.github.io/zh/posts/tech/fg%E5%91%BD%E4%BB%A4/</link>
+      <pubDate>Sun, 30 Jul 2023 15:49:00 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/fg%E5%91%BD%E4%BB%A4/</guid>
+      <description>fg 命令是 Unix 和类 Unix 操作系统中的一个重要命令，用于将后台运行的任务（进程）恢复到前台。它的全称是 &amp;ldquo;foreground&amp;rdquo;</description>
+    </item>
+    <item>
+      <title>深入剖析addrinfo结构体</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90addrinfo%E7%BB%93%E6%9E%84%E4%BD%93/</link>
+      <pubDate>Thu, 27 Jul 2023 15:32:48 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90addrinfo%E7%BB%93%E6%9E%84%E4%BD%93/</guid>
+      <description>在网络编程中，特别是在使用套接字编程时，地址解析和管理是一个关键问题。为了简化这个过程，POSIX 标准定义了 addrinfo 结构体和相关函数。 一、addr</description>
+    </item>
+    <item>
+      <title>监听描述符与已连接描述符在网络编程中的区别</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E7%9B%91%E5%90%AC%E6%8F%8F%E8%BF%B0%E7%AC%A6%E4%B8%8E%E5%B7%B2%E8%BF%9E%E6%8E%A5%E6%8F%8F%E8%BF%B0%E7%AC%A6%E5%9C%A8%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E4%B8%AD%E7%9A%84%E5%8C%BA%E5%88%AB/</link>
+      <pubDate>Wed, 26 Jul 2023 15:22:55 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E7%9B%91%E5%90%AC%E6%8F%8F%E8%BF%B0%E7%AC%A6%E4%B8%8E%E5%B7%B2%E8%BF%9E%E6%8E%A5%E6%8F%8F%E8%BF%B0%E7%AC%A6%E5%9C%A8%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E4%B8%AD%E7%9A%84%E5%8C%BA%E5%88%AB/</guid>
+      <description>一、什么是监听描述符（Listening Descriptor）？ 监听描述符主要用于等待和接受传入的客户端连接请求。它在服务器启动时被创建和配</description>
+    </item>
+    <item>
+      <title>理解和构建一个高效的C&#43;&#43;工程项目目录结构</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3%E5%92%8C%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AA%E9%AB%98%E6%95%88%E7%9A%84c&#43;&#43;%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84/</link>
+      <pubDate>Tue, 25 Jul 2023 14:54:42 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3%E5%92%8C%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AA%E9%AB%98%E6%95%88%E7%9A%84c&#43;&#43;%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84/</guid>
+      <description>在软件开发过程中，组织和管理项目文件是一项至关重要的任务。一个良好的目录结构可以提高开发效率、简化项目维护、促进团队协作。在 C++ 项目中，目录结</description>
+    </item>
+    <item>
       <title>Linux手册页指南：了解各章节及其使用场景</title>
       <link>https://oheyu.github.io/zh/posts/tech/linux%E6%89%8B%E5%86%8C%E9%A1%B5%E6%8C%87%E5%8D%97%E4%BA%86%E8%A7%A3%E5%90%84%E7%AB%A0%E8%8A%82%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/</link>
       <pubDate>Mon, 24 Jul 2023 20:59:07 +0800</pubDate>

@@ -56,7 +56,42 @@
         }
 
     </style>
-</noscript>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
   
 
 <meta property="og:title" content="Linux" />
@@ -155,6 +190,18 @@
     Linux
   </h1>
 </header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Fg命令
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>fg 命令是 Unix 和类 Unix 操作系统中的一个重要命令，用于将后台运行的任务（进程）恢复到前台。它的全称是 “foreground”...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-07-30 15:49:00 +0800 CST'>2023-07-30</span>&nbsp;·&nbsp;2 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to Fg命令" href="https://oheyu.github.io/zh/posts/tech/fg%E5%91%BD%E4%BB%A4/"></a>
+</article>
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">

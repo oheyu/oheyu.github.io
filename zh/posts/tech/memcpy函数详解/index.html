@@ -55,7 +55,42 @@
         }
 
     </style>
-</noscript>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
   
 
 <meta property="og:title" content="memcpy()函数详解" />
@@ -561,10 +596,10 @@
       <li><a href="https://oheyu.github.io/zh/tags/c/cpp/">C/CPP</a></li>
     </ul>
 <nav class="paginav">
-  <a class="next" href="https://oheyu.github.io/zh/posts/tech/linux%E6%89%8B%E5%86%8C%E9%A1%B5%E6%8C%87%E5%8D%97%E4%BA%86%E8%A7%A3%E5%90%84%E7%AB%A0%E8%8A%82%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/">
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/fg%E5%91%BD%E4%BB%A4/">
     <span class="title">下一页 »</span>
     <br>
-    <span>Linux手册页指南：了解各章节及其使用场景</span>
+    <span>Fg命令</span>
   </a>
 </nav>
 

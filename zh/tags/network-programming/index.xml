@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Network Programming on 史玉浩的个人博客</title>
+    <link>https://oheyu.github.io/zh/tags/network-programming/</link>
+    <description>Recent content in Network Programming on 史玉浩的个人博客</description>
+    <generator>Hugo -- 0.127.0</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 27 Jul 2023 15:32:48 +0800</lastBuildDate>
+    <atom:link href="https://oheyu.github.io/zh/tags/network-programming/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>深入剖析addrinfo结构体</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90addrinfo%E7%BB%93%E6%9E%84%E4%BD%93/</link>
+      <pubDate>Thu, 27 Jul 2023 15:32:48 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90addrinfo%E7%BB%93%E6%9E%84%E4%BD%93/</guid>
+      <description>在网络编程中，特别是在使用套接字编程时，地址解析和管理是一个关键问题。为了简化这个过程，POSIX 标准定义了 addrinfo 结构体和相关函数。 一、addr</description>
+    </item>
+  </channel>
+</rss>

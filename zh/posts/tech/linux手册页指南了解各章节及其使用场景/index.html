@@ -55,7 +55,42 @@
         }
 
     </style>
-</noscript>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
   
 
 <meta property="og:title" content="Linux手册页指南：了解各章节及其使用场景" />
@@ -464,10 +499,10 @@
       <li><a href="https://oheyu.github.io/zh/tags/linux/">Linux</a></li>
     </ul>
 <nav class="paginav">
-  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/memcpy%E5%87%BD%E6%95%B0%E8%AF%A6%E8%A7%A3/">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/%E7%90%86%E8%A7%A3%E5%92%8C%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AA%E9%AB%98%E6%95%88%E7%9A%84c&#43;&#43;%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84/">
     <span class="title">« 上一页</span>
     <br>
-    <span>memcpy()函数详解</span>
+    <span>理解和构建一个高效的C&#43;&#43;工程项目目录结构</span>
   </a>
   <a class="next" href="https://oheyu.github.io/zh/posts/tech/pytorch%E4%B8%AD%E7%9A%84%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%BC%8F%E5%92%8C%E6%8D%9F%E5%A4%B1%E8%AE%A1%E7%AE%97/">
     <span class="title">下一页 »</span>
