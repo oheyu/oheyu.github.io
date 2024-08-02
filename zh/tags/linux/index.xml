@@ -6,8 +6,15 @@
     <description>Recent content in Linux on 史玉浩的个人博客</description>
     <generator>Hugo -- 0.127.0</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sun, 30 Jul 2023 15:49:00 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 01 Aug 2023 21:58:41 +0800</lastBuildDate>
     <atom:link href="https://oheyu.github.io/zh/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux中的符号链接与符号链接所引用的文件</title>
+      <link>https://oheyu.github.io/zh/posts/tech/linux%E4%B8%AD%E7%9A%84%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E4%B8%8E%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E6%89%80%E5%BC%95%E7%94%A8%E7%9A%84%E6%96%87%E4%BB%B6/</link>
+      <pubDate>Tue, 01 Aug 2023 21:58:41 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/linux%E4%B8%AD%E7%9A%84%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E4%B8%8E%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E6%89%80%E5%BC%95%E7%94%A8%E7%9A%84%E6%96%87%E4%BB%B6/</guid>
+      <description>在操作系统中，符号链接（Symbolic Link）是一种常用的文件系统功能，它允许用户通过快捷方式访问其他文件或目录。 一、什么是符号链接？ 符</description>
+    </item>
     <item>
       <title>Fg命令</title>
       <link>https://oheyu.github.io/zh/posts/tech/fg%E5%91%BD%E4%BB%A4/</link>
