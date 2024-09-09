@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CPP模板参数推导与显示指定的原理及应用场景 | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="C&#43;&#43; 的模板机制是其强大功能的核心之一，它允许编写通用的代码，并根据不同的类型进行实例化。然而，C&#43;&#43; 中的模板使用过程中，有时我们可以依赖编译器">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/cpp%E6%A8%A1%E6%9D%BF%E5%8F%82%E6%95%B0%E6%8E%A8%E5%AF%BC%E4%B8%8E%E6%98%BE%E7%A4%BA%E6%8C%87%E5%AE%9A%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/cpp%E6%A8%A1%E6%9D%BF%E5%8F%82%E6%95%B0%E6%8E%A8%E5%AF%BC%E4%B8%8E%E6%98%BE%E7%A4%BA%E6%8C%87%E5%AE%9A%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="CPP模板参数推导与显示指定的原理及应用场景" />
+<meta property="og:description" content="C&#43;&#43; 的模板机制是其强大功能的核心之一，它允许编写通用的代码，并根据不同的类型进行实例化。然而，C&#43;&#43; 中的模板使用过程中，有时我们可以依赖编译器" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/cpp%E6%A8%A1%E6%9D%BF%E5%8F%82%E6%95%B0%E6%8E%A8%E5%AF%BC%E4%B8%8E%E6%98%BE%E7%A4%BA%E6%8C%87%E5%AE%9A%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-08-31T21:42:05+08:00" />
+<meta property="article:modified_time" content="2023-08-31T21:42:05+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CPP模板参数推导与显示指定的原理及应用场景"/>
+<meta name="twitter:description" content="C&#43;&#43; 的模板机制是其强大功能的核心之一，它允许编写通用的代码，并根据不同的类型进行实例化。然而，C&#43;&#43; 中的模板使用过程中，有时我们可以依赖编译器"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "CPP模板参数推导与显示指定的原理及应用场景",
+      "item": "https://oheyu.github.io/zh/posts/tech/cpp%E6%A8%A1%E6%9D%BF%E5%8F%82%E6%95%B0%E6%8E%A8%E5%AF%BC%E4%B8%8E%E6%98%BE%E7%A4%BA%E6%8C%87%E5%AE%9A%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CPP模板参数推导与显示指定的原理及应用场景",
+  "name": "CPP模板参数推导与显示指定的原理及应用场景",
+  "description": "C++ 的模板机制是其强大功能的核心之一，它允许编写通用的代码，并根据不同的类型进行实例化。然而，C++ 中的模板使用过程中，有时我们可以依赖编译器",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\rC++ 的模板机制是其强大功能的核心之一，它允许编写通用的代码，并根据不同的类型进行实例化。然而，C++ 中的模板使用过程中，有时我们可以依赖编译器进行模板参数推导，而有时却必须显式指定模板参数。这种现象背后有一套明确的规则和限制。目前来说，我有些摸不着头脑了，今天我尝试着解释一下。\n一、模板参数推导机制 C++ 编译器在调用模板函数时，通常能够通过函数实参的类型推导出模板参数类型。这种自动推导机制使得代码更加简洁，无需显式指定模板参数。这是 C++ 模板机制带来的主要便利之一。\n1.1 模板参数的推导规则 模板参数推导的基本原则是：编译器通过函数实参的类型来推导模板参数类型。如果实参类型与模板参数存在对应关系，编译器就能够自动推导出模板参数。\n示例：\n1 2 3 4 5 6 7 8 9 template \u003ctypename T\u003e T add(const T\u0026 a, const T\u0026 b) { return a + b; } int main() { int x = 10, y = 20; auto result = add(x, y); // T 被推导为 int } 在此例中，函数 add 接受两个相同类型的参数，编译器通过实参 x 和 y 的类型（int）推导出模板参数 T 为 int，因此调用时不需要显式指定模板参数。\n1.2 引用与指针类型的推导 模板参数的推导不仅限于基本类型。当模板参数是引用或指针类型时，编译器会通过实参的基础类型来推导模板参数。\n1 2 3 4 5 6 7 8 9 template \u003ctypename T\u003e void printPointer(T* ptr) { std::cout \u003c\u003c *ptr \u003c\u003c std::endl; } int main() { int value = 42; printPointer(\u0026value); // T 被推导为 int } 在此例中，模板函数 printPointer 接受一个指向类型 T 的指针，通过实参 \u0026value 的类型，编译器推导出 T 为 int。\n二、必须显式指定模板参数的场景 尽管在许多情况下编译器可以自动推导模板参数，但在一些特殊情况下，编译器无法推导模板参数的类型。此时，我们必须显式指定模板参数类型。\n2.1 缺少足够的类型信息 当模板函数没有参数时，编译器没有足够的信息推导出模板参数。这种情况下，必须显式指定模板参数类型。\n1 2 3 4 5 6 template \u003ctypename T\u003e void printType(); int main() { printType\u003cint\u003e(); // 必须显式指定 T，因为没有参数提供类型信息 } 这里，printType 函数没有任何参数，因此编译器无法推导模板参数 T，需要显式指定为 int。\n2.2 函数返回类型无法参与推导 C++ 的模板参数推导机制只能从函数参数类型推导模板参数，函数的返回类型不参与推导。这意味着即使返回类型明确，也必须显式指定模板参数。\n示例：\n1 2 3 4 5 6 template \u003ctypename T\u003e T createObject(); int main() { auto obj = createObject\u003cint\u003e(); // 必须显式指定 T } 尽管 obj 的类型可以从返回类型推导，但编译器无法根据返回类型推导模板参数，因此必须在调用 createObject 时显式指定 T。\n2.3 参数类型与模板参数无关 在某些情况下，函数的参数类型与模板参数并不直接相关，编译器无法推导出模板参数。例如，当传递的参数类型不能提供足够的类型信息时。\n1 2 3 4 5 6 template \u003ctypename T\u003e void processPointer(T* ptr); int main() { processPointer(nullptr); // 必须显式指定 T，因为 nullptr 没有类型信息 } nullptr 并不提供足够的类型信息，无法推导出 T，因此需要显式指定 processPointer(nullptr)。\n2.4 函数作为模板参数 当模板函数本身作为参数传递时，编译器无法通过上下文推导模板参数类型，需要显式指定。\n1 2 3 4 5 6 7 8 9 10 11 12 template \u003ctypename T\u003e bool compare(const T\u0026 a, const T\u0026 b) { return a \u003c b; } template \u003ctypename Iterator, typename Compare\u003e void sort(Iterator begin, Iterator end, Compare comp); int main() { std::vector\u003cint\u003e vec = {3, 1, 4, 1, 5}; sort(vec.begin(), vec.end(), compare\u003cint\u003e); // 必须显式指定 compare } 在这个例子中，由于 compare 是一个模板函数，编译器无法自动推导它的模板参数 T，因此需要显式指定为 int。\n三、C++11 中的默认模板参数 为了减少显式指定模板参数的需求，C++11 引入了默认模板参数的概念。通过为模板参数提供默认值，可以在未显式指定模板参数时让编译器使用默认值。\n1 2 3 4 5 6 7 8 template \u003ctypename T = int\u003e T multiply(const T\u0026 a, const T\u0026 b) { return a * b; } int main() { auto result = multiply(3, 4); // T 被默认推导为 int } 在此例中，模板 T 被赋予了默认值 int，因此在调用 multiply(3, 4) 时，编译器自动使用 int 作为模板参数。\n四、模板推导中的特殊情况：万能引用（Universal Reference） C++11 引入了万能引用（或称为转发引用，forwarding reference），这为模板参数推导带来了一些新的复杂性。万能引用的模板参数可以绑定到左值或右值，并能保留实参的值类型，这使得模板函数更具通用性。\n1 2 3 4 5 6 7 8 9 10 template \u003ctypename T\u003e void forward(T\u0026\u0026 arg) { process(std::forward\u003cT\u003e(arg)); } int main() { int x = 10; forward(x); // T 被推导为 int\u0026 forward(20); // T 被推导为 int } 在这种情况下，T\u0026\u0026 是一个万能引用，编译器会根据传递的实参类型推导出 T。当传递左值 x 时，T 被推导为 int\u0026，而当传递右值 20 时，T 被推导为 int。\n五、总结 C++ 的模板参数推导机制是其模板系统中的一个重要特性，极大地简化了模板函数的使用。然而，在某些特殊情况下，编译器无法推导出模板参数，这时就必须显式指定模板参数。理解模板参数推导的规则与限制，可以帮助我们在编写和使用模板代码时做出更好的选择，确保代码的简洁性与正确性。\n关键点总结：\n模板参数推导：编译器通过函数实参的类型自动推导模板参数，减少显式指定的需要。 显式指定的场景：当编译器缺少足够的信息时，例如没有函数参数、返回类型不参与推导或使用 nullptr 等特殊值时，必须显式指定模板参数。 默认模板参数：C++11 引入了默认模板参数，进一步减少显式指定模板参数的场景。 万能引用：C++11 的万能引用在模板推导中具有特殊性，使得模板函数能够根据实参的值类别灵活处理左值与右值。 ",
+  "wordCount" : "2053",
+  "inLanguage": "zh",
+  "datePublished": "2023-08-31T21:42:05+08:00",
+  "dateModified": "2023-08-31T21:42:05+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/cpp%E6%A8%A1%E6%9D%BF%E5%8F%82%E6%95%B0%E6%8E%A8%E5%AF%BC%E4%B8%8E%E6%98%BE%E7%A4%BA%E6%8C%87%E5%AE%9A%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      CPP模板参数推导与显示指定的原理及应用场景
+    </h1>
+    <div class="post-meta"><span title='2023-08-31 21:42:05 +0800 CST'>2023-08-31</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e6%a8%a1%e6%9d%bf%e5%8f%82%e6%95%b0%e6%8e%a8%e5%af%bc%e6%9c%ba%e5%88%b6" aria-label="一、模板参数推导机制">一、模板参数推导机制</a><ul>
+                            
+                    <li>
+                        <a href="#11-%e6%a8%a1%e6%9d%bf%e5%8f%82%e6%95%b0%e7%9a%84%e6%8e%a8%e5%af%bc%e8%a7%84%e5%88%99" aria-label="1.1 模板参数的推导规则">1.1 模板参数的推导规则</a></li>
+                    <li>
+                        <a href="#12-%e5%bc%95%e7%94%a8%e4%b8%8e%e6%8c%87%e9%92%88%e7%b1%bb%e5%9e%8b%e7%9a%84%e6%8e%a8%e5%af%bc" aria-label="1.2 引用与指针类型的推导">1.2 引用与指针类型的推导</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%8c%e5%bf%85%e9%a1%bb%e6%98%be%e5%bc%8f%e6%8c%87%e5%ae%9a%e6%a8%a1%e6%9d%bf%e5%8f%82%e6%95%b0%e7%9a%84%e5%9c%ba%e6%99%af" aria-label="二、必须显式指定模板参数的场景">二、必须显式指定模板参数的场景</a><ul>
+                            
+                    <li>
+                        <a href="#21-%e7%bc%ba%e5%b0%91%e8%b6%b3%e5%a4%9f%e7%9a%84%e7%b1%bb%e5%9e%8b%e4%bf%a1%e6%81%af" aria-label="2.1 缺少足够的类型信息">2.1 缺少足够的类型信息</a></li>
+                    <li>
+                        <a href="#22-%e5%87%bd%e6%95%b0%e8%bf%94%e5%9b%9e%e7%b1%bb%e5%9e%8b%e6%97%a0%e6%b3%95%e5%8f%82%e4%b8%8e%e6%8e%a8%e5%af%bc" aria-label="2.2 函数返回类型无法参与推导">2.2 函数返回类型无法参与推导</a></li>
+                    <li>
+                        <a href="#23-%e5%8f%82%e6%95%b0%e7%b1%bb%e5%9e%8b%e4%b8%8e%e6%a8%a1%e6%9d%bf%e5%8f%82%e6%95%b0%e6%97%a0%e5%85%b3" aria-label="2.3 参数类型与模板参数无关">2.3 参数类型与模板参数无关</a></li>
+                    <li>
+                        <a href="#24-%e5%87%bd%e6%95%b0%e4%bd%9c%e4%b8%ba%e6%a8%a1%e6%9d%bf%e5%8f%82%e6%95%b0" aria-label="2.4 函数作为模板参数">2.4 函数作为模板参数</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%89c11-%e4%b8%ad%e7%9a%84%e9%bb%98%e8%ae%a4%e6%a8%a1%e6%9d%bf%e5%8f%82%e6%95%b0" aria-label="三、C&#43;&#43;11 中的默认模板参数">三、C++11 中的默认模板参数</a></li>
+                    <li>
+                        <a href="#%e5%9b%9b%e6%a8%a1%e6%9d%bf%e6%8e%a8%e5%af%bc%e4%b8%ad%e7%9a%84%e7%89%b9%e6%ae%8a%e6%83%85%e5%86%b5%e4%b8%87%e8%83%bd%e5%bc%95%e7%94%a8universal-reference" aria-label="四、模板推导中的特殊情况：万能引用（Universal Reference）">四、模板推导中的特殊情况：万能引用（Universal Reference）</a></li>
+                    <li>
+                        <a href="#%e4%ba%94%e6%80%bb%e7%bb%93" aria-label="五、总结">五、总结</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>C++ 的模板机制是其强大功能的核心之一，它允许编写通用的代码，并根据不同的类型进行实例化。然而，C++ 中的模板使用过程中，有时我们可以依赖编译器进行<strong>模板参数推导</strong>，而有时却必须显式指定模板参数。这种现象背后有一套明确的规则和限制。目前来说，我有些摸不着头脑了，今天我尝试着解释一下。</p>
+<hr>
+<h3 id="一模板参数推导机制">一、模板参数推导机制<a hidden class="anchor" aria-hidden="true" href="#一模板参数推导机制">#</a></h3>
+<p>C++ 编译器在调用模板函数时，通常能够通过函数实参的类型推导出模板参数类型。这种自动推导机制使得代码更加简洁，无需显式指定模板参数。这是 C++ 模板机制带来的主要便利之一。</p>
+<h4 id="11-模板参数的推导规则">1.1 模板参数的推导规则<a hidden class="anchor" aria-hidden="true" href="#11-模板参数的推导规则">#</a></h4>
+<p>模板参数推导的基本原则是：<strong>编译器通过函数实参的类型来推导模板参数类型</strong>。如果实参类型与模板参数存在对应关系，编译器就能够自动推导出模板参数。</p>
+<p><strong>示例：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">T</span> <span class="n">add</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>  <span class="c1">// T 被推导为 int
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在此例中，函数 <code>add</code> 接受两个相同类型的参数，编译器通过实参 <code>x</code> 和 <code>y</code> 的类型（<code>int</code>）推导出模板参数 <code>T</code> 为 <code>int</code>，因此调用时不需要显式指定模板参数。</p>
+<h4 id="12-引用与指针类型的推导">1.2 引用与指针类型的推导<a hidden class="anchor" aria-hidden="true" href="#12-引用与指针类型的推导">#</a></h4>
+<p>模板参数的推导不仅限于基本类型。当模板参数是引用或指针类型时，编译器会通过实参的基础类型来推导模板参数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">printPointer</span><span class="p">(</span><span class="n">T</span><span class="o">*</span> <span class="n">ptr</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">ptr</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printPointer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">);</span>  <span class="c1">// T 被推导为 int
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在此例中，模板函数 <code>printPointer</code> 接受一个指向类型 <code>T</code> 的指针，通过实参 <code>&amp;value</code> 的类型，编译器推导出 <code>T</code> 为 <code>int</code>。</p>
+<hr>
+<h3 id="二必须显式指定模板参数的场景">二、必须显式指定模板参数的场景<a hidden class="anchor" aria-hidden="true" href="#二必须显式指定模板参数的场景">#</a></h3>
+<p>尽管在许多情况下编译器可以自动推导模板参数，但在一些特殊情况下，<strong>编译器无法推导模板参数的类型</strong>。此时，我们必须显式指定模板参数类型。</p>
+<h4 id="21-缺少足够的类型信息">2.1 缺少足够的类型信息<a hidden class="anchor" aria-hidden="true" href="#21-缺少足够的类型信息">#</a></h4>
+<p>当模板函数没有参数时，编译器没有足够的信息推导出模板参数。这种情况下，必须显式指定模板参数类型。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">printType</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printType</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>  <span class="c1">// 必须显式指定 T，因为没有参数提供类型信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里，<code>printType</code> 函数没有任何参数，因此编译器无法推导模板参数 <code>T</code>，需要显式指定为 <code>int</code>。</p>
+<h4 id="22-函数返回类型无法参与推导">2.2 函数返回类型无法参与推导<a hidden class="anchor" aria-hidden="true" href="#22-函数返回类型无法参与推导">#</a></h4>
+<p>C++ 的模板参数推导机制只能从函数参数类型推导模板参数，<strong>函数的返回类型不参与推导</strong>。这意味着即使返回类型明确，也必须显式指定模板参数。</p>
+<p><strong>示例：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">T</span> <span class="n">createObject</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">obj</span> <span class="o">=</span> <span class="n">createObject</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>  <span class="c1">// 必须显式指定 T
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>尽管 <code>obj</code> 的类型可以从返回类型推导，但编译器无法根据返回类型推导模板参数，因此必须在调用 <code>createObject</code> 时显式指定 <code>T</code>。</p>
+<h4 id="23-参数类型与模板参数无关">2.3 参数类型与模板参数无关<a hidden class="anchor" aria-hidden="true" href="#23-参数类型与模板参数无关">#</a></h4>
+<p>在某些情况下，函数的参数类型与模板参数并不直接相关，编译器无法推导出模板参数。例如，当传递的参数类型不能提供足够的类型信息时。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">processPointer</span><span class="p">(</span><span class="n">T</span><span class="o">*</span> <span class="n">ptr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">processPointer</span><span class="p">(</span><span class="k">nullptr</span><span class="p">);</span>  <span class="c1">// 必须显式指定 T，因为 nullptr 没有类型信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>nullptr</code> 并不提供足够的类型信息，无法推导出 <code>T</code>，因此需要显式指定 <code>processPointer&lt;int&gt;(nullptr)</code>。</p>
+<h4 id="24-函数作为模板参数">2.4 函数作为模板参数<a hidden class="anchor" aria-hidden="true" href="#24-函数作为模板参数">#</a></h4>
+<p>当模板函数本身作为参数传递时，编译器无法通过上下文推导模板参数类型，需要显式指定。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">bool</span> <span class="n">compare</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Iterator</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Compare</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">sort</span><span class="p">(</span><span class="n">Iterator</span> <span class="n">begin</span><span class="p">,</span> <span class="n">Iterator</span> <span class="n">end</span><span class="p">,</span> <span class="n">Compare</span> <span class="n">comp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">vec</span> <span class="o">=</span> <span class="p">{</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sort</span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">vec</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">compare</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">);</span>  <span class="c1">// 必须显式指定 compare&lt;int&gt;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中，由于 <code>compare</code> 是一个模板函数，编译器无法自动推导它的模板参数 <code>T</code>，因此需要显式指定为 <code>int</code>。</p>
+<hr>
+<h3 id="三c11-中的默认模板参数">三、C++11 中的默认模板参数<a hidden class="anchor" aria-hidden="true" href="#三c11-中的默认模板参数">#</a></h3>
+<p>为了减少显式指定模板参数的需求，C++11 引入了<strong>默认模板参数</strong>的概念。通过为模板参数提供默认值，可以在未显式指定模板参数时让编译器使用默认值。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span> <span class="o">=</span> <span class="kt">int</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">T</span> <span class="n">multiply</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">multiply</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>  <span class="c1">// T 被默认推导为 int
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在此例中，模板 <code>T</code> 被赋予了默认值 <code>int</code>，因此在调用 <code>multiply(3, 4)</code> 时，编译器自动使用 <code>int</code> 作为模板参数。</p>
+<hr>
+<h3 id="四模板推导中的特殊情况万能引用universal-reference">四、模板推导中的特殊情况：万能引用（Universal Reference）<a hidden class="anchor" aria-hidden="true" href="#四模板推导中的特殊情况万能引用universal-reference">#</a></h3>
+<p>C++11 引入了万能引用（或称为转发引用，forwarding reference），这为模板参数推导带来了一些新的复杂性。万能引用的模板参数可以绑定到左值或右值，并能保留实参的值类型，这使得模板函数更具通用性。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">forward</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">arg</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">process</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arg</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>        <span class="c1">// T 被推导为 int&amp;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">forward</span><span class="p">(</span><span class="mi">20</span><span class="p">);</span>       <span class="c1">// T 被推导为 int
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这种情况下，<code>T&amp;&amp;</code> 是一个万能引用，编译器会根据传递的实参类型推导出 <code>T</code>。当传递左值 <code>x</code> 时，<code>T</code> 被推导为 <code>int&amp;</code>，而当传递右值 <code>20</code> 时，<code>T</code> 被推导为 <code>int</code>。</p>
+<hr>
+<h3 id="五总结">五、总结<a hidden class="anchor" aria-hidden="true" href="#五总结">#</a></h3>
+<p>C++ 的模板参数推导机制是其模板系统中的一个重要特性，极大地简化了模板函数的使用。然而，在某些特殊情况下，编译器无法推导出模板参数，这时就必须显式指定模板参数。理解模板参数推导的规则与限制，可以帮助我们在编写和使用模板代码时做出更好的选择，确保代码的简洁性与正确性。</p>
+<p>关键点总结：</p>
+<ul>
+<li><strong>模板参数推导</strong>：编译器通过函数实参的类型自动推导模板参数，减少显式指定的需要。</li>
+<li><strong>显式指定的场景</strong>：当编译器缺少足够的信息时，例如没有函数参数、返回类型不参与推导或使用 <code>nullptr</code> 等特殊值时，必须显式指定模板参数。</li>
+<li><strong>默认模板参数</strong>：C++11 引入了默认模板参数，进一步减少显式指定模板参数的场景。</li>
+<li><strong>万能引用</strong>：C++11 的万能引用在模板推导中具有特殊性，使得模板函数能够根据实参的值类别灵活处理左值与右值。</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/memcpy%E5%87%BD%E6%95%B0%E8%AF%A6%E8%A7%A3/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>memcpy()函数详解</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/returnexit_exit%E4%BB%A5%E5%8F%8A_exit/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>Return、exit、_exit以及_Exit</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
