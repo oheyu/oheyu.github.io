@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>全局变量与静态变量 | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="在 C&#43;&#43; 开发中，全局变量和静态变量的使用是一个常见且重要的话题。虽然它们有着各自独特的特性，但在实际项目中，合理运用这些变量可以帮助我们提高代码">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F%E4%B8%8E%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F%E4%B8%8E%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="全局变量与静态变量" />
+<meta property="og:description" content="在 C&#43;&#43; 开发中，全局变量和静态变量的使用是一个常见且重要的话题。虽然它们有着各自独特的特性，但在实际项目中，合理运用这些变量可以帮助我们提高代码" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F%E4%B8%8E%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-08-07T11:14:55+08:00" />
+<meta property="article:modified_time" content="2023-08-07T11:14:55+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="全局变量与静态变量"/>
+<meta name="twitter:description" content="在 C&#43;&#43; 开发中，全局变量和静态变量的使用是一个常见且重要的话题。虽然它们有着各自独特的特性，但在实际项目中，合理运用这些变量可以帮助我们提高代码"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "全局变量与静态变量",
+      "item": "https://oheyu.github.io/zh/posts/tech/%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F%E4%B8%8E%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "全局变量与静态变量",
+  "name": "全局变量与静态变量",
+  "description": "在 C++ 开发中，全局变量和静态变量的使用是一个常见且重要的话题。虽然它们有着各自独特的特性，但在实际项目中，合理运用这些变量可以帮助我们提高代码",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\r在 C++ 开发中，全局变量和静态变量的使用是一个常见且重要的话题。虽然它们有着各自独特的特性，但在实际项目中，合理运用这些变量可以帮助我们提高代码的可读性和维护性，反之则可能带来难以发现的错误和隐患。\n一、全局变量的作用与局限 1.1 优势 全局变量因其在程序各个模块间共享数据的便利性而被广泛使用。它们可以被定义在程序的任意源文件中，并通过 extern 声明在其他源文件中访问。全局变量在以下情况下特别有用：\n状态共享：当多个模块、函数或类需要访问相同的数据时，全局变量可以用作一个共享的状态存储。例如，应用程序的配置参数、日志对象等常常被定义为全局变量，以便全局访问。 减少参数传递：在某些情况下，使用全局变量可以减少函数间大量传递参数的复杂性，特别是在需要在不同模块间传递多个状态时。 1.2 局限与风险 然而，全局变量的使用也带来了不少风险：\n命名冲突：由于全局变量可以在程序的任何地方被访问，如果项目中有多个开发者同时维护不同模块，可能会导致命名冲突，造成无法预期的错误。尽管可以使用命名空间来缓解这个问题，但仍然不能完全避免冲突。 难以维护：全局变量增加了模块之间的耦合度，导致代码维护难度加大。随着项目的复杂度增加，全局变量可能会分散在多个文件中，追踪它们的修改变得更加困难，容易导致意外的行为。 测试不便：全局变量由于在全局范围内可访问，往往难以对单独模块进行单元测试。因为全局状态可能会导致测试之间互相影响，难以保持测试环境的隔离性。 1.3 开发中的最佳实践 在现代C++开发中，尽量减少全局变量的使用是公认的最佳实践。可以通过以下方法替代全局变量：\n单例模式：当需要共享一个全局状态时，可以使用单例模式（Singleton）来保证只有一个实例存在，并且可以通过控制访问权限来减少对全局变量的不必要修改。 依赖注入：通过依赖注入（Dependency Injection）将依赖的对象或数据传递给需要的模块，避免全局状态的共享。 使用常量：对于全局只读的数据，可以使用 const 或 constexpr 来保证全局变量不可被修改，降低风险。 二、 静态变量的优点与使用场景 静态变量提供了与全局变量类似的功能，但作用范围更加局限，可以有效避免全局变量带来的问题。静态变量根据它们的定义位置可以分为局部静态变量和全局静态变量。\n2.1 局部静态变量 局部静态变量定义在函数或代码块内，虽然它们的生命周期与程序相同，但作用域仅限于该函数或代码块内。这使得局部静态变量非常适合用来维护状态，尤其在以下场景中非常有用：\n递归函数中的状态保存：在递归算法中，局部静态变量可以用于保存函数调用之间的状态。例如，在递归计算斐波那契数列时，可以使用静态变量来保存中间计算结果，避免重复计算。 只初始化一次：局部静态变量只会在函数第一次调用时被初始化，这可以避免每次调用函数时重复初始化的开销。在一些性能关键的代码中，这种特性非常有用。 2.2 全局静态变量 全局静态变量则定义在全局作用域中，但与普通全局变量不同，它们的作用域仅限于当前文件。这种限制作用域的特性使得全局静态变量可以用于模块内部的实现细节，避免其他模块误用。例如，某些模块内部的缓存机制或计数器可以使用全局静态变量来实现，而外部模块无法访问这些数据。\n隐藏实现细节：通过将全局静态变量定义在文件内部，可以确保这些变量不会暴露给其他文件，有效减少了模块之间的耦合。 避免命名冲突：由于全局静态变量不能被外部文件访问，因此即使不同文件中定义了相同名字的静态变量，也不会发生冲突。 2.3 静态变量的最佳实践 控制作用域：在使用静态变量时，应该尽可能将它们的作用范围限制在需要的最小范围内。对于局部静态变量，确保它们只在特定的函数中使用；对于全局静态变量，确保它们只在当前文件中有效。 避免滥用：虽然静态变量在保持状态和减少全局依赖上很有用，但也要避免过度使用静态变量。特别是在多线程环境中，静态变量可能引发数据竞争和不可预期的行为。因此，在并发编程中，应该使用锁或其他同步机制来保护静态变量的访问。 三、多线程中的静态与全局变量 在多线程程序中，全局变量和静态变量的使用需要格外小心。如果多个线程同时访问和修改这些变量，可能会导致数据竞争和未定义行为。常见的解决方案是：\n线程安全的访问：在访问全局变量或静态变量时，使用互斥锁（std::mutex）或读写锁来保护共享数据，确保同一时刻只有一个线程可以修改变量。 原子操作：对于简单的全局或静态计数器，可以使用 C++ 提供的原子类型（如 std::atomic）来避免锁的使用，提升性能。 ",
+  "wordCount" : "1822",
+  "inLanguage": "zh",
+  "datePublished": "2023-08-07T11:14:55+08:00",
+  "dateModified": "2023-08-07T11:14:55+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F%E4%B8%8E%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      全局变量与静态变量
+    </h1>
+    <div class="post-meta"><span title='2023-08-07 11:14:55 +0800 CST'>2023-08-07</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e5%85%a8%e5%b1%80%e5%8f%98%e9%87%8f%e7%9a%84%e4%bd%9c%e7%94%a8%e4%b8%8e%e5%b1%80%e9%99%90" aria-label="一、全局变量的作用与局限">一、全局变量的作用与局限</a><ul>
+                            
+                    <li>
+                        <a href="#11-%e4%bc%98%e5%8a%bf" aria-label="1.1 优势">1.1 优势</a></li>
+                    <li>
+                        <a href="#12-%e5%b1%80%e9%99%90%e4%b8%8e%e9%a3%8e%e9%99%a9" aria-label="1.2 局限与风险">1.2 局限与风险</a></li>
+                    <li>
+                        <a href="#13-%e5%bc%80%e5%8f%91%e4%b8%ad%e7%9a%84%e6%9c%80%e4%bd%b3%e5%ae%9e%e8%b7%b5" aria-label="1.3 开发中的最佳实践">1.3 开发中的最佳实践</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%8c-%e9%9d%99%e6%80%81%e5%8f%98%e9%87%8f%e7%9a%84%e4%bc%98%e7%82%b9%e4%b8%8e%e4%bd%bf%e7%94%a8%e5%9c%ba%e6%99%af" aria-label="二、 静态变量的优点与使用场景">二、 静态变量的优点与使用场景</a><ul>
+                            
+                    <li>
+                        <a href="#21-%e5%b1%80%e9%83%a8%e9%9d%99%e6%80%81%e5%8f%98%e9%87%8f" aria-label="2.1 局部静态变量">2.1 局部静态变量</a></li>
+                    <li>
+                        <a href="#22-%e5%85%a8%e5%b1%80%e9%9d%99%e6%80%81%e5%8f%98%e9%87%8f" aria-label="2.2 全局静态变量">2.2 全局静态变量</a></li>
+                    <li>
+                        <a href="#23-%e9%9d%99%e6%80%81%e5%8f%98%e9%87%8f%e7%9a%84%e6%9c%80%e4%bd%b3%e5%ae%9e%e8%b7%b5" aria-label="2.3 静态变量的最佳实践">2.3 静态变量的最佳实践</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%89%e5%a4%9a%e7%ba%bf%e7%a8%8b%e4%b8%ad%e7%9a%84%e9%9d%99%e6%80%81%e4%b8%8e%e5%85%a8%e5%b1%80%e5%8f%98%e9%87%8f" aria-label="三、多线程中的静态与全局变量">三、多线程中的静态与全局变量</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>在 C++ 开发中，全局变量和静态变量的使用是一个常见且重要的话题。虽然它们有着各自独特的特性，但在实际项目中，合理运用这些变量可以帮助我们提高代码的可读性和维护性，反之则可能带来难以发现的错误和隐患。</p>
+<hr>
+<h3 id="一全局变量的作用与局限">一、全局变量的作用与局限<a hidden class="anchor" aria-hidden="true" href="#一全局变量的作用与局限">#</a></h3>
+<h4 id="11-优势">1.1 优势<a hidden class="anchor" aria-hidden="true" href="#11-优势">#</a></h4>
+<p>全局变量因其在程序各个模块间共享数据的便利性而被广泛使用。它们可以被定义在程序的任意源文件中，并通过 <code>extern</code> 声明在其他源文件中访问。全局变量在以下情况下特别有用：</p>
+<ul>
+<li><strong>状态共享</strong>：当多个模块、函数或类需要访问相同的数据时，全局变量可以用作一个共享的状态存储。例如，应用程序的配置参数、日志对象等常常被定义为全局变量，以便全局访问。</li>
+<li><strong>减少参数传递</strong>：在某些情况下，使用全局变量可以减少函数间大量传递参数的复杂性，特别是在需要在不同模块间传递多个状态时。</li>
+</ul>
+<h4 id="12-局限与风险">1.2 局限与风险<a hidden class="anchor" aria-hidden="true" href="#12-局限与风险">#</a></h4>
+<p>然而，全局变量的使用也带来了不少风险：</p>
+<ul>
+<li><strong>命名冲突</strong>：由于全局变量可以在程序的任何地方被访问，如果项目中有多个开发者同时维护不同模块，可能会导致命名冲突，造成无法预期的错误。尽管可以使用命名空间来缓解这个问题，但仍然不能完全避免冲突。</li>
+<li><strong>难以维护</strong>：全局变量增加了模块之间的耦合度，导致代码维护难度加大。随着项目的复杂度增加，全局变量可能会分散在多个文件中，追踪它们的修改变得更加困难，容易导致意外的行为。</li>
+<li><strong>测试不便</strong>：全局变量由于在全局范围内可访问，往往难以对单独模块进行单元测试。因为全局状态可能会导致测试之间互相影响，难以保持测试环境的隔离性。</li>
+</ul>
+<h4 id="13-开发中的最佳实践">1.3 开发中的最佳实践<a hidden class="anchor" aria-hidden="true" href="#13-开发中的最佳实践">#</a></h4>
+<p>在现代C++开发中，<strong>尽量减少全局变量的使用</strong>是公认的最佳实践。可以通过以下方法替代全局变量：</p>
+<ul>
+<li><strong>单例模式</strong>：当需要共享一个全局状态时，可以使用单例模式（Singleton）来保证只有一个实例存在，并且可以通过控制访问权限来减少对全局变量的不必要修改。</li>
+<li><strong>依赖注入</strong>：通过依赖注入（Dependency Injection）将依赖的对象或数据传递给需要的模块，避免全局状态的共享。</li>
+<li><strong>使用常量</strong>：对于全局只读的数据，可以使用 <code>const</code> 或 <code>constexpr</code> 来保证全局变量不可被修改，降低风险。</li>
+</ul>
+<hr>
+<h3 id="二-静态变量的优点与使用场景">二、 静态变量的优点与使用场景<a hidden class="anchor" aria-hidden="true" href="#二-静态变量的优点与使用场景">#</a></h3>
+<p>静态变量提供了与全局变量类似的功能，但作用范围更加局限，可以有效避免全局变量带来的问题。静态变量根据它们的定义位置可以分为<strong>局部静态变量</strong>和<strong>全局静态变量</strong>。</p>
+<h4 id="21-局部静态变量">2.1 局部静态变量<a hidden class="anchor" aria-hidden="true" href="#21-局部静态变量">#</a></h4>
+<p>局部静态变量定义在函数或代码块内，虽然它们的生命周期与程序相同，但作用域仅限于该函数或代码块内。这使得局部静态变量非常适合用来维护状态，尤其在以下场景中非常有用：</p>
+<ul>
+<li><strong>递归函数中的状态保存</strong>：在递归算法中，局部静态变量可以用于保存函数调用之间的状态。例如，在递归计算斐波那契数列时，可以使用静态变量来保存中间计算结果，避免重复计算。</li>
+<li><strong>只初始化一次</strong>：局部静态变量只会在函数第一次调用时被初始化，这可以避免每次调用函数时重复初始化的开销。在一些性能关键的代码中，这种特性非常有用。</li>
+</ul>
+<h4 id="22-全局静态变量">2.2 全局静态变量<a hidden class="anchor" aria-hidden="true" href="#22-全局静态变量">#</a></h4>
+<p>全局静态变量则定义在全局作用域中，但与普通全局变量不同，它们的作用域仅限于当前文件。这种限制作用域的特性使得全局静态变量可以用于模块内部的实现细节，避免其他模块误用。例如，某些模块内部的缓存机制或计数器可以使用全局静态变量来实现，而外部模块无法访问这些数据。</p>
+<ul>
+<li><strong>隐藏实现细节</strong>：通过将全局静态变量定义在文件内部，可以确保这些变量不会暴露给其他文件，有效减少了模块之间的耦合。</li>
+<li><strong>避免命名冲突</strong>：由于全局静态变量不能被外部文件访问，因此即使不同文件中定义了相同名字的静态变量，也不会发生冲突。</li>
+</ul>
+<h4 id="23-静态变量的最佳实践">2.3 静态变量的最佳实践<a hidden class="anchor" aria-hidden="true" href="#23-静态变量的最佳实践">#</a></h4>
+<ul>
+<li><strong>控制作用域</strong>：在使用静态变量时，应该尽可能将它们的作用范围限制在需要的最小范围内。对于局部静态变量，确保它们只在特定的函数中使用；对于全局静态变量，确保它们只在当前文件中有效。</li>
+<li><strong>避免滥用</strong>：虽然静态变量在保持状态和减少全局依赖上很有用，但也要避免过度使用静态变量。特别是在多线程环境中，静态变量可能引发数据竞争和不可预期的行为。因此，在并发编程中，应该使用锁或其他同步机制来保护静态变量的访问。</li>
+</ul>
+<hr>
+<h3 id="三多线程中的静态与全局变量">三、多线程中的静态与全局变量<a hidden class="anchor" aria-hidden="true" href="#三多线程中的静态与全局变量">#</a></h3>
+<p>在多线程程序中，全局变量和静态变量的使用需要格外小心。如果多个线程同时访问和修改这些变量，可能会导致数据竞争和未定义行为。常见的解决方案是：</p>
+<ul>
+<li><strong>线程安全的访问</strong>：在访问全局变量或静态变量时，使用互斥锁（<code>std::mutex</code>）或读写锁来保护共享数据，确保同一时刻只有一个线程可以修改变量。</li>
+<li><strong>原子操作</strong>：对于简单的全局或静态计数器，可以使用 C++ 提供的原子类型（如 <code>std::atomic</code>）来避免锁的使用，提升性能。</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E6%89%A7%E8%A1%8C%E5%A4%96%E9%83%A8%E7%A8%8B%E5%BA%8F/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>CPP中执行外部程序</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/cpp%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>CPP内存模型</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

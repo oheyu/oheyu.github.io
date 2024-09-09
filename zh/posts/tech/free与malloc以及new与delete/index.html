@@ -5,11 +5,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Linux中的符号链接与符号链接所引用的文件 | 史玉浩的个人博客</title>
-<meta name="keywords" content="Linux">
-<meta name="description" content="在操作系统中，符号链接（Symbolic Link）是一种常用的文件系统功能，它允许用户通过快捷方式访问其他文件或目录。 一、什么是符号链接？ 符">
+<title>Free与malloc以及new与delete | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="在 C/C&#43;&#43; 中，new/delete 与 malloc/free 的使用涉及内存分配和释放的机制，虽然它们的功能表面上类似，但在使用上存在许多本质上的区别，使用时务必配对使用">
 <meta name="author" content="史玉浩">
-<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/linux%E4%B8%AD%E7%9A%84%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E4%B8%8E%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E6%89%80%E5%BC%95%E7%94%A8%E7%9A%84%E6%96%87%E4%BB%B6/">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/free%E4%B8%8Emalloc%E4%BB%A5%E5%8F%8Anew%E4%B8%8Edelete/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://oheyu.github.io/img/logo.svg">
 <link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
@@ -18,7 +18,7 @@
 <link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/linux%E4%B8%AD%E7%9A%84%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E4%B8%8E%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E6%89%80%E5%BC%95%E7%94%A8%E7%9A%84%E6%96%87%E4%BB%B6/">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/free%E4%B8%8Emalloc%E4%BB%A5%E5%8F%8Anew%E4%B8%8Edelete/">
 <noscript>
     <style>
         #theme-toggle,
@@ -93,16 +93,16 @@ code.has-jax {
 
   
 
-<meta property="og:title" content="Linux中的符号链接与符号链接所引用的文件" />
-<meta property="og:description" content="在操作系统中，符号链接（Symbolic Link）是一种常用的文件系统功能，它允许用户通过快捷方式访问其他文件或目录。 一、什么是符号链接？ 符" />
+<meta property="og:title" content="Free与malloc以及new与delete" />
+<meta property="og:description" content="在 C/C&#43;&#43; 中，new/delete 与 malloc/free 的使用涉及内存分配和释放的机制，虽然它们的功能表面上类似，但在使用上存在许多本质上的区别，使用时务必配对使用" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/linux%E4%B8%AD%E7%9A%84%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E4%B8%8E%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E6%89%80%E5%BC%95%E7%94%A8%E7%9A%84%E6%96%87%E4%BB%B6/" /><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2023-08-01T21:58:41+08:00" />
-<meta property="article:modified_time" content="2023-08-01T21:58:41+08:00" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/free%E4%B8%8Emalloc%E4%BB%A5%E5%8F%8Anew%E4%B8%8Edelete/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-08-05T09:22:41+08:00" />
+<meta property="article:modified_time" content="2023-08-05T09:22:41+08:00" />
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Linux中的符号链接与符号链接所引用的文件"/>
-<meta name="twitter:description" content="在操作系统中，符号链接（Symbolic Link）是一种常用的文件系统功能，它允许用户通过快捷方式访问其他文件或目录。 一、什么是符号链接？ 符"/>
+<meta name="twitter:title" content="Free与malloc以及new与delete"/>
+<meta name="twitter:description" content="在 C/C&#43;&#43; 中，new/delete 与 malloc/free 的使用涉及内存分配和释放的机制，虽然它们的功能表面上类似，但在使用上存在许多本质上的区别，使用时务必配对使用"/>
 
 
 <script type="application/ld+json">
@@ -125,8 +125,8 @@ code.has-jax {
     {
       "@type": "ListItem",
       "position":  3 ,
-      "name": "Linux中的符号链接与符号链接所引用的文件",
-      "item": "https://oheyu.github.io/zh/posts/tech/linux%E4%B8%AD%E7%9A%84%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E4%B8%8E%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E6%89%80%E5%BC%95%E7%94%A8%E7%9A%84%E6%96%87%E4%BB%B6/"
+      "name": "Free与malloc以及new与delete",
+      "item": "https://oheyu.github.io/zh/posts/tech/free%E4%B8%8Emalloc%E4%BB%A5%E5%8F%8Anew%E4%B8%8Edelete/"
     }
   ]
 }
@@ -135,24 +135,24 @@ code.has-jax {
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  "headline": "Linux中的符号链接与符号链接所引用的文件",
-  "name": "Linux中的符号链接与符号链接所引用的文件",
-  "description": "在操作系统中，符号链接（Symbolic Link）是一种常用的文件系统功能，它允许用户通过快捷方式访问其他文件或目录。 一、什么是符号链接？ 符",
+  "headline": "Free与malloc以及new与delete",
+  "name": "Free与malloc以及new与delete",
+  "description": "在 C/C++ 中，new/delete 与 malloc/free 的使用涉及内存分配和释放的机制，虽然它们的功能表面上类似，但在使用上存在许多本质上的区别，使用时务必配对使用",
   "keywords": [
-    "Linux"
+    "CPP"
   ],
-  "articleBody": "\r在操作系统中，符号链接（Symbolic Link）是一种常用的文件系统功能，它允许用户通过快捷方式访问其他文件或目录。\n一、什么是符号链接？ 符号链接是一种特殊的文件类型，它包含了指向另一个文件或目录的路径。你可以将其视为指向目标文件或目录的快捷方式或别名。在 Unix/Linux 系统中，符号链接的文件类型标记为 l，例如 lrwxrwxrwx。\n我们可以从以下四个方面来了解符号链接：\n独立性：符号链接本身是一个独立的文件，与它指向的目标文件或目录相分离。它仅仅包含目标的路径信息。\n路径：符号链接存储的是目标文件的路径，这个路径可以是相对的或绝对的。\n文件类型：符号链接的文件类型是 symlink，这是文件系统支持的一种特殊文件类型。\n创建：可以使用 ln -s 命令在 Unix/Linux 系统中创建符号链接。例如：\n1 ln -s /path/to/targetfile linkname 假设我们有一个名为 linkfile 的符号链接，它指向文件 targetfile。可以使用如下命令查看符号链接：\n1 2 $ ls -l linkfile lrwxrwxrwx 1 user group 12 Jul 29 15:00 linkfile -\u003e /path/to/targetfile 在这个示例中，linkfile 是符号链接，指向 /path/to/targetfile。\n二、什么是符号链接所引用的文件？ 符号链接所引用的文件是符号链接指向的实际文件或目录。它是符号链接的目标，包含了真实的数据或内容。\n符号链接所引用的文件包含实际的数据或内容。这是磁盘上存储的真正文件。\n假设 linkfile 指向 /path/to/targetfile，那么 /path/to/targetfile 就是符号链接所引用的文件。这个文件可以是文本文件、二进制文件、目录等。\n三、符号链接与符号链接所引用的文件的区别 在定义方面：\n符号链接：一个特殊的文件，它包含了指向另一个文件或目录的路径。 符号链接所引用的文件：符号链接指向的实际文件或目录，包含真实的数据或内容。 在功能方面：\n符号链接：作为快捷方式，让用户通过符号链接访问实际文件或目录。 符号链接所引用的文件：实际存储数据或文件内容。 在实际操作方面：\n符号链接：对符号链接本身的操作（如删除、移动）不会影响目标文件的内容，除非它影响了路径。 符号链接所引用的文件：对目标文件的操作（如修改、删除）会影响文件内容。 ",
-  "wordCount" : "842",
+  "articleBody": "\r在 C/C++ 中，new/delete 与 malloc/free 的使用涉及内存分配和释放的机制，虽然它们的功能表面上类似，但在使用上存在许多本质上的区别，使用时务必配对使用，不可混用。\n一、new/delete 与 malloc/free 的对比分析 1.1 内存分配的来源 new/delete：内存从“自由存储区”（Free Store）分配。自由存储区是专门为 C++ 中对象管理的内存区域，它的管理由 C++ 的内存分配机制决定。new 分配的内存适合构造对象，因为它会自动调用构造函数。\nmalloc/free：内存从“堆”（Heap）分配。这是 C 语言标准中的内存分配机制，malloc 只知道要分配的字节数，不会涉及到对象的构造和析构。\n说到这里，不得不简单谈一下内存分区。事实上，内存分区没有一个统一的定义，根据 CSAPP 这本书，我们可以将内存分为：代码区、全局/静态存储区、堆区、栈区以及常量区。我们可以将前述的 ”自由存储区“ 视为堆区，但其不仅可以是堆区，还可以是静态存储区，这由 operator new 的具体实现决定。\n1.2 返回类型 new/delete：new 返回一个完全类型化的指针，即指向特定类型的对象，因此不需要手动进行类型转换。如果分配失败，new 会抛出异常（std::bad_alloc），这与返回 NULL 的方式不同。当然，我们也可使用关键字 std::nothrow 使其在分配失败时返回 nullptr。\nmalloc/free：malloc 返回 void* 指针，意味着需要手动将其转换为所需的类型。并且当 malloc 分配失败时，它会返回 NULL，这要求使用者在每次分配时检查返回值。\n1.3 内存大小的计算 new/delete：编译器在编译时根据类型自动计算所需的内存大小，因此不需要手动提供内存的大小。尤其在处理类对象时，编译器会根据对象的类型自动分配所需的空间。\nmalloc/free：调用 malloc 时，必须明确指定要分配的字节数，这意味着开发人员需要自己计算复杂类型的大小。这在处理数组或结构体时显得尤其繁琐。\n1.4 数组分配 new/delete：C++ 提供了 new[] 和 delete[] 来专门分配和释放数组，这些操作会调用每个对象的构造函数和析构函数，确保数组中每个元素被正确初始化和销毁。\nmalloc/free：malloc 分配数组时，需要开发者自己手动计算总的字节大小，而 free 不会调用析构函数，因此需要开发者手动管理数组元素的初始化和销毁。\n1.5 对象的构造与析构 new/delete：new 会自动调用对象的构造函数来初始化分配的内存，delete 则会调用析构函数来清理对象的资源。这一点对需要进行资源管理（如动态内存、文件句柄等）的类尤为重要。\nmalloc/free：malloc 仅仅分配内存，不会调用构造函数，因此对象不会自动初始化。同样，free 也不会调用析构函数，仅仅是释放分配的内存。\n1.6 内存重新分配 new/delete：new 没有提供重新分配内存的机制。对于重新分配，需要手动管理复制和删除旧的对象。这在处理复杂类型时会涉及拷贝构造函数和析构函数的调用。\nmalloc/free：malloc 可以与 realloc 一起使用，实现更大的内存块分配，而无需担心对象的构造和析构。对于简单的内存块操作，realloc 更为直观和方便。\n1.7 内存不足处理 new/delete：C++ 提供了 std::set_new_handler，可以自定义内存不足时的处理方式，这允许开发者在内存不足时采取一些措施（如释放内存或记录日志）。\nmalloc/free：malloc 没有类似的机制来处理低内存情况。当系统内存不足时，malloc 直接返回 NULL，用户无法在这一点插入自己的代码来进行处理。\n1.8 是否可以重载 new/delete：C++ 允许用户重载 operator new 和 operator delete，这样可以自定义内存分配和释放的行为。例如，可以实现自定义的内存池或内存跟踪机制。\nmalloc/free：malloc 和 free 是标准库函数，不能被合法重载，因此不支持自定义内存管理行为。\n",
+  "wordCount" : "1564",
   "inLanguage": "zh",
-  "datePublished": "2023-08-01T21:58:41+08:00",
-  "dateModified": "2023-08-01T21:58:41+08:00",
+  "datePublished": "2023-08-05T09:22:41+08:00",
+  "dateModified": "2023-08-05T09:22:41+08:00",
   "author":[{
     "@type": "Person",
     "name": "史玉浩"
   }],
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://oheyu.github.io/zh/posts/tech/linux%E4%B8%AD%E7%9A%84%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E4%B8%8E%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E6%89%80%E5%BC%95%E7%94%A8%E7%9A%84%E6%96%87%E4%BB%B6/"
+    "@id": "https://oheyu.github.io/zh/posts/tech/free%E4%B8%8Emalloc%E4%BB%A5%E5%8F%8Anew%E4%B8%8Edelete/"
   },
   "publisher": {
     "@type": "Organization",
@@ -251,9 +251,9 @@ code.has-jax {
   <header class="post-header">
     <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
     <h1 class="post-title entry-hint-parent">
-      Linux中的符号链接与符号链接所引用的文件
+      Free与malloc以及new与delete
     </h1>
-    <div class="post-meta"><span title='2023-08-01 21:58:41 +0800 CST'>2023-08-01</span>&nbsp;·&nbsp;2 分钟&nbsp;·&nbsp;史玉浩
+    <div class="post-meta"><span title='2023-08-05 09:22:41 +0800 CST'>2023-08-05</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
 
 </div>
   </header> <aside id="toc-container" class="toc-container wide">
@@ -265,12 +265,27 @@ code.has-jax {
 
             <div class="inner"><ul>
                     <li>
-                        <a href="#%e4%b8%80%e4%bb%80%e4%b9%88%e6%98%af%e7%ac%a6%e5%8f%b7%e9%93%be%e6%8e%a5" aria-label="一、什么是符号链接？">一、什么是符号链接？</a></li>
+                        <a href="#%e4%b8%80newdelete-%e4%b8%8e-mallocfree-%e7%9a%84%e5%af%b9%e6%af%94%e5%88%86%e6%9e%90" aria-label="一、new/delete 与 malloc/free 的对比分析">一、<code>new/delete</code> 与 <code>malloc/free</code> 的对比分析</a><ul>
+                            
                     <li>
-                        <a href="#%e4%ba%8c%e4%bb%80%e4%b9%88%e6%98%af%e7%ac%a6%e5%8f%b7%e9%93%be%e6%8e%a5%e6%89%80%e5%bc%95%e7%94%a8%e7%9a%84%e6%96%87%e4%bb%b6" aria-label="二、什么是符号链接所引用的文件？">二、什么是符号链接所引用的文件？</a></li>
+                        <a href="#11-%e5%86%85%e5%ad%98%e5%88%86%e9%85%8d%e7%9a%84%e6%9d%a5%e6%ba%90" aria-label="1.1 内存分配的来源">1.1 内存分配的来源</a></li>
                     <li>
-                        <a href="#%e4%b8%89%e7%ac%a6%e5%8f%b7%e9%93%be%e6%8e%a5%e4%b8%8e%e7%ac%a6%e5%8f%b7%e9%93%be%e6%8e%a5%e6%89%80%e5%bc%95%e7%94%a8%e7%9a%84%e6%96%87%e4%bb%b6%e7%9a%84%e5%8c%ba%e5%88%ab" aria-label="三、符号链接与符号链接所引用的文件的区别">三、符号链接与符号链接所引用的文件的区别</a>
+                        <a href="#12-%e8%bf%94%e5%9b%9e%e7%b1%bb%e5%9e%8b" aria-label="1.2 返回类型">1.2 返回类型</a></li>
+                    <li>
+                        <a href="#13-%e5%86%85%e5%ad%98%e5%a4%a7%e5%b0%8f%e7%9a%84%e8%ae%a1%e7%ae%97" aria-label="1.3 内存大小的计算">1.3 内存大小的计算</a></li>
+                    <li>
+                        <a href="#14-%e6%95%b0%e7%bb%84%e5%88%86%e9%85%8d" aria-label="1.4 数组分配">1.4 数组分配</a></li>
+                    <li>
+                        <a href="#15-%e5%af%b9%e8%b1%a1%e7%9a%84%e6%9e%84%e9%80%a0%e4%b8%8e%e6%9e%90%e6%9e%84" aria-label="1.5 对象的构造与析构">1.5 对象的构造与析构</a></li>
+                    <li>
+                        <a href="#16-%e5%86%85%e5%ad%98%e9%87%8d%e6%96%b0%e5%88%86%e9%85%8d" aria-label="1.6 内存重新分配">1.6 内存重新分配</a></li>
+                    <li>
+                        <a href="#17-%e5%86%85%e5%ad%98%e4%b8%8d%e8%b6%b3%e5%a4%84%e7%90%86" aria-label="1.7 内存不足处理">1.7 内存不足处理</a></li>
+                    <li>
+                        <a href="#18-%e6%98%af%e5%90%a6%e5%8f%af%e4%bb%a5%e9%87%8d%e8%bd%bd" aria-label="1.8 是否可以重载">1.8 是否可以重载</a>
                     </li>
+                </ul>
+                </li>
                 </ul>
             </div>
         </details>
@@ -336,85 +351,52 @@ code.has-jax {
     }
 </script>
   <div class="post-content"><!-- more -->
-<p>在操作系统中，符号链接（Symbolic Link）是一种常用的文件系统功能，它允许用户通过快捷方式访问其他文件或目录。</p>
+<p>在 C/C++ 中，<code>new/delete</code> 与 <code>malloc/free</code> 的使用涉及内存分配和释放的机制，虽然它们的功能表面上类似，但在使用上存在许多本质上的区别，使用时务必配对使用，不可混用。</p>
 <hr>
-<h3 id="一什么是符号链接">一、什么是符号链接？<a hidden class="anchor" aria-hidden="true" href="#一什么是符号链接">#</a></h3>
-<p>符号链接是一种特殊的文件类型，它包含了指向另一个文件或目录的路径。你可以将其视为指向目标文件或目录的快捷方式或别名。在 Unix/Linux 系统中，符号链接的文件类型标记为 <code>l</code>，例如 <code>lrwxrwxrwx</code>。</p>
-<p>我们可以从以下四个方面来了解符号链接：</p>
-<ol>
-<li>
-<p><strong>独立性</strong>：符号链接本身是一个独立的文件，与它指向的目标文件或目录相分离。它仅仅包含目标的路径信息。</p>
-</li>
-<li>
-<p><strong>路径</strong>：符号链接存储的是目标文件的路径，这个路径可以是相对的或绝对的。</p>
-</li>
-<li>
-<p><strong>文件类型</strong>：符号链接的文件类型是 <code>symlink</code>，这是文件系统支持的一种特殊文件类型。</p>
-</li>
-<li>
-<p><strong>创建</strong>：可以使用 <code>ln -s</code> 命令在 Unix/Linux 系统中创建符号链接。例如：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ln -s /path/to/targetfile linkname
-</span></span></code></pre></td></tr></table>
-</div>
-</div></li>
-</ol>
-<p>假设我们有一个名为 <code>linkfile</code> 的符号链接，它指向文件 <code>targetfile</code>。可以使用如下命令查看符号链接：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ ls -l linkfile
-</span></span><span class="line"><span class="cl">lrwxrwxrwx <span class="m">1</span> user group <span class="m">12</span> Jul <span class="m">29</span> 15:00 linkfile -&gt; /path/to/targetfile
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>在这个示例中，<code>linkfile</code> 是符号链接，指向 <code>/path/to/targetfile</code>。</p>
-<hr>
-<h3 id="二什么是符号链接所引用的文件">二、什么是符号链接所引用的文件？<a hidden class="anchor" aria-hidden="true" href="#二什么是符号链接所引用的文件">#</a></h3>
-<p>符号链接所引用的文件是符号链接指向的实际文件或目录。它是符号链接的目标，包含了真实的数据或内容。</p>
-<p>符号链接所引用的文件包含实际的数据或内容。这是磁盘上存储的真正文件。</p>
-<p>假设 <code>linkfile</code> 指向 <code>/path/to/targetfile</code>，那么 <code>/path/to/targetfile</code> 就是符号链接所引用的文件。这个文件可以是文本文件、二进制文件、目录等。</p>
-<hr>
-<h3 id="三符号链接与符号链接所引用的文件的区别">三、符号链接与符号链接所引用的文件的区别<a hidden class="anchor" aria-hidden="true" href="#三符号链接与符号链接所引用的文件的区别">#</a></h3>
-<p>在定义方面：</p>
-<ul>
-<li>符号链接：一个特殊的文件，它包含了指向另一个文件或目录的路径。</li>
-<li>符号链接所引用的文件：符号链接指向的实际文件或目录，包含真实的数据或内容。</li>
-</ul>
-<p>在功能方面：</p>
-<ul>
-<li>符号链接：作为快捷方式，让用户通过符号链接访问实际文件或目录。</li>
-<li>符号链接所引用的文件：实际存储数据或文件内容。</li>
-</ul>
-<p>在实际操作方面：</p>
-<ul>
-<li>符号链接：对符号链接本身的操作（如删除、移动）不会影响目标文件的内容，除非它影响了路径。</li>
-<li>符号链接所引用的文件：对目标文件的操作（如修改、删除）会影响文件内容。</li>
-</ul>
+<h3 id="一newdelete-与-mallocfree-的对比分析">一、<code>new/delete</code> 与 <code>malloc/free</code> 的对比分析<a hidden class="anchor" aria-hidden="true" href="#一newdelete-与-mallocfree-的对比分析">#</a></h3>
+<h4 id="11-内存分配的来源">1.1 内存分配的来源<a hidden class="anchor" aria-hidden="true" href="#11-内存分配的来源">#</a></h4>
+<p><code>new/delete</code>：内存从“自由存储区”（Free Store）分配。自由存储区是专门为 C++ 中对象管理的内存区域，它的管理由 C++ 的内存分配机制决定。<code>new</code> 分配的内存适合构造对象，因为它会自动调用构造函数。</p>
+<p><code>malloc/free</code>：内存从“堆”（Heap）分配。这是 C 语言标准中的内存分配机制，<code>malloc</code> 只知道要分配的字节数，不会涉及到对象的构造和析构。</p>
+<p>说到这里，不得不简单谈一下内存分区。事实上，内存分区没有一个统一的定义，根据 CSAPP 这本书，我们可以将内存分为：代码区、全局/静态存储区、堆区、栈区以及常量区。我们可以将前述的 ”自由存储区“ 视为堆区，但其不仅可以是堆区，还可以是静态存储区，这由 <code>operator new</code> 的具体实现决定。</p>
+<h4 id="12-返回类型">1.2 返回类型<a hidden class="anchor" aria-hidden="true" href="#12-返回类型">#</a></h4>
+<p><code>new/delete</code>：<code>new</code> 返回一个完全类型化的指针，即指向特定类型的对象，因此不需要手动进行类型转换。如果分配失败，<code>new</code> 会抛出异常（<code>std::bad_alloc</code>），这与返回 <code>NULL</code> 的方式不同。当然，我们也可使用关键字 <code>std::nothrow</code> 使其在分配失败时返回 <code>nullptr</code>。</p>
+<p><code>malloc/free</code>：<code>malloc</code> 返回 <code>void*</code> 指针，意味着需要手动将其转换为所需的类型。并且当 <code>malloc</code> 分配失败时，它会返回 <code>NULL</code>，这要求使用者在每次分配时检查返回值。</p>
+<h4 id="13-内存大小的计算">1.3 内存大小的计算<a hidden class="anchor" aria-hidden="true" href="#13-内存大小的计算">#</a></h4>
+<p><code>new/delete</code>：编译器在编译时根据类型自动计算所需的内存大小，因此不需要手动提供内存的大小。尤其在处理类对象时，编译器会根据对象的类型自动分配所需的空间。</p>
+<p><code>malloc/free</code>：调用 <code>malloc</code> 时，必须明确指定要分配的字节数，这意味着开发人员需要自己计算复杂类型的大小。这在处理数组或结构体时显得尤其繁琐。</p>
+<h4 id="14-数组分配">1.4 数组分配<a hidden class="anchor" aria-hidden="true" href="#14-数组分配">#</a></h4>
+<p><code>new/delete</code>：C++ 提供了 <code>new[]</code> 和 <code>delete[]</code> 来专门分配和释放数组，这些操作会调用每个对象的构造函数和析构函数，确保数组中每个元素被正确初始化和销毁。</p>
+<p><code>malloc/free</code>：<code>malloc</code> 分配数组时，需要开发者自己手动计算总的字节大小，而 <code>free</code> 不会调用析构函数，因此需要开发者手动管理数组元素的初始化和销毁。</p>
+<h4 id="15-对象的构造与析构">1.5 对象的构造与析构<a hidden class="anchor" aria-hidden="true" href="#15-对象的构造与析构">#</a></h4>
+<p><code>new/delete</code>：<code>new</code> 会自动调用对象的构造函数来初始化分配的内存，<code>delete</code> 则会调用析构函数来清理对象的资源。这一点对需要进行资源管理（如动态内存、文件句柄等）的类尤为重要。</p>
+<p><code>malloc/free</code>：<code>malloc</code> 仅仅分配内存，不会调用构造函数，因此对象不会自动初始化。同样，<code>free</code> 也不会调用析构函数，仅仅是释放分配的内存。</p>
+<h4 id="16-内存重新分配">1.6 内存重新分配<a hidden class="anchor" aria-hidden="true" href="#16-内存重新分配">#</a></h4>
+<p><code>new/delete</code>：<code>new</code> 没有提供重新分配内存的机制。对于重新分配，需要手动管理复制和删除旧的对象。这在处理复杂类型时会涉及拷贝构造函数和析构函数的调用。</p>
+<p><code>malloc/free</code>：<code>malloc</code> 可以与 <code>realloc</code> 一起使用，实现更大的内存块分配，而无需担心对象的构造和析构。对于简单的内存块操作，<code>realloc</code> 更为直观和方便。</p>
+<h4 id="17-内存不足处理">1.7 内存不足处理<a hidden class="anchor" aria-hidden="true" href="#17-内存不足处理">#</a></h4>
+<p><code>new/delete</code>：C++ 提供了 <code>std::set_new_handler</code>，可以自定义内存不足时的处理方式，这允许开发者在内存不足时采取一些措施（如释放内存或记录日志）。</p>
+<p><code>malloc/free</code>：<code>malloc</code> 没有类似的机制来处理低内存情况。当系统内存不足时，<code>malloc</code> 直接返回 <code>NULL</code>，用户无法在这一点插入自己的代码来进行处理。</p>
+<h4 id="18-是否可以重载">1.8 是否可以重载<a hidden class="anchor" aria-hidden="true" href="#18-是否可以重载">#</a></h4>
+<p><code>new/delete</code>：C++ 允许用户重载 <code>operator new</code> 和 <code>operator delete</code>，这样可以自定义内存分配和释放的行为。例如，可以实现自定义的内存池或内存跟踪机制。</p>
+<p><code>malloc/free</code>：<code>malloc</code> 和 <code>free</code> 是标准库函数，不能被合法重载，因此不支持自定义内存管理行为。</p>
 
 
   </div>
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://oheyu.github.io/zh/tags/linux/">Linux</a></li>
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
     </ul>
 <nav class="paginav">
-  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/%E5%8D%8A%E8%A7%92%E5%AD%97%E7%AC%A6%E4%B8%8E%E5%85%A8%E8%A7%92%E5%AD%97%E7%AC%A6/">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/cpp%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">
     <span class="title">« 上一页</span>
     <br>
-    <span>半角字符与全角字符</span>
+    <span>CPP内存模型</span>
   </a>
-  <a class="next" href="https://oheyu.github.io/zh/posts/tech/fg%E5%91%BD%E4%BB%A4/">
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/%E5%8D%8A%E8%A7%92%E5%AD%97%E7%AC%A6%E4%B8%8E%E5%85%A8%E8%A7%92%E5%AD%97%E7%AC%A6/">
     <span class="title">下一页 »</span>
     <br>
-    <span>Fg命令</span>
+    <span>半角字符与全角字符</span>
   </a>
 </nav>
 
