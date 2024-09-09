@@ -6,6 +6,14 @@
     <description>Recent content in 👨🏻‍💻 tech on 史玉浩的个人博客</description>
     <generator>Hugo -- 0.127.0</generator>
     <language>en-US</language>
+    <lastBuildDate>Sat, 01 Jul 2023 21:31:46 +0800</lastBuildDate>
     <atom:link href="https://oheyu.github.io/en/posts/tech/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Compilation Process：From Source Code to Executable</title>
+      <link>https://oheyu.github.io/en/posts/tech/compilation-processfrom-source-code-to-executable/</link>
+      <pubDate>Sat, 01 Jul 2023 21:31:46 +0800</pubDate>
+      <guid>https://oheyu.github.io/en/posts/tech/compilation-processfrom-source-code-to-executable/</guid>
+      <description>As a senior Linux/C++ programmer, it&amp;rsquo;s crucial to understand the journey of source code as it transforms into an executable file. This process involves several stages: preprocessing, compilation, assembly, and linking. Source Code Files Source code files are where it all begins. They contain human-readable instructions written in C or C++ languages. In C, these files typically have a .c extension, while in C++, they usually have a .cpp extension.</description>
+    </item>
   </channel>
 </rss>

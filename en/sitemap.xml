@@ -2,6 +2,74 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://oheyu.github.io/en/posts/tech/</loc>
+    <lastmod>2023-07-01T21:31:46+08:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="zh-CN"
+                href="https://oheyu.github.io/zh/posts/tech/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-US"
+                href="https://oheyu.github.io/en/posts/tech/"
+                />
+  </url><url>
+    <loc>https://oheyu.github.io/en/posts/</loc>
+    <lastmod>2023-07-01T21:31:46+08:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="zh-CN"
+                href="https://oheyu.github.io/zh/posts/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-US"
+                href="https://oheyu.github.io/en/posts/"
+                />
+  </url><url>
+    <loc>https://oheyu.github.io/en/tags/c/cpp/</loc>
+    <lastmod>2023-07-01T21:31:46+08:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="zh-CN"
+                href="https://oheyu.github.io/zh/tags/c/cpp/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-US"
+                href="https://oheyu.github.io/en/tags/c/cpp/"
+                />
+  </url><url>
+    <loc>https://oheyu.github.io/en/posts/tech/compilation-processfrom-source-code-to-executable/</loc>
+    <lastmod>2023-07-01T21:31:46+08:00</lastmod>
+  </url><url>
+    <loc>https://oheyu.github.io/en/tags/</loc>
+    <lastmod>2023-07-01T21:31:46+08:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="zh-CN"
+                href="https://oheyu.github.io/zh/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-US"
+                href="https://oheyu.github.io/en/tags/"
+                />
+  </url><url>
+    <loc>https://oheyu.github.io/en/</loc>
+    <lastmod>2023-07-01T21:31:46+08:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="zh-CN"
+                href="https://oheyu.github.io/zh/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-US"
+                href="https://oheyu.github.io/en/"
+                />
+  </url><url>
     <loc>https://oheyu.github.io/en/archives/</loc>
     <xhtml:link
                 rel="alternate"
@@ -14,18 +82,6 @@
                 href="https://oheyu.github.io/en/archives/"
                 />
   </url><url>
-    <loc>https://oheyu.github.io/en/posts/tech/</loc>
-    <xhtml:link
-                rel="alternate"
-                hreflang="zh-CN"
-                href="https://oheyu.github.io/zh/posts/tech/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en-US"
-                href="https://oheyu.github.io/en/posts/tech/"
-                />
-  </url><url>
     <loc>https://oheyu.github.io/en/posts/read/</loc>
     <xhtml:link
                 rel="alternate"
@@ -36,18 +92,6 @@
                 rel="alternate"
                 hreflang="en-US"
                 href="https://oheyu.github.io/en/posts/read/"
-                />
-  </url><url>
-    <loc>https://oheyu.github.io/en/posts/</loc>
-    <xhtml:link
-                rel="alternate"
-                hreflang="zh-CN"
-                href="https://oheyu.github.io/zh/posts/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en-US"
-                href="https://oheyu.github.io/en/posts/"
                 />
   </url><url>
     <loc>https://oheyu.github.io/en/categories/</loc>
@@ -84,30 +128,6 @@
                 rel="alternate"
                 hreflang="en-US"
                 href="https://oheyu.github.io/en/series/"
-                />
-  </url><url>
-    <loc>https://oheyu.github.io/en/tags/</loc>
-    <xhtml:link
-                rel="alternate"
-                hreflang="zh-CN"
-                href="https://oheyu.github.io/zh/tags/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en-US"
-                href="https://oheyu.github.io/en/tags/"
-                />
-  </url><url>
-    <loc>https://oheyu.github.io/en/</loc>
-    <xhtml:link
-                rel="alternate"
-                hreflang="zh-CN"
-                href="https://oheyu.github.io/zh/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en-US"
-                href="https://oheyu.github.io/en/"
                 />
   </url><url>
     <loc>https://oheyu.github.io/en/posts/life/</loc>

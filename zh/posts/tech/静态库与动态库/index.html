@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>静态库与动态库 | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="在 C&#43;&#43; 开发中，库文件是用于封装可重用代码的文件，帮助开发者在多个项目中共享和重用函数、类或数据结构。库文件主要分为两类：静态库（Static L">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="静态库与动态库" />
+<meta property="og:description" content="在 C&#43;&#43; 开发中，库文件是用于封装可重用代码的文件，帮助开发者在多个项目中共享和重用函数、类或数据结构。库文件主要分为两类：静态库（Static L" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-08-23T20:47:58+08:00" />
+<meta property="article:modified_time" content="2023-08-23T20:47:58+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="静态库与动态库"/>
+<meta name="twitter:description" content="在 C&#43;&#43; 开发中，库文件是用于封装可重用代码的文件，帮助开发者在多个项目中共享和重用函数、类或数据结构。库文件主要分为两类：静态库（Static L"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "静态库与动态库",
+      "item": "https://oheyu.github.io/zh/posts/tech/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "静态库与动态库",
+  "name": "静态库与动态库",
+  "description": "在 C++ 开发中，库文件是用于封装可重用代码的文件，帮助开发者在多个项目中共享和重用函数、类或数据结构。库文件主要分为两类：静态库（Static L",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\r在 C++ 开发中，库文件是用于封装可重用代码的文件，帮助开发者在多个项目中共享和重用函数、类或数据结构。库文件主要分为两类：静态库（Static Library） 和 动态库（Dynamic Library）。\n一、静态库 1.1 静态库的概念 静态库是一种在编译时将库的代码直接链接到目标程序中的文件。静态库的内容在编译时复制到每个使用该库的程序中，意味着每个程序都有自己独立的库代码副本。静态库通常使用 .a（Linux/Unix）或 .lib（Windows）扩展名。\n1.2 静态库的创建 创建静态库通常包括以下步骤：\n编译源代码为目标文件： 使用 g++ -c 命令编译源代码生成目标文件：\n1 g++ -c myfile.cpp -o myfile.o -c 参数告诉编译器只编译文件而不链接生成可执行文件。\n使用 ar 命令打包目标文件为静态库： 使用 ar 命令创建静态库：\n1 ar rcs libmylib.a myfile.o 其中，libmylib.a 是静态库的名称，rcs 是创建或替换归档文件的选项。\n1.3 静态库的使用 在使用静态库时，编译器会将库文件的代码嵌入到最终的可执行文件中。链接静态库的方式如下：\n1 g++ main.cpp -L. -lmylib -o myprogram -L. 指定库文件的搜索路径为当前目录。 -lmylib 表示链接库 libmylib.a（省略了前缀 lib 和扩展名 .a）。 -o myprogram 指定生成的可执行文件名。 使用静态库时，需要确保在源代码中包含库的头文件：\n1 #include \"mylib.h\" 1.4 静态库的优缺点 优点：\n加载速度快：因为静态库在编译时被嵌入到程序中，运行时不需要额外的库加载步骤。 独立性强：静态链接的程序独立运行，不依赖外部库文件的存在。 缺点：\n可执行文件体积较大：每个使用静态库的程序都包含库的完整代码，导致二进制文件体积增大。 更新不便：当库文件需要更新时，所有使用该库的程序都需要重新编译和发布。 二、动态库 2.1 动态库的概念 动态库（也称为共享库）在程序运行时动态加载到内存中，多个进程可以共享同一个库的实例。动态库通常使用 .so（Linux/Unix）或 .dll（Windows）扩展名。与静态库不同，动态库的代码不直接嵌入可执行文件中，而是在运行时由系统加载。\n2.2 动态库的创建 创建动态库需要以下步骤：\n编译源代码为位置无关代码： 使用 -fPIC 选项编译生成位置无关代码（Position Independent Code）：\n1 g++ -fPIC -c myfile.cpp -o myfile.o 将目标文件链接为动态库： 使用 g++ -shared 命令创建动态库：\n1 g++ -shared -o libmylib.so myfile.o -shared 参数告诉编译器生成动态库，libmylib.so 是动态库的名称。\n2.3 动态库的使用 编译时需要链接动态库，方法如下：\n1 g++ main.cpp -L. -lmylib -o myprogram 其中，-L. 和 -lmylib 与使用静态库时相同。\n此外，在运行时，系统需要知道动态库的位置。如果库文件不在系统默认的路径中，可以使用 LD_LIBRARY_PATH 环境变量设置库的搜索路径：\n1 export LD_LIBRARY_PATH=./:$LD_LIBRARY_PATH 2.4 动态库的优缺点 优点：\n内存占用小：多个进程可以共享同一个动态库，减少内存使用。 更新方便：动态库可以独立更新，无需重新编译依赖它的程序。程序会在下次运行时加载新的库。 缺点：\n运行时依赖：如果动态库在程序运行时不可用，程序可能无法正常启动。 加载开销：动态库需要在运行时加载，可能会增加程序启动时间。 三、静态库与动态库的对比 特性 静态库 动态库 链接方式 编译时静态链接，库代码嵌入程序中 运行时动态链接，库代码在运行时加载 文件扩展名 .a（Linux/Unix），.lib（Windows） .so（Linux/Unix），.dll（Windows） 可执行文件体积 较大，包含库的全部代码 较小，依赖外部库文件 内存使用 每个程序独立包含库代码 多个进程共享同一份库代码 库的更新 需要重新编译所有依赖库的程序 可以独立更新库文件 运行时依赖 无外部依赖，独立执行 程序运行时需要动态库 加载时间 无需加载，程序启动时更快 程序启动时加载库，可能略有延迟 四、动态库与静态库的应用场景 4.1 何时使用静态库 静态库适用于以下场景：\n高性能场景：程序启动时间至关重要，且不希望在运行时加载额外库。 独立性要求高：程序需要在不同环境下运行而不依赖外部库文件，例如嵌入式系统或分发独立的应用程序包。 4.2 何时使用动态库 动态库适用于以下场景：\n内存优化：多个进程同时运行并共享同一份库，节省内存。 频繁更新：库代码可能需要频繁更新，而不希望每次更新后都重新编译依赖它的程序。 五、总结 静态库和动态库是 C++ 开发中两种常见的代码复用方式。静态库在编译时将库代码嵌入到可执行文件中，增加了文件体积但减少了运行时依赖。动态库在程序运行时加载，多个进程可以共享库资源，减少内存占用，并且便于独立更新。选择使用静态库还是动态库应根据项目的具体需求、性能要求和更新频率来决定。\n无论是使用静态库还是动态库，合理管理和打包库文件，确保正确地链接和加载库，都是开发高效、健壮的 C++ 应用程序的关键。\n",
+  "wordCount" : "1843",
+  "inLanguage": "zh",
+  "datePublished": "2023-08-23T20:47:58+08:00",
+  "dateModified": "2023-08-23T20:47:58+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      静态库与动态库
+    </h1>
+    <div class="post-meta"><span title='2023-08-23 20:47:58 +0800 CST'>2023-08-23</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e9%9d%99%e6%80%81%e5%ba%93" aria-label="一、静态库">一、静态库</a><ul>
+                            
+                    <li>
+                        <a href="#11-%e9%9d%99%e6%80%81%e5%ba%93%e7%9a%84%e6%a6%82%e5%bf%b5" aria-label="1.1 静态库的概念">1.1 静态库的概念</a></li>
+                    <li>
+                        <a href="#12-%e9%9d%99%e6%80%81%e5%ba%93%e7%9a%84%e5%88%9b%e5%bb%ba" aria-label="1.2 静态库的创建">1.2 静态库的创建</a></li>
+                    <li>
+                        <a href="#13-%e9%9d%99%e6%80%81%e5%ba%93%e7%9a%84%e4%bd%bf%e7%94%a8" aria-label="1.3 静态库的使用">1.3 静态库的使用</a></li>
+                    <li>
+                        <a href="#14-%e9%9d%99%e6%80%81%e5%ba%93%e7%9a%84%e4%bc%98%e7%bc%ba%e7%82%b9" aria-label="1.4 静态库的优缺点">1.4 静态库的优缺点</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%8c%e5%8a%a8%e6%80%81%e5%ba%93" aria-label="二、动态库">二、动态库</a><ul>
+                            
+                    <li>
+                        <a href="#21-%e5%8a%a8%e6%80%81%e5%ba%93%e7%9a%84%e6%a6%82%e5%bf%b5" aria-label="2.1 动态库的概念">2.1 动态库的概念</a></li>
+                    <li>
+                        <a href="#22-%e5%8a%a8%e6%80%81%e5%ba%93%e7%9a%84%e5%88%9b%e5%bb%ba" aria-label="2.2 动态库的创建">2.2 动态库的创建</a></li>
+                    <li>
+                        <a href="#23-%e5%8a%a8%e6%80%81%e5%ba%93%e7%9a%84%e4%bd%bf%e7%94%a8" aria-label="2.3 动态库的使用">2.3 动态库的使用</a></li>
+                    <li>
+                        <a href="#24-%e5%8a%a8%e6%80%81%e5%ba%93%e7%9a%84%e4%bc%98%e7%bc%ba%e7%82%b9" aria-label="2.4 动态库的优缺点">2.4 动态库的优缺点</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%89%e9%9d%99%e6%80%81%e5%ba%93%e4%b8%8e%e5%8a%a8%e6%80%81%e5%ba%93%e7%9a%84%e5%af%b9%e6%af%94" aria-label="三、静态库与动态库的对比">三、静态库与动态库的对比</a></li>
+                    <li>
+                        <a href="#%e5%9b%9b%e5%8a%a8%e6%80%81%e5%ba%93%e4%b8%8e%e9%9d%99%e6%80%81%e5%ba%93%e7%9a%84%e5%ba%94%e7%94%a8%e5%9c%ba%e6%99%af" aria-label="四、动态库与静态库的应用场景">四、动态库与静态库的应用场景</a><ul>
+                            
+                    <li>
+                        <a href="#41-%e4%bd%95%e6%97%b6%e4%bd%bf%e7%94%a8%e9%9d%99%e6%80%81%e5%ba%93" aria-label="4.1 何时使用静态库">4.1 何时使用静态库</a></li>
+                    <li>
+                        <a href="#42-%e4%bd%95%e6%97%b6%e4%bd%bf%e7%94%a8%e5%8a%a8%e6%80%81%e5%ba%93" aria-label="4.2 何时使用动态库">4.2 何时使用动态库</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%94%e6%80%bb%e7%bb%93" aria-label="五、总结">五、总结</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>在 C++ 开发中，库文件是用于封装可重用代码的文件，帮助开发者在多个项目中共享和重用函数、类或数据结构。库文件主要分为两类：<strong>静态库（Static Library）</strong> 和 <strong>动态库（Dynamic Library）</strong>。</p>
+<hr>
+<h3 id="一静态库">一、静态库<a hidden class="anchor" aria-hidden="true" href="#一静态库">#</a></h3>
+<h4 id="11-静态库的概念">1.1 静态库的概念<a hidden class="anchor" aria-hidden="true" href="#11-静态库的概念">#</a></h4>
+<p>静态库是一种在编译时将库的代码直接链接到目标程序中的文件。静态库的内容在编译时复制到每个使用该库的程序中，意味着每个程序都有自己独立的库代码副本。静态库通常使用 <code>.a</code>（Linux/Unix）或 <code>.lib</code>（Windows）扩展名。</p>
+<h4 id="12-静态库的创建">1.2 静态库的创建<a hidden class="anchor" aria-hidden="true" href="#12-静态库的创建">#</a></h4>
+<p>创建静态库通常包括以下步骤：</p>
+<ol>
+<li>
+<p><strong>编译源代码为目标文件</strong>：
+使用 <code>g++ -c</code> 命令编译源代码生成目标文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">g++ -c myfile.cpp -o myfile.o
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>-c</code> 参数告诉编译器只编译文件而不链接生成可执行文件。</p>
+</li>
+<li>
+<p><strong>使用 <code>ar</code> 命令打包目标文件为静态库</strong>：
+使用 <code>ar</code> 命令创建静态库：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ar rcs libmylib.a myfile.o
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中，<code>libmylib.a</code> 是静态库的名称，<code>rcs</code> 是创建或替换归档文件的选项。</p>
+</li>
+</ol>
+<h4 id="13-静态库的使用">1.3 静态库的使用<a hidden class="anchor" aria-hidden="true" href="#13-静态库的使用">#</a></h4>
+<p>在使用静态库时，编译器会将库文件的代码嵌入到最终的可执行文件中。链接静态库的方式如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">g++ main.cpp -L. -lmylib -o myprogram
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>-L.</code> 指定库文件的搜索路径为当前目录。</li>
+<li><code>-lmylib</code> 表示链接库 <code>libmylib.a</code>（省略了前缀 <code>lib</code> 和扩展名 <code>.a</code>）。</li>
+<li><code>-o myprogram</code> 指定生成的可执行文件名。</li>
+</ul>
+<p>使用静态库时，需要确保在源代码中包含库的头文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;mylib.h&#34;</span><span class="cp">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="14-静态库的优缺点">1.4 静态库的优缺点<a hidden class="anchor" aria-hidden="true" href="#14-静态库的优缺点">#</a></h4>
+<p><strong>优点</strong>：</p>
+<ul>
+<li><strong>加载速度快</strong>：因为静态库在编译时被嵌入到程序中，运行时不需要额外的库加载步骤。</li>
+<li><strong>独立性强</strong>：静态链接的程序独立运行，不依赖外部库文件的存在。</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li><strong>可执行文件体积较大</strong>：每个使用静态库的程序都包含库的完整代码，导致二进制文件体积增大。</li>
+<li><strong>更新不便</strong>：当库文件需要更新时，所有使用该库的程序都需要重新编译和发布。</li>
+</ul>
+<hr>
+<h3 id="二动态库">二、动态库<a hidden class="anchor" aria-hidden="true" href="#二动态库">#</a></h3>
+<h4 id="21-动态库的概念">2.1 动态库的概念<a hidden class="anchor" aria-hidden="true" href="#21-动态库的概念">#</a></h4>
+<p>动态库（也称为共享库）在程序运行时动态加载到内存中，多个进程可以共享同一个库的实例。动态库通常使用 <code>.so</code>（Linux/Unix）或 <code>.dll</code>（Windows）扩展名。与静态库不同，动态库的代码不直接嵌入可执行文件中，而是在运行时由系统加载。</p>
+<h4 id="22-动态库的创建">2.2 动态库的创建<a hidden class="anchor" aria-hidden="true" href="#22-动态库的创建">#</a></h4>
+<p>创建动态库需要以下步骤：</p>
+<ol>
+<li>
+<p><strong>编译源代码为位置无关代码</strong>：
+使用 <code>-fPIC</code> 选项编译生成位置无关代码（Position Independent Code）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">g++ -fPIC -c myfile.cpp -o myfile.o
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p><strong>将目标文件链接为动态库</strong>：
+使用 <code>g++ -shared</code> 命令创建动态库：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">g++ -shared -o libmylib.so myfile.o
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>-shared</code> 参数告诉编译器生成动态库，<code>libmylib.so</code> 是动态库的名称。</p>
+</li>
+</ol>
+<h4 id="23-动态库的使用">2.3 动态库的使用<a hidden class="anchor" aria-hidden="true" href="#23-动态库的使用">#</a></h4>
+<p>编译时需要链接动态库，方法如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">g++ main.cpp -L. -lmylib -o myprogram
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中，<code>-L.</code> 和 <code>-lmylib</code> 与使用静态库时相同。</p>
+<p>此外，在运行时，系统需要知道动态库的位置。如果库文件不在系统默认的路径中，可以使用 <code>LD_LIBRARY_PATH</code> 环境变量设置库的搜索路径：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span>./:<span class="nv">$LD_LIBRARY_PATH</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="24-动态库的优缺点">2.4 动态库的优缺点<a hidden class="anchor" aria-hidden="true" href="#24-动态库的优缺点">#</a></h4>
+<p><strong>优点</strong>：</p>
+<ul>
+<li><strong>内存占用小</strong>：多个进程可以共享同一个动态库，减少内存使用。</li>
+<li><strong>更新方便</strong>：动态库可以独立更新，无需重新编译依赖它的程序。程序会在下次运行时加载新的库。</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li><strong>运行时依赖</strong>：如果动态库在程序运行时不可用，程序可能无法正常启动。</li>
+<li><strong>加载开销</strong>：动态库需要在运行时加载，可能会增加程序启动时间。</li>
+</ul>
+<hr>
+<h3 id="三静态库与动态库的对比">三、静态库与动态库的对比<a hidden class="anchor" aria-hidden="true" href="#三静态库与动态库的对比">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>静态库</th>
+<th>动态库</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>链接方式</strong></td>
+<td>编译时静态链接，库代码嵌入程序中</td>
+<td>运行时动态链接，库代码在运行时加载</td>
+</tr>
+<tr>
+<td><strong>文件扩展名</strong></td>
+<td><code>.a</code>（Linux/Unix），<code>.lib</code>（Windows）</td>
+<td><code>.so</code>（Linux/Unix），<code>.dll</code>（Windows）</td>
+</tr>
+<tr>
+<td><strong>可执行文件体积</strong></td>
+<td>较大，包含库的全部代码</td>
+<td>较小，依赖外部库文件</td>
+</tr>
+<tr>
+<td><strong>内存使用</strong></td>
+<td>每个程序独立包含库代码</td>
+<td>多个进程共享同一份库代码</td>
+</tr>
+<tr>
+<td><strong>库的更新</strong></td>
+<td>需要重新编译所有依赖库的程序</td>
+<td>可以独立更新库文件</td>
+</tr>
+<tr>
+<td><strong>运行时依赖</strong></td>
+<td>无外部依赖，独立执行</td>
+<td>程序运行时需要动态库</td>
+</tr>
+<tr>
+<td><strong>加载时间</strong></td>
+<td>无需加载，程序启动时更快</td>
+<td>程序启动时加载库，可能略有延迟</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="四动态库与静态库的应用场景">四、动态库与静态库的应用场景<a hidden class="anchor" aria-hidden="true" href="#四动态库与静态库的应用场景">#</a></h3>
+<h4 id="41-何时使用静态库">4.1 何时使用静态库<a hidden class="anchor" aria-hidden="true" href="#41-何时使用静态库">#</a></h4>
+<p>静态库适用于以下场景：</p>
+<ul>
+<li><strong>高性能场景</strong>：程序启动时间至关重要，且不希望在运行时加载额外库。</li>
+<li><strong>独立性要求高</strong>：程序需要在不同环境下运行而不依赖外部库文件，例如嵌入式系统或分发独立的应用程序包。</li>
+</ul>
+<h4 id="42-何时使用动态库">4.2 何时使用动态库<a hidden class="anchor" aria-hidden="true" href="#42-何时使用动态库">#</a></h4>
+<p>动态库适用于以下场景：</p>
+<ul>
+<li><strong>内存优化</strong>：多个进程同时运行并共享同一份库，节省内存。</li>
+<li><strong>频繁更新</strong>：库代码可能需要频繁更新，而不希望每次更新后都重新编译依赖它的程序。</li>
+</ul>
+<hr>
+<h3 id="五总结">五、总结<a hidden class="anchor" aria-hidden="true" href="#五总结">#</a></h3>
+<p>静态库和动态库是 C++ 开发中两种常见的代码复用方式。静态库在编译时将库代码嵌入到可执行文件中，增加了文件体积但减少了运行时依赖。动态库在程序运行时加载，多个进程可以共享库资源，减少内存占用，并且便于独立更新。选择使用静态库还是动态库应根据项目的具体需求、性能要求和更新频率来决定。</p>
+<p>无论是使用静态库还是动态库，合理管理和打包库文件，确保正确地链接和加载库，都是开发高效、健壮的 C++ 应用程序的关键。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E6%8B%B7%E8%B4%9D%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E4%B8%8E%E8%B5%8B%E5%80%BC%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>CPP中的拷贝构造函数与赋值构造函数</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E9%9D%99%E6%80%81%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E4%B8%8E%E6%99%AE%E9%80%9A%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>CPP中的静态成员函数与普通成员函数</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

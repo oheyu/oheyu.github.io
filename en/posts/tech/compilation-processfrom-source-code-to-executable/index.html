@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Compilation Process：From Source Code to Executable | 史玉浩的个人博客</title>
+<meta name="keywords" content="C\CPP">
+<meta name="description" content="As a senior Linux/C&#43;&#43; programmer, it&rsquo;s crucial to understand the journey of source code as it transforms into an executable file. This process involves several stages: preprocessing, compilation, assembly, and linking. Source Code Files Source code files are where it all begins. They contain human-readable instructions written in C or C&#43;&#43; languages. In C, these files typically have a .c extension, while in C&#43;&#43;, they usually have a .cpp extension.">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/en/posts/tech/compilation-processfrom-source-code-to-executable/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://oheyu.github.io/en/posts/tech/compilation-processfrom-source-code-to-executable/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="Compilation Process：From Source Code to Executable" />
+<meta property="og:description" content="As a senior Linux/C&#43;&#43; programmer, it&rsquo;s crucial to understand the journey of source code as it transforms into an executable file. This process involves several stages: preprocessing, compilation, assembly, and linking. Source Code Files Source code files are where it all begins. They contain human-readable instructions written in C or C&#43;&#43; languages. In C, these files typically have a .c extension, while in C&#43;&#43;, they usually have a .cpp extension." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/en/posts/tech/compilation-processfrom-source-code-to-executable/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-07-01T21:31:46+08:00" />
+<meta property="article:modified_time" content="2023-07-01T21:31:46+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Compilation Process：From Source Code to Executable"/>
+<meta name="twitter:description" content="As a senior Linux/C&#43;&#43; programmer, it&rsquo;s crucial to understand the journey of source code as it transforms into an executable file. This process involves several stages: preprocessing, compilation, assembly, and linking. Source Code Files Source code files are where it all begins. They contain human-readable instructions written in C or C&#43;&#43; languages. In C, these files typically have a .c extension, while in C&#43;&#43;, they usually have a .cpp extension."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 posts",
+      "item": "https://oheyu.github.io/en/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 tech",
+      "item": "https://oheyu.github.io/en/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Compilation Process：From Source Code to Executable",
+      "item": "https://oheyu.github.io/en/posts/tech/compilation-processfrom-source-code-to-executable/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Compilation Process：From Source Code to Executable",
+  "name": "Compilation Process：From Source Code to Executable",
+  "description": "As a senior Linux/C++ programmer, it\u0026rsquo;s crucial to understand the journey of source code as it transforms into an executable file. This process involves several stages: preprocessing, compilation, assembly, and linking. Source Code Files Source code files are where it all begins. They contain human-readable instructions written in C or C++ languages. In C, these files typically have a .c extension, while in C++, they usually have a .cpp extension.",
+  "keywords": [
+    "C\\CPP"
+  ],
+  "articleBody": "\rAs a senior Linux/C++ programmer, it’s crucial to understand the journey of source code as it transforms into an executable file. This process involves several stages: preprocessing, compilation, assembly, and linking.\nSource Code Files Source code files are where it all begins. They contain human-readable instructions written in C or C++ languages. In C, these files typically have a .c extension, while in C++, they usually have a .cpp extension. For example, consider the following simple C++ source code file:\n1 2 3 4 5 6 7 8 // main.cpp #include #define PI 3.1415926 int main() { std::cout \u003c\u003c \"PI value is \" \u003c\u003c PI \u003c\u003c std::endl; return 0; } Preprocessing The preprocessing stage is the first step in the compilation process. During this phase, the preprocessor handles directives in the source code that begin with #, such as #include, #define, and #ifdef. The result of preprocessing is an “expanded source code” file, typically with a .i extension. This file includes all macro expansions and header file inclusions. For our example, preprocessing would replace PI with its defined value and include the contents of iostream:\n1 2 3 4 5 6 // main.i // Expanded content of iostream int main() { std::cout \u003c\u003c \"PI value is \" \u003c\u003c 3.1415926 \u003c\u003c std::endl; return 0; } Compilation In the compilation stage, the compiler translates the preprocessed source code into assembly language specific to the target platform. This step involves syntax and semantic analysis, as well as optimization. The compiler outputs assembly code, usually with a .s extension. Here is an example of assembly code for the x86 platform:\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 .section .rodata .LC0: .string \"PI value is %f\\n\" .text .globl main main: pushq %rbp movq %rsp, %rbp subq $16, %rsp movss $0x40490fdb, -4(%rbp) // PI value as float movq $LC0, %rdi leaq -4(%rbp), %rsi call printf movl $0, %eax leave ret Assembly The assembly stage converts assembly code into machine code, which consists of binary instructions that the CPU can execute directly. The assembler produces an object file with a .o (on Unix/Linux) or .obj (on Windows) extension. These object files contain the machine code but do not yet have finalized addresses. They are binary files and are generally not human-readable. Here’s why the assembler doesn’t complete address binding:\nWhy doesn’t the assembler complete address binding?\nMulti-Module Programs: Large programs are often divided into multiple source files, each compiled into separate object files. During assembly, the assembler can only handle addresses for symbols within the current module and marks external symbols as unresolved.\nLibrary Linking: Programs may use external libraries. These libraries are compiled separately, and their function addresses are not known during assembly. The assembler generates relocation records for these symbols, which are resolved in the linking stage.\nRelocation\nThe object files include relocation records and symbol tables to handle unresolved symbols:\nRelocation Records: These records indicate where addresses are yet to be resolved. For internal module symbols, addresses can be filled in directly; for external symbols, the assembler creates relocation entries.\nLinking: The linker takes multiple object files and library files, combines them, and resolves all symbol references. It constructs a global symbol table and replaces unresolved addresses with actual addresses in the final executable. The linker also handles the final placement of code and data segments into the executable’s memory space.\nLinking The final stage, linking, involves the linker processing one or more object files and libraries to resolve external symbol references. It combines all object files and necessary libraries to produce the final executable file (with a .exe extension on Windows or no extension on Unix/Linux). The linker’s output is a program file that can be executed directly on a computer.\nConclusion Understanding the compilation process from source code to executable is fundamental for mastering C/C++ programming and debugging. Each step in this process—preprocessing, compilation, assembly, and linking—plays a crucial role in converting human-readable code into a format that the computer can execute.\n",
+  "wordCount" : "727",
+  "inLanguage": "en",
+  "datePublished": "2023-07-01T21:31:46+08:00",
+  "dateModified": "2023-07-01T21:31:46+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/en/posts/tech/compilation-processfrom-source-code-to-executable/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/en/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/zh/" title="Chinese"
+                            aria-label="Chinese">Chinese</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/en/search" title="🔍search (Alt &#43; /)" accesskey=/>
+                    <span>🔍search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/en/" title="🏠home">
+                    <span>🏠home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/en/posts" title="📚post">
+                    <span>📚post</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/en/archives" title="⏱archives">
+                    <span>⏱archives</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/en/categories" title="🧩categories">
+                    <span>🧩categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/en/tags" title="🔖tags">
+                    <span>🔖tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/en/">Home</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/en/posts/">📚 posts</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/en/posts/tech/">👨🏻‍💻 tech</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Compilation Process：From Source Code to Executable
+    </h1>
+    <div class="post-meta"><span title='2023-07-01 21:31:46 +0800 CST'>2023-07-01</span>&nbsp;·&nbsp;2 min&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">Table of Contents</span>
+            </summary>
+
+            <div class="inner"><ul><ul>
+                    <li>
+                        <a href="#source-code-files" aria-label="Source Code Files">Source Code Files</a></li>
+                    <li>
+                        <a href="#preprocessing" aria-label="Preprocessing">Preprocessing</a></li>
+                    <li>
+                        <a href="#compilation" aria-label="Compilation">Compilation</a></li>
+                    <li>
+                        <a href="#assembly" aria-label="Assembly">Assembly</a></li></ul>
+                        
+                    <li>
+                        <a href="#linking" aria-label="Linking">Linking</a></li>
+                    <li>
+                        <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>As a senior Linux/C++ programmer, it&rsquo;s crucial to understand the journey of source code as it transforms into an executable file. This process involves several stages: preprocessing, compilation, assembly, and linking.</p>
+<hr>
+<h3 id="source-code-files">Source Code Files<a hidden class="anchor" aria-hidden="true" href="#source-code-files">#</a></h3>
+<p>Source code files are where it all begins. They contain human-readable instructions written in C or C++ languages. In C, these files typically have a <code>.c</code> extension, while in C++, they usually have a <code>.cpp</code> extension. For example, consider the following simple C++ source code file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// main.cpp
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define PI 3.1415926
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;PI value is &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">PI</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="preprocessing">Preprocessing<a hidden class="anchor" aria-hidden="true" href="#preprocessing">#</a></h3>
+<p>The preprocessing stage is the first step in the compilation process. During this phase, the preprocessor handles directives in the source code that begin with <code>#</code>, such as <code>#include</code>, <code>#define</code>, and <code>#ifdef</code>. The result of preprocessing is an &ldquo;expanded source code&rdquo; file, typically with a <code>.i</code> extension. This file includes all macro expansions and header file inclusions. For our example, preprocessing would replace <code>PI</code> with its defined value and include the contents of <code>iostream</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// main.i
+</span></span></span><span class="line"><span class="cl"><span class="c1">// Expanded content of iostream
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;PI value is &#34;</span> <span class="o">&lt;&lt;</span> <span class="mf">3.1415926</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="compilation">Compilation<a hidden class="anchor" aria-hidden="true" href="#compilation">#</a></h3>
+<p>In the compilation stage, the compiler translates the preprocessed source code into assembly language specific to the target platform. This step involves syntax and semantic analysis, as well as optimization. The compiler outputs assembly code, usually with a <code>.s</code> extension. Here is an example of assembly code for the x86 platform:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">.section .rodata 
+</span></span><span class="line"><span class="cl">.LC0: 
+</span></span><span class="line"><span class="cl">    .string &#34;PI value is %f\n&#34; 
+</span></span><span class="line"><span class="cl">.text 
+</span></span><span class="line"><span class="cl">.globl main 
+</span></span><span class="line"><span class="cl">main: 
+</span></span><span class="line"><span class="cl">    pushq %rbp 
+</span></span><span class="line"><span class="cl">    movq %rsp, %rbp 
+</span></span><span class="line"><span class="cl">    subq $16, %rsp 
+</span></span><span class="line"><span class="cl">    movss $0x40490fdb, -4(%rbp) // PI value as float 
+</span></span><span class="line"><span class="cl">    movq $LC0, %rdi 
+</span></span><span class="line"><span class="cl">    leaq -4(%rbp), %rsi 
+</span></span><span class="line"><span class="cl">    call printf 
+</span></span><span class="line"><span class="cl">    movl $0, %eax 
+</span></span><span class="line"><span class="cl">    leave 
+</span></span><span class="line"><span class="cl">    ret
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="assembly">Assembly<a hidden class="anchor" aria-hidden="true" href="#assembly">#</a></h3>
+<p>The assembly stage converts assembly code into machine code, which consists of binary instructions that the CPU can execute directly. The assembler produces an object file with a <code>.o</code> (on Unix/Linux) or <code>.obj</code> (on Windows) extension. These object files contain the machine code but do not yet have finalized addresses. They are binary files and are generally not human-readable. Here’s why the assembler doesn’t complete address binding:</p>
+<p><strong>Why doesn’t the assembler complete address binding?</strong></p>
+<ol>
+<li>
+<p><strong>Multi-Module Programs</strong>: Large programs are often divided into multiple source files, each compiled into separate object files. During assembly, the assembler can only handle addresses for symbols within the current module and marks external symbols as unresolved.</p>
+</li>
+<li>
+<p><strong>Library Linking</strong>: Programs may use external libraries. These libraries are compiled separately, and their function addresses are not known during assembly. The assembler generates relocation records for these symbols, which are resolved in the linking stage.</p>
+</li>
+</ol>
+<p><strong>Relocation</strong></p>
+<p>The object files include relocation records and symbol tables to handle unresolved symbols:</p>
+<ul>
+<li>
+<p><strong>Relocation Records</strong>: These records indicate where addresses are yet to be resolved. For internal module symbols, addresses can be filled in directly; for external symbols, the assembler creates relocation entries.</p>
+</li>
+<li>
+<p><strong>Linking</strong>: The linker takes multiple object files and library files, combines them, and resolves all symbol references. It constructs a global symbol table and replaces unresolved addresses with actual addresses in the final executable. The linker also handles the final placement of code and data segments into the executable&rsquo;s memory space.</p>
+</li>
+</ul>
+<hr>
+<h2 id="linking">Linking<a hidden class="anchor" aria-hidden="true" href="#linking">#</a></h2>
+<p>The final stage, linking, involves the linker processing one or more object files and libraries to resolve external symbol references. It combines all object files and necessary libraries to produce the final executable file (with a <code>.exe</code> extension on Windows or no extension on Unix/Linux). The linker’s output is a program file that can be executed directly on a computer.</p>
+<hr>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Understanding the compilation process from source code to executable is fundamental for mastering C/C++ programming and debugging. Each step in this process—preprocessing, compilation, assembly, and linking—plays a crucial role in converting human-readable code into a format that the computer can execute.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/en/tags/c/cpp/">C\CPP</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/en/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

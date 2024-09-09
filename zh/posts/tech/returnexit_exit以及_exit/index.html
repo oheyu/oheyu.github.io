@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Return、exit、_exit以及_Exit | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="在 C 和 C&#43;&#43; 编程中，return、exit()、_exit() 以及 _Exit() 都可以用于终止程序或函数的执行，但它们的行为、作用范围以及对资源的处理方式存">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/returnexit_exit%E4%BB%A5%E5%8F%8A_exit/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/returnexit_exit%E4%BB%A5%E5%8F%8A_exit/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="Return、exit、_exit以及_Exit" />
+<meta property="og:description" content="在 C 和 C&#43;&#43; 编程中，return、exit()、_exit() 以及 _Exit() 都可以用于终止程序或函数的执行，但它们的行为、作用范围以及对资源的处理方式存" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/returnexit_exit%E4%BB%A5%E5%8F%8A_exit/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-08-27T21:20:55+08:00" />
+<meta property="article:modified_time" content="2023-08-27T21:20:55+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Return、exit、_exit以及_Exit"/>
+<meta name="twitter:description" content="在 C 和 C&#43;&#43; 编程中，return、exit()、_exit() 以及 _Exit() 都可以用于终止程序或函数的执行，但它们的行为、作用范围以及对资源的处理方式存"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Return、exit、_exit以及_Exit",
+      "item": "https://oheyu.github.io/zh/posts/tech/returnexit_exit%E4%BB%A5%E5%8F%8A_exit/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Return、exit、_exit以及_Exit",
+  "name": "Return、exit、_exit以及_Exit",
+  "description": "在 C 和 C++ 编程中，return、exit()、_exit() 以及 _Exit() 都可以用于终止程序或函数的执行，但它们的行为、作用范围以及对资源的处理方式存",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\r在 C 和 C++ 编程中，return、exit()、_exit() 以及 _Exit() 都可以用于终止程序或函数的执行，但它们的行为、作用范围以及对资源的处理方式存在显著差异。\n一、return：从函数中返回控制权 return 是 C/C++ 中用于从函数返回控制权给调用者的关键字。它不仅仅用于结束函数执行，还能将值返回给调用者。特别是在 main() 函数中，return 还会将状态码返回给操作系统。\n1.1 return 的基本特点 作用范围：return 仅在函数内部使用，它会将控制流返回到调用函数的地方。如果在 main() 函数中使用，return 会结束程序，并向操作系统返回状态码。 自动资源管理：当 return 被调用时，局部对象的析构函数会自动调用，释放相关资源。这确保了对象的生命周期在函数结束时得到正确管理。 控制流的返回：return 不会终止整个程序，它只结束当前函数的执行，并返回控制权给调用函数。 1.2 return 的应用示例 1 2 3 4 5 6 7 8 9 10 11 12 #include void myFunction() { std::cout \u003c\u003c \"Inside myFunction\" \u003c\u003c std::endl; return; // 返回控制权到调用者 } int main() { myFunction(); std::cout \u003c\u003c \"Back in main\" \u003c\u003c std::endl; return 0; // 返回状态码 0 给操作系统 } 在这个例子中，return 从 myFunction() 返回到 main()，而 main() 的 return 0 结束程序并向操作系统返回 0，表示成功执行。\n1.3 资源清理 局部对象：在函数退出时，所有局部对象会自动析构，调用它们的析构函数。这确保了函数内的资源得到正确管理。 全局对象：如果在 main() 中使用 return，全局对象的析构函数也会被调用，确保整个程序的资源被正确清理。 二、exit()：终止整个程序 exit() 是 C 和 C++ 中用于立即终止整个程序执行的标准库函数。它可以在程序的任何地方调用，并返回状态码给操作系统，但与 return 不同，exit() 不仅仅退出函数，而是直接终止整个程序。\n2.1 exit() 的行为特点 全局终止：exit() 会立即终止程序的所有执行，不会返回到调用它的函数。它不会等待当前的函数执行完毕，而是直接结束整个进程。 全局清理：exit() 会执行全局对象的析构函数、刷新所有 I/O 缓冲区，并关闭打开的文件。同时，它还会调用通过 atexit() 注册的终止处理程序（cleanup functions）。 不可恢复：一旦调用 exit()，程序不会再恢复执行。因此，任何 exit() 后面的代码都不会被执行。 2.2 exit() 的使用示例 1 2 3 4 5 6 7 8 #include #include // 包含 exit() 的头文件 int main() { std::cout \u003c\u003c \"Program starting\" \u003c\u003c std::endl; exit(1); // 立即终止程序并返回状态码 1 std::cout \u003c\u003c \"This will not be printed\" \u003c\u003c std::endl; // 不会被执行 } 在这个示例中，exit(1) 立即终止程序，并返回 1 给操作系统，表示程序发生错误。后续的 std::cout 语句不会被执行。\n三、_exit() 和 _Exit()：跳过清理的快速退出 _exit() 和 _Exit() 是系统级的终止函数，它们与 exit() 的主要区别在于它们不进行全局清理工作，也不会调用对象的析构函数或终止处理程序。它们通常用于多进程编程中，尤其是子进程中。\n3.1 _exit() 和 _Exit() 的区别 _exit()：是 POSIX 标准中定义的函数，通常用于子进程调用。在子进程中调用 exit() 会导致不必要的终止处理程序和缓冲区刷新，因此 _exit() 直接终止进程，不进行这些操作。 _Exit()：是 C 标准库中的函数，行为与 _exit() 类似，都是直接终止程序。两者的差异主要在于它们的标准来源。 3.2 主要特点 立即终止：_exit() 和 _Exit() 都会立即终止程序执行，不会执行任何 I/O 清理、析构函数或终止处理程序。 常用于多进程编程：在多进程环境中，子进程不应影响父进程的资源，因此 _exit() 和 _Exit() 是快速终止子进程的理想工具。 3.3 _exit() 的使用示例 1 2 3 4 5 6 7 8 #include #include // 包含 _exit() int main() { std::cout \u003c\u003c \"Program starting\" \u003c\u003c std::endl; _exit(1); // 立即终止程序，不进行清理 std::cout \u003c\u003c \"This line will not be executed\" \u003c\u003c std::endl; } 在这个例子中，_exit(1) 直接终止程序，不进行 I/O 缓冲刷新和对象析构。与 exit() 的区别在于，它不会执行任何形式的清理工作。\n四、return、exit()、_exit() 与 _Exit() 的对比 功能 return exit() _exit()/_Exit() 作用范围 当前函数 整个程序 整个程序 返回控制权 返回给调用者 不返回，直接终止程序 不返回，直接终止程序 局部对象析构 是 否 否 全局对象析构 是（main()） 是 否 I/O 缓冲刷新 是 是 否 终止处理程序调用 否 是 否 常见应用场景 函数返回，控制流跳转 正常或异常终止整个程序 进程立即终止，多用于多进程编程 五、总结 在 C 和 C++ 编程中，理解 return、exit()、_exit() 和 _Exit() 之间的区别对于控制程序流和正确管理资源至关重要。\nreturn：用于函数的正常返回，确保局部对象被正确销毁，适合常规的控制流管理。 exit()：用于立即终止程序，适用于需要终止整个程序的情况，并执行必要的全局清理操作。 _exit() 和 _Exit()：用于立即终止程序，不执行任何清理工作，通常用于子进程或异常情况下的快速退出。 ",
+  "wordCount" : "1803",
+  "inLanguage": "zh",
+  "datePublished": "2023-08-27T21:20:55+08:00",
+  "dateModified": "2023-08-27T21:20:55+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/returnexit_exit%E4%BB%A5%E5%8F%8A_exit/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Return、exit、_exit以及_Exit
+    </h1>
+    <div class="post-meta"><span title='2023-08-27 21:20:55 +0800 CST'>2023-08-27</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80return%e4%bb%8e%e5%87%bd%e6%95%b0%e4%b8%ad%e8%bf%94%e5%9b%9e%e6%8e%a7%e5%88%b6%e6%9d%83" aria-label="一、return：从函数中返回控制权">一、<code>return</code>：从函数中返回控制权</a><ul>
+                            
+                    <li>
+                        <a href="#11-return-%e7%9a%84%e5%9f%ba%e6%9c%ac%e7%89%b9%e7%82%b9" aria-label="1.1 return 的基本特点">1.1 <code>return</code> 的基本特点</a></li>
+                    <li>
+                        <a href="#12-return-%e7%9a%84%e5%ba%94%e7%94%a8%e7%a4%ba%e4%be%8b" aria-label="1.2 return 的应用示例">1.2 <code>return</code> 的应用示例</a></li>
+                    <li>
+                        <a href="#13-%e8%b5%84%e6%ba%90%e6%b8%85%e7%90%86" aria-label="1.3 资源清理">1.3 资源清理</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%8cexit%e7%bb%88%e6%ad%a2%e6%95%b4%e4%b8%aa%e7%a8%8b%e5%ba%8f" aria-label="二、exit()：终止整个程序">二、<code>exit()</code>：终止整个程序</a><ul>
+                            
+                    <li>
+                        <a href="#21-exit-%e7%9a%84%e8%a1%8c%e4%b8%ba%e7%89%b9%e7%82%b9" aria-label="2.1 exit() 的行为特点">2.1 <code>exit()</code> 的行为特点</a></li>
+                    <li>
+                        <a href="#22-exit-%e7%9a%84%e4%bd%bf%e7%94%a8%e7%a4%ba%e4%be%8b" aria-label="2.2 exit() 的使用示例">2.2 <code>exit()</code> 的使用示例</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%89_exit-%e5%92%8c-_exit%e8%b7%b3%e8%bf%87%e6%b8%85%e7%90%86%e7%9a%84%e5%bf%ab%e9%80%9f%e9%80%80%e5%87%ba" aria-label="三、_exit() 和 _Exit()：跳过清理的快速退出">三、<code>_exit()</code> 和 <code>_Exit()</code>：跳过清理的快速退出</a><ul>
+                            
+                    <li>
+                        <a href="#31-_exit-%e5%92%8c-_exit-%e7%9a%84%e5%8c%ba%e5%88%ab" aria-label="3.1 _exit() 和 _Exit() 的区别">3.1 <code>_exit()</code> 和 <code>_Exit()</code> 的区别</a></li>
+                    <li>
+                        <a href="#32-%e4%b8%bb%e8%a6%81%e7%89%b9%e7%82%b9" aria-label="3.2 主要特点">3.2 主要特点</a></li>
+                    <li>
+                        <a href="#33-_exit-%e7%9a%84%e4%bd%bf%e7%94%a8%e7%a4%ba%e4%be%8b" aria-label="3.3 _exit() 的使用示例">3.3 <code>_exit()</code> 的使用示例</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%9b%9breturnexit_exit-%e4%b8%8e-_exit-%e7%9a%84%e5%af%b9%e6%af%94" aria-label="四、return、exit()、_exit() 与 _Exit() 的对比">四、<code>return</code>、<code>exit()</code>、<code>_exit()</code> 与 <code>_Exit()</code> 的对比</a></li>
+                    <li>
+                        <a href="#%e4%ba%94%e6%80%bb%e7%bb%93" aria-label="五、总结">五、总结</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>在 C 和 C++ 编程中，<strong><code>return</code></strong>、<strong><code>exit()</code></strong>、<strong><code>_exit()</code></strong> 以及 <strong><code>_Exit()</code></strong> 都可以用于终止程序或函数的执行，但它们的行为、作用范围以及对资源的处理方式存在显著差异。</p>
+<hr>
+<h3 id="一return从函数中返回控制权">一、<code>return</code>：从函数中返回控制权<a hidden class="anchor" aria-hidden="true" href="#一return从函数中返回控制权">#</a></h3>
+<p><strong><code>return</code></strong> 是 C/C++ 中用于从函数返回控制权给调用者的关键字。它不仅仅用于结束函数执行，还能将值返回给调用者。特别是在 <code>main()</code> 函数中，<code>return</code> 还会将状态码返回给操作系统。</p>
+<h4 id="11-return-的基本特点">1.1 <code>return</code> 的基本特点<a hidden class="anchor" aria-hidden="true" href="#11-return-的基本特点">#</a></h4>
+<ul>
+<li><strong>作用范围</strong>：<code>return</code> 仅在函数内部使用，它会将控制流返回到调用函数的地方。如果在 <code>main()</code> 函数中使用，<code>return</code> 会结束程序，并向操作系统返回状态码。</li>
+<li><strong>自动资源管理</strong>：当 <code>return</code> 被调用时，局部对象的析构函数会自动调用，释放相关资源。这确保了对象的生命周期在函数结束时得到正确管理。</li>
+<li><strong>控制流的返回</strong>：<code>return</code> 不会终止整个程序，它只结束当前函数的执行，并返回控制权给调用函数。</li>
+</ul>
+<h4 id="12-return-的应用示例">1.2 <code>return</code> 的应用示例<a hidden class="anchor" aria-hidden="true" href="#12-return-的应用示例">#</a></h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">myFunction</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Inside myFunction&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span><span class="p">;</span> <span class="c1">// 返回控制权到调用者
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">myFunction</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Back in main&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 返回状态码 0 给操作系统
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中，<code>return</code> 从 <code>myFunction()</code> 返回到 <code>main()</code>，而 <code>main()</code> 的 <code>return 0</code> 结束程序并向操作系统返回 <code>0</code>，表示成功执行。</p>
+<h4 id="13-资源清理">1.3 资源清理<a hidden class="anchor" aria-hidden="true" href="#13-资源清理">#</a></h4>
+<ul>
+<li><strong>局部对象</strong>：在函数退出时，所有局部对象会自动析构，调用它们的析构函数。这确保了函数内的资源得到正确管理。</li>
+<li><strong>全局对象</strong>：如果在 <code>main()</code> 中使用 <code>return</code>，全局对象的析构函数也会被调用，确保整个程序的资源被正确清理。</li>
+</ul>
+<hr>
+<h3 id="二exit终止整个程序">二、<code>exit()</code>：终止整个程序<a hidden class="anchor" aria-hidden="true" href="#二exit终止整个程序">#</a></h3>
+<p><strong><code>exit()</code></strong> 是 C 和 C++ 中用于立即终止整个程序执行的标准库函数。它可以在程序的任何地方调用，并返回状态码给操作系统，但与 <code>return</code> 不同，<code>exit()</code> 不仅仅退出函数，而是直接终止整个程序。</p>
+<h4 id="21-exit-的行为特点">2.1 <code>exit()</code> 的行为特点<a hidden class="anchor" aria-hidden="true" href="#21-exit-的行为特点">#</a></h4>
+<ul>
+<li><strong>全局终止</strong>：<code>exit()</code> 会立即终止程序的所有执行，不会返回到调用它的函数。它不会等待当前的函数执行完毕，而是直接结束整个进程。</li>
+<li><strong>全局清理</strong>：<code>exit()</code> 会执行全局对象的析构函数、刷新所有 I/O 缓冲区，并关闭打开的文件。同时，它还会调用通过 <code>atexit()</code> 注册的终止处理程序（cleanup functions）。</li>
+<li><strong>不可恢复</strong>：一旦调用 <code>exit()</code>，程序不会再恢复执行。因此，任何 <code>exit()</code> 后面的代码都不会被执行。</li>
+</ul>
+<h4 id="22-exit-的使用示例">2.2 <code>exit()</code> 的使用示例<a hidden class="anchor" aria-hidden="true" href="#22-exit-的使用示例">#</a></h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;cstdlib&gt;</span><span class="cp"> </span><span class="c1">// 包含 exit() 的头文件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Program starting&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// 立即终止程序并返回状态码 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;This will not be printed&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="c1">// 不会被执行
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个示例中，<code>exit(1)</code> 立即终止程序，并返回 <code>1</code> 给操作系统，表示程序发生错误。后续的 <code>std::cout</code> 语句不会被执行。</p>
+<hr>
+<h3 id="三_exit-和-_exit跳过清理的快速退出">三、<code>_exit()</code> 和 <code>_Exit()</code>：跳过清理的快速退出<a hidden class="anchor" aria-hidden="true" href="#三_exit-和-_exit跳过清理的快速退出">#</a></h3>
+<p><strong><code>_exit()</code></strong> 和 <strong><code>_Exit()</code></strong> 是系统级的终止函数，它们与 <code>exit()</code> 的主要区别在于它们不进行全局清理工作，也不会调用对象的析构函数或终止处理程序。它们通常用于多进程编程中，尤其是子进程中。</p>
+<h4 id="31-_exit-和-_exit-的区别">3.1 <code>_exit()</code> 和 <code>_Exit()</code> 的区别<a hidden class="anchor" aria-hidden="true" href="#31-_exit-和-_exit-的区别">#</a></h4>
+<ul>
+<li><strong><code>_exit()</code></strong>：是 POSIX 标准中定义的函数，通常用于子进程调用。在子进程中调用 <code>exit()</code> 会导致不必要的终止处理程序和缓冲区刷新，因此 <code>_exit()</code> 直接终止进程，不进行这些操作。</li>
+<li><strong><code>_Exit()</code></strong>：是 C 标准库中的函数，行为与 <code>_exit()</code> 类似，都是直接终止程序。两者的差异主要在于它们的标准来源。</li>
+</ul>
+<h4 id="32-主要特点">3.2 主要特点<a hidden class="anchor" aria-hidden="true" href="#32-主要特点">#</a></h4>
+<ul>
+<li><strong>立即终止</strong>：<code>_exit()</code> 和 <code>_Exit()</code> 都会立即终止程序执行，不会执行任何 I/O 清理、析构函数或终止处理程序。</li>
+<li><strong>常用于多进程编程</strong>：在多进程环境中，子进程不应影响父进程的资源，因此 <code>_exit()</code> 和 <code>_Exit()</code> 是快速终止子进程的理想工具。</li>
+</ul>
+<h4 id="33-_exit-的使用示例">3.3 <code>_exit()</code> 的使用示例<a hidden class="anchor" aria-hidden="true" href="#33-_exit-的使用示例">#</a></h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp"> </span><span class="c1">// 包含 _exit()
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Program starting&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// 立即终止程序，不进行清理
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;This line will not be executed&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中，<code>_exit(1)</code> 直接终止程序，不进行 I/O 缓冲刷新和对象析构。与 <code>exit()</code> 的区别在于，它不会执行任何形式的清理工作。</p>
+<hr>
+<h3 id="四returnexit_exit-与-_exit-的对比">四、<code>return</code>、<code>exit()</code>、<code>_exit()</code> 与 <code>_Exit()</code> 的对比<a hidden class="anchor" aria-hidden="true" href="#四returnexit_exit-与-_exit-的对比">#</a></h3>
+<table>
+<thead>
+<tr>
+<th><strong>功能</strong></th>
+<th><strong><code>return</code></strong></th>
+<th><strong><code>exit()</code></strong></th>
+<th><strong><code>_exit()</code>/<code>_Exit()</code></strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>作用范围</strong></td>
+<td>当前函数</td>
+<td>整个程序</td>
+<td>整个程序</td>
+</tr>
+<tr>
+<td><strong>返回控制权</strong></td>
+<td>返回给调用者</td>
+<td>不返回，直接终止程序</td>
+<td>不返回，直接终止程序</td>
+</tr>
+<tr>
+<td><strong>局部对象析构</strong></td>
+<td>是</td>
+<td>否</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>全局对象析构</strong></td>
+<td>是（<code>main()</code>）</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>I/O 缓冲刷新</strong></td>
+<td>是</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>终止处理程序调用</strong></td>
+<td>否</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>常见应用场景</strong></td>
+<td>函数返回，控制流跳转</td>
+<td>正常或异常终止整个程序</td>
+<td>进程立即终止，多用于多进程编程</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="五总结">五、总结<a hidden class="anchor" aria-hidden="true" href="#五总结">#</a></h3>
+<p>在 C 和 C++ 编程中，理解 <code>return</code>、<code>exit()</code>、<code>_exit()</code> 和 <code>_Exit()</code> 之间的区别对于控制程序流和正确管理资源至关重要。</p>
+<ul>
+<li><strong><code>return</code></strong>：用于函数的正常返回，确保局部对象被正确销毁，适合常规的控制流管理。</li>
+<li><strong><code>exit()</code></strong>：用于立即终止程序，适用于需要终止整个程序的情况，并执行必要的全局清理操作。</li>
+<li><strong><code>_exit()</code> 和 <code>_Exit()</code></strong>：用于立即终止程序，不执行任何清理工作，通常用于子进程或异常情况下的快速退出。</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/memcpy%E5%87%BD%E6%95%B0%E8%AF%A6%E8%A7%A3/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>memcpy()函数详解</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/linux%E9%80%80%E5%87%BA%E7%8A%B6%E6%80%81%E7%A0%81/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>Linux退出状态码</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
