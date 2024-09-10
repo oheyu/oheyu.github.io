@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>冷不丁儿的内存就泄漏了 | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="在 C&#43;&#43; 编程中，内存泄漏是一个经常遇到的重大问题，特别是在涉及动态内存管理的场景中。如果程序在分配内存后没有及时释放，可能导致系统内存逐渐被耗尽">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/%E5%86%B7%E4%B8%8D%E4%B8%81%E5%84%BF%E7%9A%84%E5%86%85%E5%AD%98%E5%B0%B1%E6%B3%84%E6%BC%8F%E4%BA%86/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/%E5%86%B7%E4%B8%8D%E4%B8%81%E5%84%BF%E7%9A%84%E5%86%85%E5%AD%98%E5%B0%B1%E6%B3%84%E6%BC%8F%E4%BA%86/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="冷不丁儿的内存就泄漏了" />
+<meta property="og:description" content="在 C&#43;&#43; 编程中，内存泄漏是一个经常遇到的重大问题，特别是在涉及动态内存管理的场景中。如果程序在分配内存后没有及时释放，可能导致系统内存逐渐被耗尽" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/%E5%86%B7%E4%B8%8D%E4%B8%81%E5%84%BF%E7%9A%84%E5%86%85%E5%AD%98%E5%B0%B1%E6%B3%84%E6%BC%8F%E4%BA%86/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-09-09T11:05:16+08:00" />
+<meta property="article:modified_time" content="2023-09-09T11:05:16+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="冷不丁儿的内存就泄漏了"/>
+<meta name="twitter:description" content="在 C&#43;&#43; 编程中，内存泄漏是一个经常遇到的重大问题，特别是在涉及动态内存管理的场景中。如果程序在分配内存后没有及时释放，可能导致系统内存逐渐被耗尽"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "冷不丁儿的内存就泄漏了",
+      "item": "https://oheyu.github.io/zh/posts/tech/%E5%86%B7%E4%B8%8D%E4%B8%81%E5%84%BF%E7%9A%84%E5%86%85%E5%AD%98%E5%B0%B1%E6%B3%84%E6%BC%8F%E4%BA%86/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "冷不丁儿的内存就泄漏了",
+  "name": "冷不丁儿的内存就泄漏了",
+  "description": "在 C++ 编程中，内存泄漏是一个经常遇到的重大问题，特别是在涉及动态内存管理的场景中。如果程序在分配内存后没有及时释放，可能导致系统内存逐渐被耗尽",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\r在 C++ 编程中，内存泄漏是一个经常遇到的重大问题，特别是在涉及动态内存管理的场景中。如果程序在分配内存后没有及时释放，可能导致系统内存逐渐被耗尽，最终影响程序和系统的性能，甚至导致崩溃。\n一、什么是内存泄漏？ 内存泄漏是指程序动态分配了内存资源，但未能正确释放，导致这些资源在程序的整个生命周期中都无法被再次使用。尽管这些内存仍被系统占用，程序却无法再访问或释放它们。随着程序的长时间运行，内存泄漏会导致系统的可用内存逐渐减少，最终导致性能问题甚至程序崩溃。\n二、内存泄漏的表现 内存泄漏的影响并不会立即显现，但随着程序的持续运行，它会表现为以下几种问题：\n系统性能下降：程序使用的内存逐渐增加，系统可用内存减少，导致系统整体性能下降。 程序崩溃：在内存泄漏严重时，程序可能耗尽所有可用内存，导致系统强制终止该程序或系统无法正常运行。 不可预测的行为：内存不足可能导致程序出现异常行为，例如响应速度减慢、无缘无故的崩溃等。 三、常见的内存泄漏原因 内存泄漏通常是由于对内存的错误管理引起的，下面是几种常见的原因。\n3.1 动态内存分配后未释放 这是最典型的内存泄漏场景。当程序通过 new 或 malloc 动态分配内存后，没有相应的 delete 或 free 来释放内存，导致泄漏。\n1 2 int* ptr = new int(10); // 动态分配内存 // 如果没有 delete，内存不会被释放 3.2 异常处理中的内存泄漏 如果在异常发生时，分配的内存没有被正确释放，会导致内存泄漏。异常可能会跳过释放代码，直接进入异常处理代码块。\n1 2 3 4 5 6 7 8 9 10 void process() { int* ptr = new int(10); try { // 可能抛出异常的代码 throw std::runtime_error(\"Error\"); } catch (...) { // 没有 delete ptr，导致内存泄漏 throw; } } 3.3 指针被重新分配而未释放原始内存 当一个指针被重新分配新内存时，如果没有先释放之前指向的内存，之前分配的内存将无法访问并导致泄漏。\n1 2 3 int* ptr = new int(10); ptr = new int(20); // 忘记释放原来分配的内存 delete ptr; // 只释放了最后分配的内存 3.4 循环引用（智能指针中的常见问题） 循环引用是指对象相互持有对方的引用，导致这些对象无法被正确析构和释放。这在使用智能指针时尤其常见，特别是在 std::shared_ptr 中。\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 #include class A; class B { public: std::shared_ptr\u003cA\u003e a_ptr; }; class A { public: std::shared_ptr\u003cB\u003e b_ptr; }; void example() { std::shared_ptr\u003cA\u003e a = std::make_shared\u003cA\u003e(); std::shared_ptr\u003cB\u003e b = std::make_shared\u003cB\u003e(); a-\u003eb_ptr = b; b-\u003ea_ptr = a; // 循环引用，导致无法释放内存 } 四、检测内存泄漏 为了确保程序的健壮性和内存使用的有效性，检测内存泄漏是必不可少的环节。下面介绍几种常用的检测手段。\n4.1 使用内存分析工具 Valgrind：这是一个流行的内存检测工具，能够检测内存泄漏、未初始化的内存使用等问题。 AddressSanitizer：由编译器支持的运行时工具，可以快速定位内存泄漏和其他内存相关错误。 Visual Studio 内存诊断工具：用于检测 Windows 环境下的内存问题。 4.2 手动代码审查 代码审查：通过检查代码中的 new 和 delete、malloc 和 free 的配对情况来手动排查内存泄漏。 内存管理策略：通过代码审查确保遵循好的内存管理习惯，避免裸指针，推荐使用智能指针。 五、预防内存泄漏的有效措施 5.1 使用智能指针 C++11 引入的智能指针极大地简化了内存管理，避免了手动释放内存时的出错机会。智能指针（如 std::unique_ptr 和 std::shared_ptr）能够自动管理内存，当指针不再被使用时，自动释放内存。\n1 2 3 4 5 6 #include void process() { std::unique_ptr\u003cint\u003e ptr = std::make_unique\u003cint\u003e(10); // 自动管理内存，无需显式 delete } 5.2 避免裸指针 尽量避免使用裸指针。特别是对于复杂的类设计和动态内存分配，使用智能指针不仅能够提高代码的健壮性，还能自动管理对象的生命周期。\n1 2 3 4 5 6 7 #include class MyClass { std::unique_ptr\u003cint\u003e ptr; public: MyClass() : ptr(std::make_unique\u003cint\u003e(10)) {} }; 5.3 遵循 RAII（资源获取即初始化）原则 RAII 是 C++ 内存管理的一大原则。使用类的构造函数分配资源，析构函数释放资源，可以确保在异常情况下，资源仍然能够被正确释放。\n1 2 3 4 5 6 7 8 9 10 class Resource { int* data; public: Resource() : data(new int(10)) {} ~Resource() { delete data; } // 析构时释放资源 }; void process() { Resource res; // res 析构时会自动释放 data 指向的内存 } 六、总结 内存泄漏是 C++ 程序中的常见问题，但通过良好的内存管理策略和工具，内存泄漏问题是可以有效避免的。使用智能指针、遵循 RAII 原则以及使用内存检测工具，可以极大地减少内存泄漏的风险。此外，定期的代码审查也能帮助发现潜在的内存管理问题。\n",
+  "wordCount" : "1646",
+  "inLanguage": "zh",
+  "datePublished": "2023-09-09T11:05:16+08:00",
+  "dateModified": "2023-09-09T11:05:16+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/%E5%86%B7%E4%B8%8D%E4%B8%81%E5%84%BF%E7%9A%84%E5%86%85%E5%AD%98%E5%B0%B1%E6%B3%84%E6%BC%8F%E4%BA%86/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      冷不丁儿的内存就泄漏了
+    </h1>
+    <div class="post-meta"><span title='2023-09-09 11:05:16 +0800 CST'>2023-09-09</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e4%bb%80%e4%b9%88%e6%98%af%e5%86%85%e5%ad%98%e6%b3%84%e6%bc%8f" aria-label="一、什么是内存泄漏？">一、什么是内存泄漏？</a></li>
+                    <li>
+                        <a href="#%e4%ba%8c%e5%86%85%e5%ad%98%e6%b3%84%e6%bc%8f%e7%9a%84%e8%a1%a8%e7%8e%b0" aria-label="二、内存泄漏的表现">二、内存泄漏的表现</a></li>
+                    <li>
+                        <a href="#%e4%b8%89%e5%b8%b8%e8%a7%81%e7%9a%84%e5%86%85%e5%ad%98%e6%b3%84%e6%bc%8f%e5%8e%9f%e5%9b%a0" aria-label="三、常见的内存泄漏原因">三、常见的内存泄漏原因</a><ul>
+                            
+                    <li>
+                        <a href="#31-%e5%8a%a8%e6%80%81%e5%86%85%e5%ad%98%e5%88%86%e9%85%8d%e5%90%8e%e6%9c%aa%e9%87%8a%e6%94%be" aria-label="3.1 动态内存分配后未释放">3.1 动态内存分配后未释放</a></li>
+                    <li>
+                        <a href="#32-%e5%bc%82%e5%b8%b8%e5%a4%84%e7%90%86%e4%b8%ad%e7%9a%84%e5%86%85%e5%ad%98%e6%b3%84%e6%bc%8f" aria-label="3.2 异常处理中的内存泄漏">3.2 异常处理中的内存泄漏</a></li>
+                    <li>
+                        <a href="#33-%e6%8c%87%e9%92%88%e8%a2%ab%e9%87%8d%e6%96%b0%e5%88%86%e9%85%8d%e8%80%8c%e6%9c%aa%e9%87%8a%e6%94%be%e5%8e%9f%e5%a7%8b%e5%86%85%e5%ad%98" aria-label="3.3 指针被重新分配而未释放原始内存">3.3 指针被重新分配而未释放原始内存</a></li>
+                    <li>
+                        <a href="#34-%e5%be%aa%e7%8e%af%e5%bc%95%e7%94%a8%e6%99%ba%e8%83%bd%e6%8c%87%e9%92%88%e4%b8%ad%e7%9a%84%e5%b8%b8%e8%a7%81%e9%97%ae%e9%a2%98" aria-label="3.4 循环引用（智能指针中的常见问题）">3.4 循环引用（智能指针中的常见问题）</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%9b%9b%e6%a3%80%e6%b5%8b%e5%86%85%e5%ad%98%e6%b3%84%e6%bc%8f" aria-label="四、检测内存泄漏">四、检测内存泄漏</a><ul>
+                            
+                    <li>
+                        <a href="#41-%e4%bd%bf%e7%94%a8%e5%86%85%e5%ad%98%e5%88%86%e6%9e%90%e5%b7%a5%e5%85%b7" aria-label="4.1 使用内存分析工具">4.1 使用内存分析工具</a></li>
+                    <li>
+                        <a href="#42-%e6%89%8b%e5%8a%a8%e4%bb%a3%e7%a0%81%e5%ae%a1%e6%9f%a5" aria-label="4.2 手动代码审查">4.2 手动代码审查</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%94%e9%a2%84%e9%98%b2%e5%86%85%e5%ad%98%e6%b3%84%e6%bc%8f%e7%9a%84%e6%9c%89%e6%95%88%e6%8e%aa%e6%96%bd" aria-label="五、预防内存泄漏的有效措施">五、预防内存泄漏的有效措施</a><ul>
+                            
+                    <li>
+                        <a href="#51-%e4%bd%bf%e7%94%a8%e6%99%ba%e8%83%bd%e6%8c%87%e9%92%88" aria-label="5.1 使用智能指针">5.1 使用智能指针</a></li>
+                    <li>
+                        <a href="#52-%e9%81%bf%e5%85%8d%e8%a3%b8%e6%8c%87%e9%92%88" aria-label="5.2 避免裸指针">5.2 避免裸指针</a></li>
+                    <li>
+                        <a href="#53-%e9%81%b5%e5%be%aa-raii%e8%b5%84%e6%ba%90%e8%8e%b7%e5%8f%96%e5%8d%b3%e5%88%9d%e5%a7%8b%e5%8c%96%e5%8e%9f%e5%88%99" aria-label="5.3 遵循 RAII（资源获取即初始化）原则">5.3 遵循 RAII（资源获取即初始化）原则</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%85%ad%e6%80%bb%e7%bb%93" aria-label="六、总结">六、总结</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>在 C++ 编程中，内存泄漏是一个经常遇到的重大问题，特别是在涉及动态内存管理的场景中。如果程序在分配内存后没有及时释放，可能导致系统内存逐渐被耗尽，最终影响程序和系统的性能，甚至导致崩溃。</p>
+<hr>
+<h3 id="一什么是内存泄漏">一、什么是内存泄漏？<a hidden class="anchor" aria-hidden="true" href="#一什么是内存泄漏">#</a></h3>
+<p><strong>内存泄漏</strong>是指程序动态分配了内存资源，但未能正确释放，导致这些资源在程序的整个生命周期中都无法被再次使用。尽管这些内存仍被系统占用，程序却无法再访问或释放它们。随着程序的长时间运行，内存泄漏会导致系统的可用内存逐渐减少，最终导致性能问题甚至程序崩溃。</p>
+<h3 id="二内存泄漏的表现">二、内存泄漏的表现<a hidden class="anchor" aria-hidden="true" href="#二内存泄漏的表现">#</a></h3>
+<p>内存泄漏的影响并不会立即显现，但随着程序的持续运行，它会表现为以下几种问题：</p>
+<ul>
+<li><strong>系统性能下降</strong>：程序使用的内存逐渐增加，系统可用内存减少，导致系统整体性能下降。</li>
+<li><strong>程序崩溃</strong>：在内存泄漏严重时，程序可能耗尽所有可用内存，导致系统强制终止该程序或系统无法正常运行。</li>
+<li><strong>不可预测的行为</strong>：内存不足可能导致程序出现异常行为，例如响应速度减慢、无缘无故的崩溃等。</li>
+</ul>
+<h3 id="三常见的内存泄漏原因">三、常见的内存泄漏原因<a hidden class="anchor" aria-hidden="true" href="#三常见的内存泄漏原因">#</a></h3>
+<p>内存泄漏通常是由于对内存的错误管理引起的，下面是几种常见的原因。</p>
+<h4 id="31-动态内存分配后未释放">3.1 动态内存分配后未释放<a hidden class="anchor" aria-hidden="true" href="#31-动态内存分配后未释放">#</a></h4>
+<p>这是最典型的内存泄漏场景。当程序通过 <code>new</code> 或 <code>malloc</code> 动态分配内存后，没有相应的 <code>delete</code> 或 <code>free</code> 来释放内存，导致泄漏。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span><span class="o">*</span> <span class="n">ptr</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span> <span class="c1">// 动态分配内存
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 如果没有 delete，内存不会被释放
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="32-异常处理中的内存泄漏">3.2 异常处理中的内存泄漏<a hidden class="anchor" aria-hidden="true" href="#32-异常处理中的内存泄漏">#</a></h4>
+<p>如果在异常发生时，分配的内存没有被正确释放，会导致内存泄漏。异常可能会跳过释放代码，直接进入异常处理代码块。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">process</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span><span class="o">*</span> <span class="n">ptr</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 可能抛出异常的代码
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">throw</span> <span class="n">std</span><span class="o">::</span><span class="n">runtime_error</span><span class="p">(</span><span class="s">&#34;Error&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">catch</span> <span class="p">(...)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 没有 delete ptr，导致内存泄漏
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">throw</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="33-指针被重新分配而未释放原始内存">3.3 指针被重新分配而未释放原始内存<a hidden class="anchor" aria-hidden="true" href="#33-指针被重新分配而未释放原始内存">#</a></h4>
+<p>当一个指针被重新分配新内存时，如果没有先释放之前指向的内存，之前分配的内存将无法访问并导致泄漏。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span><span class="o">*</span> <span class="n">ptr</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ptr</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="p">(</span><span class="mi">20</span><span class="p">);</span> <span class="c1">// 忘记释放原来分配的内存
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">delete</span> <span class="n">ptr</span><span class="p">;</span> <span class="c1">// 只释放了最后分配的内存
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="34-循环引用智能指针中的常见问题">3.4 循环引用（智能指针中的常见问题）<a hidden class="anchor" aria-hidden="true" href="#34-循环引用智能指针中的常见问题">#</a></h4>
+<p>循环引用是指对象相互持有对方的引用，导致这些对象无法被正确析构和释放。这在使用智能指针时尤其常见，特别是在 <code>std::shared_ptr</code> 中。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;memory&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">A</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">B</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;</span> <span class="n">a_ptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">A</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">B</span><span class="o">&gt;</span> <span class="n">b_ptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">example</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">B</span><span class="o">&gt;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">B</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">a</span><span class="o">-&gt;</span><span class="n">b_ptr</span> <span class="o">=</span> <span class="n">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">b</span><span class="o">-&gt;</span><span class="n">a_ptr</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span> <span class="c1">// 循环引用，导致无法释放内存
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="四检测内存泄漏">四、检测内存泄漏<a hidden class="anchor" aria-hidden="true" href="#四检测内存泄漏">#</a></h3>
+<p>为了确保程序的健壮性和内存使用的有效性，检测内存泄漏是必不可少的环节。下面介绍几种常用的检测手段。</p>
+<h4 id="41-使用内存分析工具">4.1 使用内存分析工具<a hidden class="anchor" aria-hidden="true" href="#41-使用内存分析工具">#</a></h4>
+<ul>
+<li><strong>Valgrind</strong>：这是一个流行的内存检测工具，能够检测内存泄漏、未初始化的内存使用等问题。</li>
+<li><strong>AddressSanitizer</strong>：由编译器支持的运行时工具，可以快速定位内存泄漏和其他内存相关错误。</li>
+<li><strong>Visual Studio 内存诊断工具</strong>：用于检测 Windows 环境下的内存问题。</li>
+</ul>
+<h4 id="42-手动代码审查">4.2 手动代码审查<a hidden class="anchor" aria-hidden="true" href="#42-手动代码审查">#</a></h4>
+<ul>
+<li><strong>代码审查</strong>：通过检查代码中的 <code>new</code> 和 <code>delete</code>、<code>malloc</code> 和 <code>free</code> 的配对情况来手动排查内存泄漏。</li>
+<li><strong>内存管理策略</strong>：通过代码审查确保遵循好的内存管理习惯，避免裸指针，推荐使用智能指针。</li>
+</ul>
+<h3 id="五预防内存泄漏的有效措施">五、预防内存泄漏的有效措施<a hidden class="anchor" aria-hidden="true" href="#五预防内存泄漏的有效措施">#</a></h3>
+<h4 id="51-使用智能指针">5.1 使用智能指针<a hidden class="anchor" aria-hidden="true" href="#51-使用智能指针">#</a></h4>
+<p>C++11 引入的智能指针极大地简化了内存管理，避免了手动释放内存时的出错机会。智能指针（如 <code>std::unique_ptr</code> 和 <code>std::shared_ptr</code>）能够自动管理内存，当指针不再被使用时，自动释放内存。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;memory&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">process</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 自动管理内存，无需显式 delete
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="52-避免裸指针">5.2 避免裸指针<a hidden class="anchor" aria-hidden="true" href="#52-避免裸指针">#</a></h4>
+<p>尽量避免使用裸指针。特别是对于复杂的类设计和动态内存分配，使用智能指针不仅能够提高代码的健壮性，还能自动管理对象的生命周期。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;memory&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyClass</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MyClass</span><span class="p">()</span> <span class="o">:</span> <span class="n">ptr</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="53-遵循-raii资源获取即初始化原则">5.3 遵循 RAII（资源获取即初始化）原则<a hidden class="anchor" aria-hidden="true" href="#53-遵循-raii资源获取即初始化原则">#</a></h4>
+<p>RAII 是 C++ 内存管理的一大原则。使用类的构造函数分配资源，析构函数释放资源，可以确保在异常情况下，资源仍然能够被正确释放。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Resource</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span><span class="o">*</span> <span class="n">data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Resource</span><span class="p">()</span> <span class="o">:</span> <span class="n">data</span><span class="p">(</span><span class="k">new</span> <span class="kt">int</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">~</span><span class="n">Resource</span><span class="p">()</span> <span class="p">{</span> <span class="k">delete</span> <span class="n">data</span><span class="p">;</span> <span class="p">}</span> <span class="c1">// 析构时释放资源
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">process</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Resource</span> <span class="n">res</span><span class="p">;</span>  <span class="c1">// res 析构时会自动释放 data 指向的内存
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="六总结">六、总结<a hidden class="anchor" aria-hidden="true" href="#六总结">#</a></h3>
+<p>内存泄漏是 C++ 程序中的常见问题，但通过良好的内存管理策略和工具，内存泄漏问题是可以有效避免的。使用智能指针、遵循 RAII 原则以及使用内存检测工具，可以极大地减少内存泄漏的风险。此外，定期的代码审查也能帮助发现潜在的内存管理问题。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/cpp%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E5%88%9D%E6%8E%A2/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>CPP智能指针初探</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>冒泡排序</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

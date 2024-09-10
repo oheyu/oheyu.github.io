@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CPP中的const与constexpr | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="在 C&#43;&#43; 中，const和constexpr是两个非常重要的关键字，它们的主要功能是保证变量和表达式在不同上下文中的不可修改性。然而，虽然这两个关">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84const%E4%B8%8Econstexpr/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84const%E4%B8%8Econstexpr/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="CPP中的const与constexpr" />
+<meta property="og:description" content="在 C&#43;&#43; 中，const和constexpr是两个非常重要的关键字，它们的主要功能是保证变量和表达式在不同上下文中的不可修改性。然而，虽然这两个关" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84const%E4%B8%8Econstexpr/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-09-20T16:10:28+08:00" />
+<meta property="article:modified_time" content="2023-09-20T16:10:28+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CPP中的const与constexpr"/>
+<meta name="twitter:description" content="在 C&#43;&#43; 中，const和constexpr是两个非常重要的关键字，它们的主要功能是保证变量和表达式在不同上下文中的不可修改性。然而，虽然这两个关"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "CPP中的const与constexpr",
+      "item": "https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84const%E4%B8%8Econstexpr/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CPP中的const与constexpr",
+  "name": "CPP中的const与constexpr",
+  "description": "在 C++ 中，const和constexpr是两个非常重要的关键字，它们的主要功能是保证变量和表达式在不同上下文中的不可修改性。然而，虽然这两个关",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\r在 C++ 中，const和constexpr是两个非常重要的关键字，它们的主要功能是保证变量和表达式在不同上下文中的不可修改性。然而，虽然这两个关键字有相似之处，但它们在实现和使用场景上有显著的不同。\n一、什么是 const？ const 关键字用于声明不可修改的变量，确保一旦初始化后变量的值不会再被改变。其初始化既可以在编译时完成，也可以在运行时进行，具体取决于初始值是否在编译时已知。\n运行时或编译时初始化：const 变量的值可以在编译时或运行时确定。 不可修改性：一旦初始化，变量的值不可更改。 作用域灵活：const 变量可以出现在局部和全局作用域中。 1 2 const int a = 42; // 编译时常量 const int b = getValue(); // 运行时常量，getValue() 在运行时返回值 二、什么是 constexpr？ C++11 引入了 constexpr 关键字，用于定义编译时常量表达式。与 const 不同，constexpr 保证变量的初始化必须在编译时完成，并且可以用于函数，确保函数在编译时进行求值。\n编译时计算：constexpr 变量的值必须在编译时确定，适用于编译期常量的场景。 函数修饰：constexpr 可以修饰函数，允许函数在编译期执行计算。 更严格的限制：constexpr 只能用于常量表达式，因此比 const 更严格。 1 2 constexpr int x = 10; // 编译时常量 constexpr int y = square(5); // 调用 constexpr 函数，编译时求值 三、const 与 constexpr 的主要区别 特性 const constexpr 初始化时间 编译时或运行时 只能在编译时 可修改性 不可修改 不可修改 应用场景 运行时常量或编译时常量 仅编译时常量 函数修饰 不适用 可用于修饰函数，使其在编译时求值 灵活性 可以与运行时数据配合使用 只能与编译时确定的数据使用 适用范围 可以在大多数上下文中使用 仅适用于需要编译时常量的上下文 错误处理 运行时可能抛出错误 编译时即检测到错误，减少运行时错误 四、对比示例：const 与 constexpr 的使用 通过一个实际示例进一步对比它们的使用场景：\n1 2 3 4 5 const int a = 42; // a 是编译时或运行时常量 constexpr int b = 10; // b 是编译时常量 int arr1[a]; // 如果 a 是运行时常量，数组声明可能非法 int arr2[b]; // 合法，b 是编译时常量 在此例中，a 的初始化可以在运行时确定，因此在某些场景下不能用作编译时常量。而 b 通过 constexpr 定义，保证其在编译时确定，因此可以用作数组大小。\n五、const 与 constexpr 的适用场景 5.1 什么时候使用 const 当你不需要编译时常量，但希望变量在整个程序执行过程中不可修改时，使用 const。 const 适用于大多数需要不可变性的场景，例如配置参数或局部不可修改的变量。 1 2 const int max_connections = 100; const std::string config = readConfig(); // 配置文件的内容在运行时读取 5.2 什么时候使用 constexpr 当你需要编译时常量，例如数组大小、模板参数或用于优化计算的常量时，使用 constexpr。 constexpr 保证了值在编译时确定，可以用于需要编译期计算的复杂函数中。 1 2 3 4 5 6 7 constexpr int max_buffer_size = 1024; constexpr int square(int x) { return x * x; } int buffer[square(32)]; // 使用编译时常量进行数组声明 六、总结 const：适用于任何需要不可修改值的场合，可以在运行时或编译时初始化，但在运行时使用时并不一定是编译时常量。 constexpr：更严格的关键字，确保变量或函数在编译时求值，适合用于性能优化以及编译期常量的场景。 ",
+  "wordCount" : "1243",
+  "inLanguage": "zh",
+  "datePublished": "2023-09-20T16:10:28+08:00",
+  "dateModified": "2023-09-20T16:10:28+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84const%E4%B8%8Econstexpr/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      CPP中的const与constexpr
+    </h1>
+    <div class="post-meta"><span title='2023-09-20 16:10:28 +0800 CST'>2023-09-20</span>&nbsp;·&nbsp;3 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e4%bb%80%e4%b9%88%e6%98%af-const" aria-label="一、什么是 const？">一、什么是 <code>const</code>？</a></li>
+                    <li>
+                        <a href="#%e4%ba%8c%e4%bb%80%e4%b9%88%e6%98%af-constexpr" aria-label="二、什么是 constexpr？">二、什么是 <code>constexpr</code>？</a></li>
+                    <li>
+                        <a href="#%e4%b8%89const-%e4%b8%8e-constexpr-%e7%9a%84%e4%b8%bb%e8%a6%81%e5%8c%ba%e5%88%ab" aria-label="三、const 与 constexpr 的主要区别">三、<code>const</code> 与 <code>constexpr</code> 的主要区别</a></li>
+                    <li>
+                        <a href="#%e5%9b%9b%e5%af%b9%e6%af%94%e7%a4%ba%e4%be%8bconst-%e4%b8%8e-constexpr-%e7%9a%84%e4%bd%bf%e7%94%a8" aria-label="四、对比示例：const 与 constexpr 的使用">四、对比示例：<code>const</code> 与 <code>constexpr</code> 的使用</a></li>
+                    <li>
+                        <a href="#%e4%ba%94const-%e4%b8%8e-constexpr-%e7%9a%84%e9%80%82%e7%94%a8%e5%9c%ba%e6%99%af" aria-label="五、const 与 constexpr 的适用场景">五、<code>const</code> 与 <code>constexpr</code> 的适用场景</a><ul>
+                            
+                    <li>
+                        <a href="#51-%e4%bb%80%e4%b9%88%e6%97%b6%e5%80%99%e4%bd%bf%e7%94%a8-const" aria-label="5.1 什么时候使用 const">5.1 什么时候使用 <code>const</code></a></li>
+                    <li>
+                        <a href="#52-%e4%bb%80%e4%b9%88%e6%97%b6%e5%80%99%e4%bd%bf%e7%94%a8-constexpr" aria-label="5.2 什么时候使用 constexpr">5.2 什么时候使用 <code>constexpr</code></a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%85%ad%e6%80%bb%e7%bb%93" aria-label="六、总结">六、总结</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>在 C++ 中，<code>const</code>和<code>constexpr</code>是两个非常重要的关键字，它们的主要功能是保证变量和表达式在不同上下文中的不可修改性。然而，虽然这两个关键字有相似之处，但它们在实现和使用场景上有显著的不同。</p>
+<hr>
+<h3 id="一什么是-const">一、什么是 <code>const</code>？<a hidden class="anchor" aria-hidden="true" href="#一什么是-const">#</a></h3>
+<p><code>const</code> 关键字用于声明不可修改的变量，确保一旦初始化后变量的值不会再被改变。其初始化既可以在编译时完成，也可以在运行时进行，具体取决于初始值是否在编译时已知。</p>
+<ul>
+<li><strong>运行时或编译时初始化</strong>：<code>const</code> 变量的值可以在编译时或运行时确定。</li>
+<li><strong>不可修改性</strong>：一旦初始化，变量的值不可更改。</li>
+<li><strong>作用域灵活</strong>：<code>const</code> 变量可以出现在局部和全局作用域中。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>             <span class="c1">// 编译时常量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">const</span> <span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="n">getValue</span><span class="p">();</span>     <span class="c1">// 运行时常量，getValue() 在运行时返回值
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="二什么是-constexpr">二、什么是 <code>constexpr</code>？<a hidden class="anchor" aria-hidden="true" href="#二什么是-constexpr">#</a></h3>
+<p>C++11 引入了 <code>constexpr</code> 关键字，用于定义<strong>编译时常量表达式</strong>。与 <code>const</code> 不同，<code>constexpr</code> 保证变量的初始化必须在编译时完成，并且可以用于函数，确保函数在编译时进行求值。</p>
+<ul>
+<li><strong>编译时计算</strong>：<code>constexpr</code> 变量的值必须在编译时确定，适用于编译期常量的场景。</li>
+<li><strong>函数修饰</strong>：<code>constexpr</code> 可以修饰函数，允许函数在编译期执行计算。</li>
+<li><strong>更严格的限制</strong>：<code>constexpr</code> 只能用于常量表达式，因此比 <code>const</code> 更严格。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">constexpr</span> <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>                 <span class="c1">// 编译时常量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">constexpr</span> <span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="n">square</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>          <span class="c1">// 调用 constexpr 函数，编译时求值
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="三const-与-constexpr-的主要区别">三、<code>const</code> 与 <code>constexpr</code> 的主要区别<a hidden class="anchor" aria-hidden="true" href="#三const-与-constexpr-的主要区别">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th><code>const</code></th>
+<th><code>constexpr</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>初始化时间</strong></td>
+<td>编译时或运行时</td>
+<td>只能在编译时</td>
+</tr>
+<tr>
+<td><strong>可修改性</strong></td>
+<td>不可修改</td>
+<td>不可修改</td>
+</tr>
+<tr>
+<td><strong>应用场景</strong></td>
+<td>运行时常量或编译时常量</td>
+<td>仅编译时常量</td>
+</tr>
+<tr>
+<td><strong>函数修饰</strong></td>
+<td>不适用</td>
+<td>可用于修饰函数，使其在编译时求值</td>
+</tr>
+<tr>
+<td><strong>灵活性</strong></td>
+<td>可以与运行时数据配合使用</td>
+<td>只能与编译时确定的数据使用</td>
+</tr>
+<tr>
+<td><strong>适用范围</strong></td>
+<td>可以在大多数上下文中使用</td>
+<td>仅适用于需要编译时常量的上下文</td>
+</tr>
+<tr>
+<td><strong>错误处理</strong></td>
+<td>运行时可能抛出错误</td>
+<td>编译时即检测到错误，减少运行时错误</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="四对比示例const-与-constexpr-的使用">四、对比示例：<code>const</code> 与 <code>constexpr</code> 的使用<a hidden class="anchor" aria-hidden="true" href="#四对比示例const-与-constexpr-的使用">#</a></h3>
+<p>通过一个实际示例进一步对比它们的使用场景：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>             <span class="c1">// a 是编译时或运行时常量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">constexpr</span> <span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>         <span class="c1">// b 是编译时常量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">arr1</span><span class="p">[</span><span class="n">a</span><span class="p">];</span> <span class="c1">// 如果 a 是运行时常量，数组声明可能非法
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="n">arr2</span><span class="p">[</span><span class="n">b</span><span class="p">];</span> <span class="c1">// 合法，b 是编译时常量
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在此例中，<code>a</code> 的初始化可以在运行时确定，因此在某些场景下不能用作编译时常量。而 <code>b</code> 通过 <code>constexpr</code> 定义，保证其在编译时确定，因此可以用作数组大小。</p>
+<hr>
+<h3 id="五const-与-constexpr-的适用场景">五、<code>const</code> 与 <code>constexpr</code> 的适用场景<a hidden class="anchor" aria-hidden="true" href="#五const-与-constexpr-的适用场景">#</a></h3>
+<h4 id="51-什么时候使用-const">5.1 什么时候使用 <code>const</code><a hidden class="anchor" aria-hidden="true" href="#51-什么时候使用-const">#</a></h4>
+<ul>
+<li>当你不需要编译时常量，但希望变量在整个程序执行过程中不可修改时，使用 <code>const</code>。</li>
+<li><code>const</code> 适用于大多数需要不可变性的场景，例如配置参数或局部不可修改的变量。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">int</span> <span class="n">max_connections</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">config</span> <span class="o">=</span> <span class="n">readConfig</span><span class="p">();</span> <span class="c1">// 配置文件的内容在运行时读取
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="52-什么时候使用-constexpr">5.2 什么时候使用 <code>constexpr</code><a hidden class="anchor" aria-hidden="true" href="#52-什么时候使用-constexpr">#</a></h4>
+<ul>
+<li>当你需要编译时常量，例如数组大小、模板参数或用于优化计算的常量时，使用 <code>constexpr</code>。</li>
+<li><code>constexpr</code> 保证了值在编译时确定，可以用于需要编译期计算的复杂函数中。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">constexpr</span> <span class="kt">int</span> <span class="n">max_buffer_size</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">constexpr</span> <span class="kt">int</span> <span class="nf">square</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">buffer</span><span class="p">[</span><span class="n">square</span><span class="p">(</span><span class="mi">32</span><span class="p">)];</span> <span class="c1">// 使用编译时常量进行数组声明
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="六总结">六、总结<a hidden class="anchor" aria-hidden="true" href="#六总结">#</a></h3>
+<ul>
+<li><strong><code>const</code></strong>：适用于任何需要不可修改值的场合，可以在运行时或编译时初始化，但在运行时使用时并不一定是编译时常量。</li>
+<li><strong><code>constexpr</code></strong>：更严格的关键字，确保变量或函数在编译时求值，适合用于性能优化以及编译期常量的场景。</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/lock_guard%E4%B8%8Eunique_lock/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>Lock_guard与unique_lock</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/sizeof%E8%BF%90%E7%AE%97%E7%AC%A6/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>Sizeof运算符</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

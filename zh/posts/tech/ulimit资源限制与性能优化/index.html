@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Ulimit：资源限制与性能优化 | 史玉浩的个人博客</title>
+<meta name="keywords" content="Linux">
+<meta name="description" content="在 Linux 和 Unix 系统中，系统资源的合理分配和限制是确保系统稳定性和性能的关键。而 ulimit 命令正是用于管理和控制用户进程的资源限制的工具。通过 ulimit，">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/ulimit%E8%B5%84%E6%BA%90%E9%99%90%E5%88%B6%E4%B8%8E%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/ulimit%E8%B5%84%E6%BA%90%E9%99%90%E5%88%B6%E4%B8%8E%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="Ulimit：资源限制与性能优化" />
+<meta property="og:description" content="在 Linux 和 Unix 系统中，系统资源的合理分配和限制是确保系统稳定性和性能的关键。而 ulimit 命令正是用于管理和控制用户进程的资源限制的工具。通过 ulimit，" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/ulimit%E8%B5%84%E6%BA%90%E9%99%90%E5%88%B6%E4%B8%8E%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-09-15T15:27:16+08:00" />
+<meta property="article:modified_time" content="2023-09-15T15:27:16+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Ulimit：资源限制与性能优化"/>
+<meta name="twitter:description" content="在 Linux 和 Unix 系统中，系统资源的合理分配和限制是确保系统稳定性和性能的关键。而 ulimit 命令正是用于管理和控制用户进程的资源限制的工具。通过 ulimit，"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Ulimit：资源限制与性能优化",
+      "item": "https://oheyu.github.io/zh/posts/tech/ulimit%E8%B5%84%E6%BA%90%E9%99%90%E5%88%B6%E4%B8%8E%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Ulimit：资源限制与性能优化",
+  "name": "Ulimit：资源限制与性能优化",
+  "description": "在 Linux 和 Unix 系统中，系统资源的合理分配和限制是确保系统稳定性和性能的关键。而 ulimit 命令正是用于管理和控制用户进程的资源限制的工具。通过 ulimit，",
+  "keywords": [
+    "Linux"
+  ],
+  "articleBody": "\r在 Linux 和 Unix 系统中，系统资源的合理分配和限制是确保系统稳定性和性能的关键。而 ulimit 命令正是用于管理和控制用户进程的资源限制的工具。通过 ulimit，系统管理员可以有效地防止单个用户或进程过度消耗系统资源，避免造成系统的整体崩溃或性能下降。\n一、什么是 ulimit？ ulimit 是一个内置于 shell 的命令，用于查看或设置进程可以使用的各种系统资源的限制。它允许管理员对文件大小、进程数、内存使用量等进行控制，从而为每个用户或进程设定资源上限。这些限制可以帮助防止单个用户或进程滥用系统资源，造成系统性能问题。\nulimit 的限制可以分为两类：\n软限制（Soft Limit）：这是当前有效的资源限制，用户可以在不超过硬限制的前提下自行修改。 硬限制（Hard Limit）：这是资源的绝对最大限制，只有超级用户才能提升硬限制。 ulimit 的基本语法如下：\n1 ulimit [选项] [限制值] 选项：指定要操作的资源类型。 限制值：设定资源的限制值。 二、ulimit 各个参数详解 ulimit 提供了一系列选项，允许管理员对不同类型的资源进行限制。以下是一些常见的 ulimit 参数及其用途：\n-a：显示所有当前的资源限制\n使用 ulimit -a 可以查看当前 shell 会话中所有资源的软限制。这是排查系统资源问题的一个有力工具。\n1 ulimit -a -c：核心转储文件大小限制\n核心转储文件是程序崩溃时生成的内存映像文件，用于调试程序。-c 选项控制核心转储文件的最大大小。\n设置核心转储文件大小为 0（禁用核心转储）：\n1 ulimit -c 0 设置核心转储文件最大为 100 MB：\n1 ulimit -c 102400 -d：数据段大小限制\n-d 选项设置进程数据段的最大大小。数据段是用来存储全局变量和静态变量的内存区域。\n设置数据段大小为 2 GB：\n1 ulimit -d 2097152 -f：最大文件大小限制\n-f 选项控制进程创建的文件的最大大小。超过此限制时，文件无法继续增长。\n设置文件最大为 50 MB：\n1 ulimit -f 51200 -l：最大锁定内存大小\n-l 选项设置进程可以锁定到物理内存中的最大内存量，这部分内存不会被交换到硬盘上。适用于需要高性能的应用。\n设置最大锁定内存为 1 GB：\n1 ulimit -l 1048576 -m：最大物理内存大小\n现代系统很少使用 -m 选项。它原本用于限制进程可以使用的物理内存大小。\n设置最大物理内存为 2 GB：\n1 ulimit -m 2097152 -n：最大打开文件数\n每个进程可以打开的文件描述符数量受到 -n 选项的限制。这是一个非常重要的设置，尤其是在处理高并发网络服务时。\n设置最大打开文件数为 1024：\n1 ulimit -n 1024 -s：栈大小限制\n栈用于存储函数调用信息和局部变量。-s 选项控制进程栈的最大大小，限制过小可能导致递归程序崩溃。\n设置栈大小为 8 MB：\n1 ulimit -s 8192 -t：最大运行时间限制\n-t 选项限制进程可以运行的最长时间（以秒为单位）。超出此时间后，进程将被系统强制终止。\n设置最大运行时间为 3600 秒（1 小时）：\n1 ulimit -t 3600 -u：最大进程数限制\n-u 选项限制用户可以创建的最大进程数。这可以防止用户创建过多的进程，导致系统资源枯竭。\n设置最大进程数为 500：\n1 ulimit -u 500 -v：最大虚拟内存大小\n-v 选项控制进程使用的最大虚拟内存量，包括程序代码、数据段、堆、栈等所有内存映射的内容。\n设置最大虚拟内存为 4 GB：\n1 ulimit -v 4194304 三、如何永久修改 ulimit 限制 ulimit 命令的限制通常只在当前 shell 会话中有效。如果想要使这些限制永久生效，可以通过以下方式实现：\n3.1 编辑 /etc/security/limits.conf 文件 对于系统级别的限制，可以在 /etc/security/limits.conf 文件中添加用户或组的资源限制配置。例如：\n1 2 3 4 5 # 为用户设置最大文件描述符数和最大进程数限制 username soft nofile 1024 username hard nofile 2048 username soft nproc 500 username hard nproc 1000 4.2 修改用户的 shell 配置文件 如果想为某个特定用户设置资源限制，可以将 ulimit 命令添加到用户的 .bashrc、.profile 或其他 shell 启动脚本中。例如：\n1 2 # 设置用户的最大文件描述符数 ulimit -n 1024 四、ulimit 的实际应用场景 4.1 优化高并发网络服务 对于高并发的服务器应用（如 Web 服务器、数据库等），打开的文件描述符数限制可能是性能瓶颈。通过适当增加 -n 选项的值，可以允许服务器处理更多的并发连接。\n4.2 防止资源滥用 为了防止单个用户或进程滥用系统资源，管理员可以设置进程数限制（-u）和内存使用限制（-v）。这在多用户系统中尤为重要，因为一个恶意或错误的程序可能耗尽系统资源，导致其他用户无法正常工作。\n4.3 调试程序的核心转储 开发人员在调试程序时，核心转储文件是诊断崩溃问题的重要工具。通过适当调整 -c 选项，允许生成核心转储文件，可以帮助开发人员获取崩溃时的内存状态，定位问题。\n",
+  "wordCount" : "1742",
+  "inLanguage": "zh",
+  "datePublished": "2023-09-15T15:27:16+08:00",
+  "dateModified": "2023-09-15T15:27:16+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/ulimit%E8%B5%84%E6%BA%90%E9%99%90%E5%88%B6%E4%B8%8E%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Ulimit：资源限制与性能优化
+    </h1>
+    <div class="post-meta"><span title='2023-09-15 15:27:16 +0800 CST'>2023-09-15</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e4%bb%80%e4%b9%88%e6%98%af-ulimit" aria-label="一、什么是 ulimit？">一、什么是 <code>ulimit</code>？</a></li>
+                    <li>
+                        <a href="#%e4%ba%8culimit-%e5%90%84%e4%b8%aa%e5%8f%82%e6%95%b0%e8%af%a6%e8%a7%a3" aria-label="二、ulimit 各个参数详解">二、<code>ulimit</code> 各个参数详解</a></li>
+                    <li>
+                        <a href="#%e4%b8%89%e5%a6%82%e4%bd%95%e6%b0%b8%e4%b9%85%e4%bf%ae%e6%94%b9-ulimit-%e9%99%90%e5%88%b6" aria-label="三、如何永久修改 ulimit 限制">三、如何永久修改 <code>ulimit</code> 限制</a><ul>
+                            
+                    <li>
+                        <a href="#31-%e7%bc%96%e8%be%91-etcsecuritylimitsconf-%e6%96%87%e4%bb%b6" aria-label="3.1 编辑 /etc/security/limits.conf 文件">3.1 编辑 <code>/etc/security/limits.conf</code> 文件</a></li>
+                    <li>
+                        <a href="#42-%e4%bf%ae%e6%94%b9%e7%94%a8%e6%88%b7%e7%9a%84-shell-%e9%85%8d%e7%bd%ae%e6%96%87%e4%bb%b6" aria-label="4.2 修改用户的 shell 配置文件">4.2 修改用户的 shell 配置文件</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%9b%9bulimit-%e7%9a%84%e5%ae%9e%e9%99%85%e5%ba%94%e7%94%a8%e5%9c%ba%e6%99%af" aria-label="四、ulimit 的实际应用场景">四、<code>ulimit</code> 的实际应用场景</a><ul>
+                            
+                    <li>
+                        <a href="#41-%e4%bc%98%e5%8c%96%e9%ab%98%e5%b9%b6%e5%8f%91%e7%bd%91%e7%bb%9c%e6%9c%8d%e5%8a%a1" aria-label="4.1 优化高并发网络服务">4.1 优化高并发网络服务</a></li>
+                    <li>
+                        <a href="#42-%e9%98%b2%e6%ad%a2%e8%b5%84%e6%ba%90%e6%bb%a5%e7%94%a8" aria-label="4.2 防止资源滥用">4.2 防止资源滥用</a></li>
+                    <li>
+                        <a href="#43-%e8%b0%83%e8%af%95%e7%a8%8b%e5%ba%8f%e7%9a%84%e6%a0%b8%e5%bf%83%e8%bd%ac%e5%82%a8" aria-label="4.3 调试程序的核心转储">4.3 调试程序的核心转储</a>
+                    </li>
+                </ul>
+                </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>在 Linux 和 Unix 系统中，系统资源的合理分配和限制是确保系统稳定性和性能的关键。而 <code>ulimit</code> 命令正是用于管理和控制用户进程的资源限制的工具。通过 <code>ulimit</code>，系统管理员可以有效地防止单个用户或进程过度消耗系统资源，避免造成系统的整体崩溃或性能下降。</p>
+<hr>
+<h3 id="一什么是-ulimit">一、什么是 <code>ulimit</code>？<a hidden class="anchor" aria-hidden="true" href="#一什么是-ulimit">#</a></h3>
+<p><code>ulimit</code> 是一个内置于 shell 的命令，用于查看或设置进程可以使用的各种系统资源的限制。它允许管理员对文件大小、进程数、内存使用量等进行控制，从而为每个用户或进程设定资源上限。这些限制可以帮助防止单个用户或进程滥用系统资源，造成系统性能问题。</p>
+<p><code>ulimit</code> 的限制可以分为两类：</p>
+<ul>
+<li><strong>软限制（Soft Limit）</strong>：这是当前有效的资源限制，用户可以在不超过硬限制的前提下自行修改。</li>
+<li><strong>硬限制（Hard Limit）</strong>：这是资源的绝对最大限制，只有超级用户才能提升硬限制。</li>
+</ul>
+<p><code>ulimit</code> 的基本语法如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> <span class="o">[</span>选项<span class="o">]</span> <span class="o">[</span>限制值<span class="o">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>选项</strong>：指定要操作的资源类型。</li>
+<li><strong>限制值</strong>：设定资源的限制值。</li>
+</ul>
+<hr>
+<h3 id="二ulimit-各个参数详解">二、<code>ulimit</code> 各个参数详解<a hidden class="anchor" aria-hidden="true" href="#二ulimit-各个参数详解">#</a></h3>
+<p><code>ulimit</code> 提供了一系列选项，允许管理员对不同类型的资源进行限制。以下是一些常见的 <code>ulimit</code> 参数及其用途：</p>
+<ol>
+<li>
+<p><strong><code>-a</code></strong>：显示所有当前的资源限制</p>
+<ul>
+<li>
+<p>使用 <code>ulimit -a</code> 可以查看当前 shell 会话中所有资源的软限制。这是排查系统资源问题的一个有力工具。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> -a
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p><strong><code>-c</code></strong>：核心转储文件大小限制</p>
+<ul>
+<li>
+<p>核心转储文件是程序崩溃时生成的内存映像文件，用于调试程序。<code>-c</code> 选项控制核心转储文件的最大大小。</p>
+</li>
+<li>
+<p>设置核心转储文件大小为 0（禁用核心转储）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> -c <span class="m">0</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>设置核心转储文件最大为 100 MB：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> -c <span class="m">102400</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p><strong><code>-d</code></strong>：数据段大小限制</p>
+<ul>
+<li>
+<p><code>-d</code> 选项设置进程数据段的最大大小。数据段是用来存储全局变量和静态变量的内存区域。</p>
+</li>
+<li>
+<p>设置数据段大小为 2 GB：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> -d <span class="m">2097152</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p><strong><code>-f</code></strong>：最大文件大小限制</p>
+<ul>
+<li>
+<p><code>-f</code> 选项控制进程创建的文件的最大大小。超过此限制时，文件无法继续增长。</p>
+</li>
+<li>
+<p>设置文件最大为 50 MB：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> -f <span class="m">51200</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p><strong><code>-l</code></strong>：最大锁定内存大小</p>
+<ul>
+<li>
+<p><code>-l</code> 选项设置进程可以锁定到物理内存中的最大内存量，这部分内存不会被交换到硬盘上。适用于需要高性能的应用。</p>
+</li>
+<li>
+<p>设置最大锁定内存为 1 GB：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> -l <span class="m">1048576</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p><strong><code>-m</code></strong>：最大物理内存大小</p>
+<ul>
+<li>
+<p>现代系统很少使用 <code>-m</code> 选项。它原本用于限制进程可以使用的物理内存大小。</p>
+</li>
+<li>
+<p>设置最大物理内存为 2 GB：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> -m <span class="m">2097152</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p><strong><code>-n</code></strong>：最大打开文件数</p>
+<ul>
+<li>
+<p>每个进程可以打开的文件描述符数量受到 <code>-n</code> 选项的限制。这是一个非常重要的设置，尤其是在处理高并发网络服务时。</p>
+</li>
+<li>
+<p>设置最大打开文件数为 1024：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> -n <span class="m">1024</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p><strong><code>-s</code></strong>：栈大小限制</p>
+<ul>
+<li>
+<p>栈用于存储函数调用信息和局部变量。<code>-s</code> 选项控制进程栈的最大大小，限制过小可能导致递归程序崩溃。</p>
+</li>
+<li>
+<p>设置栈大小为 8 MB：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> -s <span class="m">8192</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p><strong><code>-t</code></strong>：最大运行时间限制</p>
+<ul>
+<li>
+<p><code>-t</code> 选项限制进程可以运行的最长时间（以秒为单位）。超出此时间后，进程将被系统强制终止。</p>
+</li>
+<li>
+<p>设置最大运行时间为 3600 秒（1 小时）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> -t <span class="m">3600</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p><strong><code>-u</code></strong>：最大进程数限制</p>
+<ul>
+<li>
+<p><code>-u</code> 选项限制用户可以创建的最大进程数。这可以防止用户创建过多的进程，导致系统资源枯竭。</p>
+</li>
+<li>
+<p>设置最大进程数为 500：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> -u <span class="m">500</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p><strong><code>-v</code></strong>：最大虚拟内存大小</p>
+<ul>
+<li>
+<p><code>-v</code> 选项控制进程使用的最大虚拟内存量，包括程序代码、数据段、堆、栈等所有内存映射的内容。</p>
+</li>
+<li>
+<p>设置最大虚拟内存为 4 GB：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">ulimit</span> -v <span class="m">4194304</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="三如何永久修改-ulimit-限制">三、如何永久修改 <code>ulimit</code> 限制<a hidden class="anchor" aria-hidden="true" href="#三如何永久修改-ulimit-限制">#</a></h3>
+<p><code>ulimit</code> 命令的限制通常只在当前 shell 会话中有效。如果想要使这些限制永久生效，可以通过以下方式实现：</p>
+<h4 id="31-编辑-etcsecuritylimitsconf-文件">3.1 编辑 <code>/etc/security/limits.conf</code> 文件<a hidden class="anchor" aria-hidden="true" href="#31-编辑-etcsecuritylimitsconf-文件">#</a></h4>
+<p>对于系统级别的限制，可以在 <code>/etc/security/limits.conf</code> 文件中添加用户或组的资源限制配置。例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-plaintext" data-lang="plaintext"><span class="line"><span class="cl"># 为用户设置最大文件描述符数和最大进程数限制
+</span></span><span class="line"><span class="cl">username soft nofile 1024
+</span></span><span class="line"><span class="cl">username hard nofile 2048
+</span></span><span class="line"><span class="cl">username soft nproc 500
+</span></span><span class="line"><span class="cl">username hard nproc 1000
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="42-修改用户的-shell-配置文件">4.2 修改用户的 shell 配置文件<a hidden class="anchor" aria-hidden="true" href="#42-修改用户的-shell-配置文件">#</a></h4>
+<p>如果想为某个特定用户设置资源限制，可以将 <code>ulimit</code> 命令添加到用户的 <code>.bashrc</code>、<code>.profile</code> 或其他 shell 启动脚本中。例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 设置用户的最大文件描述符数</span>
+</span></span><span class="line"><span class="cl"><span class="nb">ulimit</span> -n <span class="m">1024</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="四ulimit-的实际应用场景">四、<code>ulimit</code> 的实际应用场景<a hidden class="anchor" aria-hidden="true" href="#四ulimit-的实际应用场景">#</a></h3>
+<h4 id="41-优化高并发网络服务">4.1 优化高并发网络服务<a hidden class="anchor" aria-hidden="true" href="#41-优化高并发网络服务">#</a></h4>
+<p>对于高并发的服务器应用（如 Web 服务器、数据库等），打开的文件描述符数限制可能是性能瓶颈。通过适当增加 <code>-n</code> 选项的值，可以允许服务器处理更多的并发连接。</p>
+<h4 id="42-防止资源滥用">4.2 防止资源滥用<a hidden class="anchor" aria-hidden="true" href="#42-防止资源滥用">#</a></h4>
+<p>为了防止单个用户或进程滥用系统资源，管理员可以设置进程数限制（<code>-u</code>）和内存使用限制（<code>-v</code>）。这在多用户系统中尤为重要，因为一个恶意或错误的程序可能耗尽系统资源，导致其他用户无法正常工作。</p>
+<h4 id="43-调试程序的核心转储">4.3 调试程序的核心转储<a hidden class="anchor" aria-hidden="true" href="#43-调试程序的核心转储">#</a></h4>
+<p>开发人员在调试程序时，核心转储文件是诊断崩溃问题的重要工具。通过适当调整 <code>-c</code> 选项，允许生成核心转储文件，可以帮助开发人员获取崩溃时的内存状态，定位问题。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/linux/">Linux</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/cpp%E5%87%BD%E6%95%B0%E8%BF%94%E5%9B%9E%E5%80%BC%E7%9A%84%E5%AD%98%E5%82%A8%E4%BD%8D%E7%BD%AE%E4%B8%8E%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>CPP函数返回值的存储位置与优化策略</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%86%85%E8%81%94%E5%87%BD%E6%95%B0/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>CPP中的内联函数</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

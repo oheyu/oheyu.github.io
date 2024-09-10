@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>左值与右值 | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="最近写代码，对左值（lvalue） 和 右值（rvalue） 两个概念感到有些拿不准，总结一下。 一、左值（lvalue）与右值（rvalue）的基">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/%E5%B7%A6%E5%80%BC%E4%B8%8E%E5%8F%B3%E5%80%BC/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/%E5%B7%A6%E5%80%BC%E4%B8%8E%E5%8F%B3%E5%80%BC/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="左值与右值" />
+<meta property="og:description" content="最近写代码，对左值（lvalue） 和 右值（rvalue） 两个概念感到有些拿不准，总结一下。 一、左值（lvalue）与右值（rvalue）的基" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/%E5%B7%A6%E5%80%BC%E4%B8%8E%E5%8F%B3%E5%80%BC/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-09-24T16:55:52+08:00" />
+<meta property="article:modified_time" content="2023-09-24T16:55:52+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="左值与右值"/>
+<meta name="twitter:description" content="最近写代码，对左值（lvalue） 和 右值（rvalue） 两个概念感到有些拿不准，总结一下。 一、左值（lvalue）与右值（rvalue）的基"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "左值与右值",
+      "item": "https://oheyu.github.io/zh/posts/tech/%E5%B7%A6%E5%80%BC%E4%B8%8E%E5%8F%B3%E5%80%BC/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "左值与右值",
+  "name": "左值与右值",
+  "description": "最近写代码，对左值（lvalue） 和 右值（rvalue） 两个概念感到有些拿不准，总结一下。 一、左值（lvalue）与右值（rvalue）的基",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\r最近写代码，对左值（lvalue） 和 右值（rvalue） 两个概念感到有些拿不准，总结一下。\n一、左值（lvalue）与右值（rvalue）的基本定义 1.1 左值（lvalue） 左值是指具有持久内存地址的对象。通俗地讲，左值代表的是可以“被赋值”的对象，它们通常是变量或可以通过引用访问的对象。左值具备持久性，可以通过引用或指针操作，因此它们可以出现在赋值语句的左侧。\n左值拥有明确的内存位置，并且可以重复使用。 它们通常是标识符（如变量）或对象的引用。 1 2 int a = 42; // 变量 a 是左值，它有一个明确的内存地址 a = 100; // 这里，a 在赋值语句的左侧，它是左值 1.2 右值（rvalue） 右值是指那些没有持久内存地址的临时值或表达式的结果。它们通常是不能被赋值的，因此不能出现在赋值表达式的左侧。右值的生命周期短暂，通常在表达式求值后便会销毁。\n右值不具备持久性，常常是临时对象或字面常量。 右值通常出现在表达式的右侧，例如数字常量、函数的返回值或算术表达式的结果。 1 2 int b = 5 + 3; // 这里的 5 + 3 是右值，它没有持久的内存地址 int c = 42; // 42 是字面常量，也是右值 二、左值与右值的特性对比 特性 左值（lvalue） 右值（rvalue） 持久性 左值具有持久内存地址，可通过指针或引用访问 右值是临时对象，通常在表达式求值后销毁 赋值能力 左值可以出现在赋值表达式的左侧 右值不能作为赋值表达式的左侧 可引用性 左值可以通过左值引用（T\u0026）来引用 右值只能通过右值引用（T\u0026\u0026，C++11 引入）引用 典型示例 变量、指针、对象引用 常量、临时对象、表达式的结果 三、左值与右值在函数参数中的应用 3.1 左值引用（lvalue reference） C++ 中的左值引用（T\u0026）允许函数通过引用参数操作调用者的对象，这样可以避免对象拷贝，提升效率。通过左值引用，函数可以直接操作左值对象。\n1 2 3 4 5 6 7 8 9 void modify(int\u0026 x) { x += 10; } int main() { int a = 5; modify(a); // a 是左值，被传递给左值引用参数 return 0; } 在上例中，modify 函数通过引用直接修改了 a，避免了对象拷贝。\n3.2 右值引用（rvalue reference） C++11 引入了右值引用（T\u0026\u0026），允许右值也可以被引用。右值引用的最大应用场景是移动语义，即通过移动而不是复制来处理资源，从而优化程序性能，特别是在处理大对象或容器时。\n1 2 3 4 5 6 7 8 void process(int\u0026\u0026 x) { std::cout \u003c\u003c \"Processing rvalue: \" \u003c\u003c x \u003c\u003c std::endl; } int main() { process(5); // 5 是右值，可以传递给右值引用参数 return 0; } 在上述代码中，process 函数接受一个右值引用，它可以安全地操作临时对象，避免不必要的拷贝。\n四、移动语义与右值引用 移动语义是 C++11 引入的一个重要特性，允许通过 “移动” 而不是 “拷贝” 来传递或返回对象的资源，避免了大量的内存分配和数据拷贝操作，极大地提高了性能。\n在实现移动语义时，右值引用提供了基础支持。通过移动构造函数和移动赋值操作符，程序员可以实现资源从一个对象转移到另一个对象。\n1 2 3 4 5 6 class MyClass { public: MyClass() { /* 构造函数 */ } MyClass(MyClass\u0026\u0026 other) noexcept { /* 移动构造函数 */ } MyClass\u0026 operator=(MyClass\u0026\u0026 other) noexcept { /* 移动赋值操作符 */ return *this; } }; 在移动语义中，资源（如动态分配的内存、文件句柄等）可以从一个对象移动到另一个对象，而不会进行深拷贝，这在处理大数据对象时尤为高效。\n1 2 3 4 5 6 7 8 9 10 11 #include #include #include // std::move int main() { std::vector\u003cint\u003e v1 = {1, 2, 3}; std::vector\u003cint\u003e v2 = std::move(v1); // v1 的资源被移动到 v2 std::cout \u003c\u003c \"v1 size: \" \u003c\u003c v1.size() \u003c\u003c std::endl; // v1 现在为空 std::cout \u003c\u003c \"v2 size: \" \u003c\u003c v2.size() \u003c\u003c std::endl; // v2 拥有原来 v1 的数据 } std::move 将左值显式地转换为右值引用，触发对象的移动语义。上例中，v1 的资源被移动到 v2，而不是通过拷贝来传递。\n五、完美转发与 std::forward 完美转发（perfect forwarding）是 C++11 中另一项重要的功能，它允许函数模板将其参数完美地转发给其他函数，保持参数的左值或右值特性。实现完美转发的关键工具是 std::forward。\n1 2 3 4 5 6 7 #include #include // std::forward template \u003ctypename T\u003e void wrapper(T\u0026\u0026 arg) { process(std::forward\u003cT\u003e(arg)); // 完美转发 } 在这个例子中，wrapper 函数可以将 arg 的左值/右值特性保留并传递给 process，确保调用时不会发生不必要的拷贝或移动操作。\n六、左值、右值与 C++ 标准库 C++ 标准库在许多地方使用了左值和右值引用的概念来优化性能。最常见的例子是 STL 容器，如 std::vector、std::string 等，它们通过移动构造函数和移动赋值操作符来避免不必要的拷贝。\n使用 std::move 和移动语义：\n1 2 std::string s1 = \"Hello\"; std::string s2 = std::move(s1); // s1 的内容被移动到 s2 此外，std::forward 用于实现完美转发，帮助标准库函数（如 std::bind 和 std::function）保持参数的左右值属性。\n",
+  "wordCount" : "1816",
+  "inLanguage": "zh",
+  "datePublished": "2023-09-24T16:55:52+08:00",
+  "dateModified": "2023-09-24T16:55:52+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/%E5%B7%A6%E5%80%BC%E4%B8%8E%E5%8F%B3%E5%80%BC/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      左值与右值
+    </h1>
+    <div class="post-meta"><span title='2023-09-24 16:55:52 +0800 CST'>2023-09-24</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e5%b7%a6%e5%80%bclvalue%e4%b8%8e%e5%8f%b3%e5%80%bcrvalue%e7%9a%84%e5%9f%ba%e6%9c%ac%e5%ae%9a%e4%b9%89" aria-label="一、左值（lvalue）与右值（rvalue）的基本定义">一、左值（lvalue）与右值（rvalue）的基本定义</a><ul>
+                            
+                    <li>
+                        <a href="#11-%e5%b7%a6%e5%80%bclvalue" aria-label="1.1 左值（lvalue）">1.1 左值（lvalue）</a></li>
+                    <li>
+                        <a href="#12-%e5%8f%b3%e5%80%bcrvalue" aria-label="1.2 右值（rvalue）">1.2 右值（rvalue）</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%8c%e5%b7%a6%e5%80%bc%e4%b8%8e%e5%8f%b3%e5%80%bc%e7%9a%84%e7%89%b9%e6%80%a7%e5%af%b9%e6%af%94" aria-label="二、左值与右值的特性对比">二、左值与右值的特性对比</a></li>
+                    <li>
+                        <a href="#%e4%b8%89%e5%b7%a6%e5%80%bc%e4%b8%8e%e5%8f%b3%e5%80%bc%e5%9c%a8%e5%87%bd%e6%95%b0%e5%8f%82%e6%95%b0%e4%b8%ad%e7%9a%84%e5%ba%94%e7%94%a8" aria-label="三、左值与右值在函数参数中的应用">三、左值与右值在函数参数中的应用</a><ul>
+                            
+                    <li>
+                        <a href="#31-%e5%b7%a6%e5%80%bc%e5%bc%95%e7%94%a8lvalue-reference" aria-label="3.1 左值引用（lvalue reference）">3.1 左值引用（lvalue reference）</a></li>
+                    <li>
+                        <a href="#32-%e5%8f%b3%e5%80%bc%e5%bc%95%e7%94%a8rvalue-reference" aria-label="3.2 右值引用（rvalue reference）">3.2 右值引用（rvalue reference）</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%9b%9b%e7%a7%bb%e5%8a%a8%e8%af%ad%e4%b9%89%e4%b8%8e%e5%8f%b3%e5%80%bc%e5%bc%95%e7%94%a8" aria-label="四、移动语义与右值引用">四、移动语义与右值引用</a></li></ul>
+                        
+                    <li>
+                        <a href="#%e4%ba%94%e5%ae%8c%e7%be%8e%e8%bd%ac%e5%8f%91%e4%b8%8e-stdforward" aria-label="五、完美转发与 std::forward">五、完美转发与 <code>std::forward</code></a><ul>
+                            
+                    <li>
+                        <a href="#%e5%85%ad%e5%b7%a6%e5%80%bc%e5%8f%b3%e5%80%bc%e4%b8%8e-c-%e6%a0%87%e5%87%86%e5%ba%93" aria-label="六、左值、右值与 C&#43;&#43; 标准库">六、左值、右值与 C++ 标准库</a>
+                    </li>
+                </ul>
+                </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>最近写代码，对<strong>左值（lvalue）</strong> 和 <strong>右值（rvalue）</strong> 两个概念感到有些拿不准，总结一下。</p>
+<hr>
+<h3 id="一左值lvalue与右值rvalue的基本定义">一、左值（lvalue）与右值（rvalue）的基本定义<a hidden class="anchor" aria-hidden="true" href="#一左值lvalue与右值rvalue的基本定义">#</a></h3>
+<h4 id="11-左值lvalue">1.1 左值（lvalue）<a hidden class="anchor" aria-hidden="true" href="#11-左值lvalue">#</a></h4>
+<p><strong>左值</strong>是指具有持久内存地址的对象。通俗地讲，左值代表的是可以“被赋值”的对象，它们通常是变量或可以通过引用访问的对象。左值具备持久性，可以通过引用或指针操作，因此它们可以出现在赋值语句的左侧。</p>
+<ul>
+<li>左值拥有明确的内存位置，并且可以重复使用。</li>
+<li>它们通常是标识符（如变量）或对象的引用。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>  <span class="c1">// 变量 a 是左值，它有一个明确的内存地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">a</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>     <span class="c1">// 这里，a 在赋值语句的左侧，它是左值
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="12-右值rvalue">1.2 右值（rvalue）<a hidden class="anchor" aria-hidden="true" href="#12-右值rvalue">#</a></h4>
+<p><strong>右值</strong>是指那些没有持久内存地址的临时值或表达式的结果。它们通常是不能被赋值的，因此不能出现在赋值表达式的左侧。右值的生命周期短暂，通常在表达式求值后便会销毁。</p>
+<ul>
+<li>右值不具备持久性，常常是临时对象或字面常量。</li>
+<li>右值通常出现在表达式的右侧，例如数字常量、函数的返回值或算术表达式的结果。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">+</span> <span class="mi">3</span><span class="p">;</span>  <span class="c1">// 这里的 5 + 3 是右值，它没有持久的内存地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>     <span class="c1">// 42 是字面常量，也是右值
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="二左值与右值的特性对比">二、左值与右值的特性对比<a hidden class="anchor" aria-hidden="true" href="#二左值与右值的特性对比">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>左值（lvalue）</th>
+<th>右值（rvalue）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>持久性</strong></td>
+<td>左值具有持久内存地址，可通过指针或引用访问</td>
+<td>右值是临时对象，通常在表达式求值后销毁</td>
+</tr>
+<tr>
+<td><strong>赋值能力</strong></td>
+<td>左值可以出现在赋值表达式的左侧</td>
+<td>右值不能作为赋值表达式的左侧</td>
+</tr>
+<tr>
+<td><strong>可引用性</strong></td>
+<td>左值可以通过左值引用（<code>T&amp;</code>）来引用</td>
+<td>右值只能通过右值引用（<code>T&amp;&amp;</code>，C++11 引入）引用</td>
+</tr>
+<tr>
+<td><strong>典型示例</strong></td>
+<td>变量、指针、对象引用</td>
+<td>常量、临时对象、表达式的结果</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="三左值与右值在函数参数中的应用">三、左值与右值在函数参数中的应用<a hidden class="anchor" aria-hidden="true" href="#三左值与右值在函数参数中的应用">#</a></h3>
+<h4 id="31-左值引用lvalue-reference">3.1 左值引用（lvalue reference）<a hidden class="anchor" aria-hidden="true" href="#31-左值引用lvalue-reference">#</a></h4>
+<p>C++ 中的左值引用（<code>T&amp;</code>）允许函数通过引用参数操作调用者的对象，这样可以避免对象拷贝，提升效率。通过左值引用，函数可以直接操作左值对象。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">modify</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">x</span> <span class="o">+=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">modify</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>  <span class="c1">// a 是左值，被传递给左值引用参数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在上例中，<code>modify</code> 函数通过引用直接修改了 <code>a</code>，避免了对象拷贝。</p>
+<h4 id="32-右值引用rvalue-reference">3.2 右值引用（rvalue reference）<a hidden class="anchor" aria-hidden="true" href="#32-右值引用rvalue-reference">#</a></h4>
+<p>C++11 引入了右值引用（<code>T&amp;&amp;</code>），允许右值也可以被引用。右值引用的最大应用场景是<strong>移动语义</strong>，即通过移动而不是复制来处理资源，从而优化程序性能，特别是在处理大对象或容器时。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">process</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Processing rvalue: &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">process</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>  <span class="c1">// 5 是右值，可以传递给右值引用参数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在上述代码中，<code>process</code> 函数接受一个右值引用，它可以安全地操作临时对象，避免不必要的拷贝。</p>
+<h3 id="四移动语义与右值引用">四、移动语义与右值引用<a hidden class="anchor" aria-hidden="true" href="#四移动语义与右值引用">#</a></h3>
+<p>移动语义是 C++11 引入的一个重要特性，允许通过 “移动” 而不是 “拷贝” 来传递或返回对象的资源，避免了大量的内存分配和数据拷贝操作，极大地提高了性能。</p>
+<p>在实现移动语义时，右值引用提供了基础支持。通过移动构造函数和移动赋值操作符，程序员可以实现资源从一个对象转移到另一个对象。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyClass</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MyClass</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* 构造函数 */</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MyClass</span><span class="p">(</span><span class="n">MyClass</span><span class="o">&amp;&amp;</span> <span class="n">other</span><span class="p">)</span> <span class="k">noexcept</span> <span class="p">{</span> <span class="cm">/* 移动构造函数 */</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MyClass</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">MyClass</span><span class="o">&amp;&amp;</span> <span class="n">other</span><span class="p">)</span> <span class="k">noexcept</span> <span class="p">{</span> <span class="cm">/* 移动赋值操作符 */</span> <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在移动语义中，资源（如动态分配的内存、文件句柄等）可以从一个对象移动到另一个对象，而不会进行深拷贝，这在处理大数据对象时尤为高效。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;utility&gt;</span><span class="cp"> </span><span class="c1">// std::move
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v1</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v2</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">v1</span><span class="p">);</span> <span class="c1">// v1 的资源被移动到 v2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;v1 size: &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">v1</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  <span class="c1">// v1 现在为空
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;v2 size: &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">v2</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  <span class="c1">// v2 拥有原来 v1 的数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>std::move</code> 将左值显式地转换为右值引用，触发对象的移动语义。上例中，<code>v1</code> 的资源被移动到 <code>v2</code>，而不是通过拷贝来传递。</p>
+<hr>
+<h2 id="五完美转发与-stdforward">五、完美转发与 <code>std::forward</code><a hidden class="anchor" aria-hidden="true" href="#五完美转发与-stdforward">#</a></h2>
+<p>完美转发（perfect forwarding）是 C++11 中另一项重要的功能，它允许函数模板将其参数<strong>完美地</strong>转发给其他函数，保持参数的左值或右值特性。实现完美转发的关键工具是 <code>std::forward</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;utility&gt;</span><span class="cp"> </span><span class="c1">// std::forward
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">arg</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">process</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arg</span><span class="p">));</span> <span class="c1">// 完美转发
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中，<code>wrapper</code> 函数可以将 <code>arg</code> 的左值/右值特性保留并传递给 <code>process</code>，确保调用时不会发生不必要的拷贝或移动操作。</p>
+<hr>
+<h3 id="六左值右值与-c-标准库">六、左值、右值与 C++ 标准库<a hidden class="anchor" aria-hidden="true" href="#六左值右值与-c-标准库">#</a></h3>
+<p>C++ 标准库在许多地方使用了左值和右值引用的概念来优化性能。最常见的例子是 STL 容器，如 <code>std::vector</code>、<code>std::string</code> 等，它们通过移动构造函数和移动赋值操作符来避免不必要的拷贝。</p>
+<p><strong>使用 <code>std::move</code> 和移动语义：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s1</span> <span class="o">=</span> <span class="s">&#34;Hello&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s2</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">s1</span><span class="p">);</span>  <span class="c1">// s1 的内容被移动到 s2
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>此外，<code>std::forward</code> 用于实现完美转发，帮助标准库函数（如 <code>std::bind</code> 和 <code>std::function</code>）保持参数的左右值属性。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/fork%E5%87%BD%E6%95%B0%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>Fork函数的工作原理</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/lock_guard%E4%B8%8Eunique_lock/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>Lock_guard与unique_lock</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

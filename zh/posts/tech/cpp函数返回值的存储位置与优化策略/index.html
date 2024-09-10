@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CPP函数返回值的存储位置与优化策略 | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="不论是那个编程语言，函数返回值是一个极其重要的概念，它不仅影响代码的逻辑，还直接关系到程序的性能。在不同的场景下，函数返回值的处理方式会对程">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/cpp%E5%87%BD%E6%95%B0%E8%BF%94%E5%9B%9E%E5%80%BC%E7%9A%84%E5%AD%98%E5%82%A8%E4%BD%8D%E7%BD%AE%E4%B8%8E%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/cpp%E5%87%BD%E6%95%B0%E8%BF%94%E5%9B%9E%E5%80%BC%E7%9A%84%E5%AD%98%E5%82%A8%E4%BD%8D%E7%BD%AE%E4%B8%8E%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="CPP函数返回值的存储位置与优化策略" />
+<meta property="og:description" content="不论是那个编程语言，函数返回值是一个极其重要的概念，它不仅影响代码的逻辑，还直接关系到程序的性能。在不同的场景下，函数返回值的处理方式会对程" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/cpp%E5%87%BD%E6%95%B0%E8%BF%94%E5%9B%9E%E5%80%BC%E7%9A%84%E5%AD%98%E5%82%A8%E4%BD%8D%E7%BD%AE%E4%B8%8E%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-09-17T15:39:19+08:00" />
+<meta property="article:modified_time" content="2023-09-17T15:39:19+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CPP函数返回值的存储位置与优化策略"/>
+<meta name="twitter:description" content="不论是那个编程语言，函数返回值是一个极其重要的概念，它不仅影响代码的逻辑，还直接关系到程序的性能。在不同的场景下，函数返回值的处理方式会对程"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "CPP函数返回值的存储位置与优化策略",
+      "item": "https://oheyu.github.io/zh/posts/tech/cpp%E5%87%BD%E6%95%B0%E8%BF%94%E5%9B%9E%E5%80%BC%E7%9A%84%E5%AD%98%E5%82%A8%E4%BD%8D%E7%BD%AE%E4%B8%8E%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CPP函数返回值的存储位置与优化策略",
+  "name": "CPP函数返回值的存储位置与优化策略",
+  "description": "不论是那个编程语言，函数返回值是一个极其重要的概念，它不仅影响代码的逻辑，还直接关系到程序的性能。在不同的场景下，函数返回值的处理方式会对程",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\r不论是那个编程语言，函数返回值是一个极其重要的概念，它不仅影响代码的逻辑，还直接关系到程序的性能。在不同的场景下，函数返回值的处理方式会对程序的效率、内存使用以及可维护性产生显著的影响。\n今儿个，列位上雅座，我们来唠一唠 C++ 中函数返回值的不同存储位置、寄存器优化、栈的使用以及如何利用现代 C++ 特性（如移动语义、RVO 等）进行性能优化。\n一、C++ 函数返回值的基本机制 C++ 函数在执行完毕后，可以通过返回值将计算结果传递给调用者。返回值可以是基本数据类型（如 int、float、double）、指针、引用，甚至是自定义的类或结构体对象。如何存储和传递这些返回值，取决于返回值的大小和类型。\n1.1 返回值的存储位置 根据返回值类型和编译器优化策略，函数返回值的存储位置一般有两种选择：\n寄存器（Register）存储：当函数返回值是基本数据类型（如 int、float）或者小型对象时，编译器通常会将返回值存储在寄存器中。寄存器是 CPU 内部的高速存储器，使用寄存器可以显著提高返回值的传递速度。\n1 2 3 int add(int a, int b) { return a + b; } 在这个例子中，返回的 int 值可能直接存储在 CPU 寄存器中，而不会经过内存操作。\n栈（Stack）存储：当返回值是大型对象（如结构体或复杂类对象）时，编译器可能会将返回值存储在栈上。栈是系统为程序分配的内存区域，主要用于存储局部变量和函数调用的返回值。如果返回值太大而不能直接存储在寄存器中，编译器会在栈上分配内存。\n1 2 3 4 5 6 7 8 struct BigStruct { int data[1000]; }; BigStruct createBigStruct() { BigStruct bs; return bs; } 在这个例子中，BigStruct 结构体非常大，编译器可能会将其返回值存储在栈上，以减少寄存器的占用。\n1.2 返回值优化（RVO）和移动语义 在返回大型对象时，频繁的拷贝操作会导致程序性能下降。C++ 提供了多种优化技术来减少不必要的内存操作，其中最常见的是 返回值优化（Return Value Optimization, RVO） 和 移动语义（Move Semantics）。\n返回值优化（RVO）：RVO 是一种编译器优化技术，它允许编译器在函数返回对象时，避免创建临时对象的开销。编译器会直接在调用点构造返回对象，而不是在函数内部先构造再拷贝回调用方。\n1 2 3 BigStruct createBigStruct() { return BigStruct(); // 编译器可能直接在调用点构造对象 } 在这个例子中，返回的 BigStruct 是一个临时对象，编译器可以通过 RVO 在调用点直接构造它，而不会创建中间的临时对象，节省了性能开销。\n移动语义（Move Semantics）：在 C++11 之后，C++ 引入了移动语义，允许对象的资源从一个对象移动到另一个对象，而不是进行深拷贝。这大大减少了内存拷贝的次数，尤其是在函数返回大型对象时。\n1 2 3 4 BigStruct createBigStruct() { BigStruct bs; return std::move(bs); // 使用移动语义，避免不必要的拷贝 } 在这里，std::move 明确告诉编译器可以“移动”对象 bs 的资源而不是复制它，这有效地减少了栈上的内存开销。\n二、引用返回与指针返回的使用 在 C++ 中，函数可以通过值传递、引用传递或指针传递返回结果。其中，引用返回和指针返回的使用能够避免返回值的拷贝开销，提高性能。但它们也存在一些风险，需要谨慎使用。\n1. 引用返回的注意事项 避免返回局部变量的引用：返回局部变量的引用会导致悬挂引用问题，因为局部变量的生命周期在函数结束时结束，返回其引用会指向无效的内存。\n1 2 3 4 int\u0026 invalidFunction() { int x = 10; return x; // 错误：x 是局部变量，函数返回后它的内存无效 } 返回类成员的引用：在类成员函数中，可以返回类成员的引用。但需要注意多线程的访问冲突问题，特别是在多个线程同时访问时。\n1 2 3 4 5 6 class MyClass { private: int value; public: int\u0026 getValue() { return value; } }; const 引用返回：如果不希望调用者修改返回值，可以使用 const 引用返回，提供只读访问。\n1 2 3 const int\u0026 getConstValue() const { return value; } 2. 指针返回的注意事项 指针生命周期：返回指向局部变量的指针同样会导致悬挂指针问题。应避免返回局部变量的指针，除非该变量是动态分配的。\n1 2 3 4 int* invalidFunction() { int x = 10; return \u0026x; // 错误：返回局部变量的地址 } 动态分配内存的指针返回：当函数返回动态分配的内存时，调用者必须负责释放内存，以避免内存泄漏。对于复杂的动态内存管理，可以使用智能指针（如 std::unique_ptr 和 std::shared_ptr）来避免手动管理内存。\n1 2 3 int* allocateMemory() { return new int[100]; // 返回动态分配的内存，调用者负责释放 } 空指针检查：在指针返回时，调用者应始终检查返回的指针是否为 nullptr，以避免访问无效内存导致程序崩溃。\n1 2 3 4 5 6 int* findElement(int* arr, int size, int value) { for (int i = 0; i \u003c size; ++i) { if (arr[i] == value) return \u0026arr[i]; } return nullptr; // 如果没找到，返回空指针 } ",
+  "wordCount" : "1773",
+  "inLanguage": "zh",
+  "datePublished": "2023-09-17T15:39:19+08:00",
+  "dateModified": "2023-09-17T15:39:19+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/cpp%E5%87%BD%E6%95%B0%E8%BF%94%E5%9B%9E%E5%80%BC%E7%9A%84%E5%AD%98%E5%82%A8%E4%BD%8D%E7%BD%AE%E4%B8%8E%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      CPP函数返回值的存储位置与优化策略
+    </h1>
+    <div class="post-meta"><span title='2023-09-17 15:39:19 +0800 CST'>2023-09-17</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80c-%e5%87%bd%e6%95%b0%e8%bf%94%e5%9b%9e%e5%80%bc%e7%9a%84%e5%9f%ba%e6%9c%ac%e6%9c%ba%e5%88%b6" aria-label="一、C&#43;&#43; 函数返回值的基本机制">一、C++ 函数返回值的基本机制</a><ul>
+                            
+                    <li>
+                        <a href="#11-%e8%bf%94%e5%9b%9e%e5%80%bc%e7%9a%84%e5%ad%98%e5%82%a8%e4%bd%8d%e7%bd%ae" aria-label="1.1 返回值的存储位置">1.1 返回值的存储位置</a></li>
+                    <li>
+                        <a href="#12-%e8%bf%94%e5%9b%9e%e5%80%bc%e4%bc%98%e5%8c%96rvo%e5%92%8c%e7%a7%bb%e5%8a%a8%e8%af%ad%e4%b9%89" aria-label="1.2 返回值优化（RVO）和移动语义">1.2 返回值优化（RVO）和移动语义</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%8c%e5%bc%95%e7%94%a8%e8%bf%94%e5%9b%9e%e4%b8%8e%e6%8c%87%e9%92%88%e8%bf%94%e5%9b%9e%e7%9a%84%e4%bd%bf%e7%94%a8" aria-label="二、引用返回与指针返回的使用">二、引用返回与指针返回的使用</a><ul>
+                            
+                    <li>
+                        <a href="#1-%e5%bc%95%e7%94%a8%e8%bf%94%e5%9b%9e%e7%9a%84%e6%b3%a8%e6%84%8f%e4%ba%8b%e9%a1%b9" aria-label="1. 引用返回的注意事项">1. 引用返回的注意事项</a></li>
+                    <li>
+                        <a href="#2-%e6%8c%87%e9%92%88%e8%bf%94%e5%9b%9e%e7%9a%84%e6%b3%a8%e6%84%8f%e4%ba%8b%e9%a1%b9" aria-label="2. 指针返回的注意事项">2. 指针返回的注意事项</a>
+                    </li>
+                </ul>
+                </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>不论是那个编程语言，函数返回值是一个极其重要的概念，它不仅影响代码的逻辑，还直接关系到程序的性能。在不同的场景下，函数返回值的处理方式会对程序的效率、内存使用以及可维护性产生显著的影响。</p>
+<p>今儿个，列位上雅座，我们来唠一唠 C++ 中函数返回值的不同存储位置、寄存器优化、栈的使用以及如何利用现代 C++ 特性（如移动语义、RVO 等）进行性能优化。</p>
+<hr>
+<h3 id="一c-函数返回值的基本机制">一、C++ 函数返回值的基本机制<a hidden class="anchor" aria-hidden="true" href="#一c-函数返回值的基本机制">#</a></h3>
+<p>C++ 函数在执行完毕后，可以通过返回值将计算结果传递给调用者。返回值可以是基本数据类型（如 <code>int</code>、<code>float</code>、<code>double</code>）、指针、引用，甚至是自定义的类或结构体对象。如何存储和传递这些返回值，取决于返回值的大小和类型。</p>
+<h4 id="11-返回值的存储位置">1.1 返回值的存储位置<a hidden class="anchor" aria-hidden="true" href="#11-返回值的存储位置">#</a></h4>
+<p>根据返回值类型和编译器优化策略，函数返回值的存储位置一般有两种选择：</p>
+<ol>
+<li>
+<p><strong>寄存器（Register）存储</strong>：当函数返回值是基本数据类型（如 <code>int</code>、<code>float</code>）或者小型对象时，编译器通常会将返回值存储在寄存器中。寄存器是 CPU 内部的高速存储器，使用寄存器可以显著提高返回值的传递速度。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">add</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中，返回的 <code>int</code> 值可能直接存储在 CPU 寄存器中，而不会经过内存操作。</p>
+</li>
+<li>
+<p><strong>栈（Stack）存储</strong>：当返回值是大型对象（如结构体或复杂类对象）时，编译器可能会将返回值存储在栈上。栈是系统为程序分配的内存区域，主要用于存储局部变量和函数调用的返回值。如果返回值太大而不能直接存储在寄存器中，编译器会在栈上分配内存。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">BigStruct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">data</span><span class="p">[</span><span class="mi">1000</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">BigStruct</span> <span class="nf">createBigStruct</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BigStruct</span> <span class="n">bs</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">bs</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中，<code>BigStruct</code> 结构体非常大，编译器可能会将其返回值存储在栈上，以减少寄存器的占用。</p>
+</li>
+</ol>
+<h4 id="12-返回值优化rvo和移动语义">1.2 返回值优化（RVO）和移动语义<a hidden class="anchor" aria-hidden="true" href="#12-返回值优化rvo和移动语义">#</a></h4>
+<p>在返回大型对象时，频繁的拷贝操作会导致程序性能下降。C++ 提供了多种优化技术来减少不必要的内存操作，其中最常见的是 <strong>返回值优化（Return Value Optimization, RVO）</strong> 和 <strong>移动语义（Move Semantics）</strong>。</p>
+<ol>
+<li>
+<p><strong>返回值优化（RVO）</strong>：RVO 是一种编译器优化技术，它允许编译器在函数返回对象时，避免创建临时对象的开销。编译器会直接在调用点构造返回对象，而不是在函数内部先构造再拷贝回调用方。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">BigStruct</span> <span class="nf">createBigStruct</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">BigStruct</span><span class="p">();</span>  <span class="c1">// 编译器可能直接在调用点构造对象
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中，返回的 <code>BigStruct</code> 是一个临时对象，编译器可以通过 RVO 在调用点直接构造它，而不会创建中间的临时对象，节省了性能开销。</p>
+</li>
+<li>
+<p><strong>移动语义（Move Semantics）</strong>：在 C++11 之后，C++ 引入了移动语义，允许对象的资源从一个对象移动到另一个对象，而不是进行深拷贝。这大大减少了内存拷贝的次数，尤其是在函数返回大型对象时。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">BigStruct</span> <span class="nf">createBigStruct</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BigStruct</span> <span class="n">bs</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">bs</span><span class="p">);</span>  <span class="c1">// 使用移动语义，避免不必要的拷贝
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这里，<code>std::move</code> 明确告诉编译器可以“移动”对象 <code>bs</code> 的资源而不是复制它，这有效地减少了栈上的内存开销。</p>
+</li>
+</ol>
+<hr>
+<h3 id="二引用返回与指针返回的使用">二、引用返回与指针返回的使用<a hidden class="anchor" aria-hidden="true" href="#二引用返回与指针返回的使用">#</a></h3>
+<p>在 C++ 中，函数可以通过值传递、引用传递或指针传递返回结果。其中，引用返回和指针返回的使用能够避免返回值的拷贝开销，提高性能。但它们也存在一些风险，需要谨慎使用。</p>
+<h4 id="1-引用返回的注意事项">1. 引用返回的注意事项<a hidden class="anchor" aria-hidden="true" href="#1-引用返回的注意事项">#</a></h4>
+<ul>
+<li>
+<p><strong>避免返回局部变量的引用</strong>：返回局部变量的引用会导致悬挂引用问题，因为局部变量的生命周期在函数结束时结束，返回其引用会指向无效的内存。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span><span class="o">&amp;</span> <span class="n">invalidFunction</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">x</span><span class="p">;</span>  <span class="c1">// 错误：x 是局部变量，函数返回后它的内存无效
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p><strong>返回类成员的引用</strong>：在类成员函数中，可以返回类成员的引用。但需要注意多线程的访问冲突问题，特别是在多个线程同时访问时。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyClass</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">private</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span><span class="o">&amp;</span> <span class="n">getValue</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">value</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p><strong>const 引用返回</strong>：如果不希望调用者修改返回值，可以使用 <code>const</code> 引用返回，提供只读访问。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">getConstValue</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<h4 id="2-指针返回的注意事项">2. 指针返回的注意事项<a hidden class="anchor" aria-hidden="true" href="#2-指针返回的注意事项">#</a></h4>
+<ul>
+<li>
+<p><strong>指针生命周期</strong>：返回指向局部变量的指针同样会导致悬挂指针问题。应避免返回局部变量的指针，除非该变量是动态分配的。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span><span class="o">*</span> <span class="nf">invalidFunction</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>  <span class="c1">// 错误：返回局部变量的地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p><strong>动态分配内存的指针返回</strong>：当函数返回动态分配的内存时，调用者必须负责释放内存，以避免内存泄漏。对于复杂的动态内存管理，可以使用智能指针（如 <code>std::unique_ptr</code> 和 <code>std::shared_ptr</code>）来避免手动管理内存。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span><span class="o">*</span> <span class="nf">allocateMemory</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="k">new</span> <span class="kt">int</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>  <span class="c1">// 返回动态分配的内存，调用者负责释放
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p><strong>空指针检查</strong>：在指针返回时，调用者应始终检查返回的指针是否为 <code>nullptr</code>，以避免访问无效内存导致程序崩溃。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span><span class="o">*</span> <span class="nf">findElement</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">arr</span><span class="p">,</span> <span class="kt">int</span> <span class="n">size</span><span class="p">,</span> <span class="kt">int</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">)</span> <span class="k">return</span> <span class="o">&amp;</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span>  <span class="c1">// 如果没找到，返回空指针
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/sizeof%E8%BF%90%E7%AE%97%E7%AC%A6/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>Sizeof运算符</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/ulimit%E8%B5%84%E6%BA%90%E9%99%90%E5%88%B6%E4%B8%8E%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>Ulimit：资源限制与性能优化</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

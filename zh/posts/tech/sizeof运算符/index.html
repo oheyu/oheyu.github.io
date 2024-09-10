@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Sizeof运算符 | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="sizeof 运算符是一个极为常用且强大的工具。它能够在编译时计算任意数据类型或对象在内存中占用的字节数。 一、什么是 sizeof 运算符？ sizeof 是一个内置于 C&#43;&#43; 的运算符，">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/sizeof%E8%BF%90%E7%AE%97%E7%AC%A6/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/sizeof%E8%BF%90%E7%AE%97%E7%AC%A6/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="Sizeof运算符" />
+<meta property="og:description" content="sizeof 运算符是一个极为常用且强大的工具。它能够在编译时计算任意数据类型或对象在内存中占用的字节数。 一、什么是 sizeof 运算符？ sizeof 是一个内置于 C&#43;&#43; 的运算符，" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/sizeof%E8%BF%90%E7%AE%97%E7%AC%A6/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-09-19T16:00:43+08:00" />
+<meta property="article:modified_time" content="2023-09-19T16:00:43+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Sizeof运算符"/>
+<meta name="twitter:description" content="sizeof 运算符是一个极为常用且强大的工具。它能够在编译时计算任意数据类型或对象在内存中占用的字节数。 一、什么是 sizeof 运算符？ sizeof 是一个内置于 C&#43;&#43; 的运算符，"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Sizeof运算符",
+      "item": "https://oheyu.github.io/zh/posts/tech/sizeof%E8%BF%90%E7%AE%97%E7%AC%A6/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Sizeof运算符",
+  "name": "Sizeof运算符",
+  "description": "sizeof 运算符是一个极为常用且强大的工具。它能够在编译时计算任意数据类型或对象在内存中占用的字节数。 一、什么是 sizeof 运算符？ sizeof 是一个内置于 C++ 的运算符，",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\rsizeof 运算符是一个极为常用且强大的工具。它能够在编译时计算任意数据类型或对象在内存中占用的字节数。\n一、什么是 sizeof 运算符？ sizeof 是一个内置于 C++ 的运算符，用于获取数据类型或对象在内存中所占的字节数。它在编译时计算结果，意味着无需等待运行时，就能确定某一类型或对象的大小。这一特性使得 sizeof 在系统编程、内存管理及平台无关的编程中扮演了重要角色。\n二、sizeof 运算符的使用场景 2.1 基本数据类型 C++ 提供了多个基本数据类型（如 int、char、float、double 等），不同的平台可能为相同的数据类型分配不同大小的内存。通过 sizeof，我们可以在编译时确定数据类型在当前平台上的大小。\n1 2 3 std::cout \u003c\u003c \"Size of int: \" \u003c\u003c sizeof(int) \u003c\u003c \" bytes\" \u003c\u003c std::endl; std::cout \u003c\u003c \"Size of char: \" \u003c\u003c sizeof(char) \u003c\u003c \" bytes\" \u003c\u003c std::endl; std::cout \u003c\u003c \"Size of double: \" \u003c\u003c sizeof(double) \u003c\u003c \" bytes\" \u003c\u003c std::endl; 不出幺蛾子的话，在 32 位系统上，int 通常占用 4 个字节，而 double 可能占用 8 个字节。不同编译器和平台的差异使得 sizeof 成为编写可移植代码的关键工具。\n2.2 用户定义的类型（结构体和类） sizeof 还可以用于计算用户定义类型（如 struct、class、union）的大小。这在系统编程中尤为重要，帮助我们理解复杂数据结构在内存中的布局。需要注意的是，结构体的大小可能会因编译器的内存对齐（padding）策略而变化。\n1 2 3 4 5 6 7 struct MyStruct { int a; char b; double c; }; std::cout \u003c\u003c \"Size of MyStruct: \" \u003c\u003c sizeof(MyStruct) \u003c\u003c \" bytes\" \u003c\u003c std::endl; 内存对齐和填充：在某些系统上，为了提高内存访问效率，编译器可能会在结构体的成员之间插入填充字节（padding）。这使得结构体的实际大小通常大于其成员的字节和。了解这一机制对优化数据结构在系统内存中的布局尤为重要。\n2.3 数组 使用 sizeof 可以获取数组的总大小（即元素大小乘以数组元素个数）。但必须注意，sizeof 只能返回静态数组的总大小。如果数组是动态分配的，sizeof 只会返回指针的大小，而不是数组的大小。\n1 2 int arr[10]; std::cout \u003c\u003c \"Size of arr: \" \u003c\u003c sizeof(arr) \u003c\u003c \" bytes\" \u003c\u003c std::endl; 重要注意：如果数组是通过指针传递给函数的，sizeof 返回的将是指针的大小，而不是数组的大小。这一点对于处理动态内存分配尤为重要。\n2.4 指针 sizeof 可以用于指针类型，返回指针本身的大小，而不是指针所指向的数据类型的大小。通常在 32 位系统上，指针大小为 4 字节；而在 64 位系统上，指针大小为 8 字节。\n1 2 int* ptr; std::cout \u003c\u003c \"Size of pointer: \" \u003c\u003c sizeof(ptr) \u003c\u003c \" bytes\" \u003c\u003c std::endl; 无论指针指向的是什么类型的数据，sizeof 返回的始终是指针本身的大小。这在动态内存分配中，尤其是多级指针的使用时，需要特别注意。\n2.5 字符串字面量 C++ 支持使用 sizeof 获取字符串字面量的大小，这包括字符串本身的字符数以及末尾的空字符 \\0。\n1 std::cout \u003c\u003c \"Size of string literal 'Hello': \" \u003c\u003c sizeof(\"Hello\") \u003c\u003c \" bytes\" \u003c\u003c std::endl; // 输出 6 在这个例子中，sizeof(\"Hello\") 返回的大小为 6，因为它包括了末尾的空字符 \\0。\n三、sizeof 运算符的限制 尽管 sizeof 是一个非常强大的工具，但它并非在所有场景下都适用。在某些特殊情况下，使用 sizeof 会产生意料之外的结果。\n3.1 动态分配的数组 对于动态分配的数组，sizeof 返回的仅仅是指针的大小，而不是数组的大小。这是因为 sizeof 无法在编译时确定堆上分配的数组的大小。\n1 2 3 int* arr = new int[10]; std::cout \u003c\u003c \"Size of arr: \" \u003c\u003c sizeof(arr) \u003c\u003c \" bytes\" \u003c\u003c std::endl; // 返回指针的大小，而不是数组的大小 delete[] arr; 解决方案：如果需要获取动态数组的大小，可以通过额外的变量存储数组的长度，或使用 C++ 提供的标准容器（如 std::vector），它们可以在运行时管理数组的大小。\n3.2 不完全类型 sizeof 不能用于不完全类型（Incomplete Type），如前向声明的类或结构体。这是因为编译器无法知道不完全类型的内存布局。\n1 2 3 struct MyStruct; // 前向声明 // std::cout \u003c\u003c sizeof(MyStruct) \u003c\u003c std::endl; // 错误，MyStruct 是不完全类型 尝试对不完全类型使用 sizeof 会导致编译错误，因此必须确保类型在使用 sizeof 之前已经完全定义。\n3.3 函数 sizeof 运算符不能用于函数类型。函数本质上是指向内存中的一段指令，sizeof 只能操作数据类型或对象，而不能直接获取函数的大小。\n1 2 3 void myFunction() {} // std::cout \u003c\u003c sizeof(myFunction) \u003c\u003c std::endl; // 错误，不能对函数使用 sizeof 四、特殊情况：虚函数表指针的大小 对于包含虚函数的类，编译器会在类的对象中添加一个指向虚函数表的指针（vptr）。这个指针占用了内存，且 sizeof 计算的对象大小包含了 vptr，开发者也无法直接访问或操作它的大小。\n1 2 3 4 5 class Base { virtual void func() {} }; std::cout \u003c\u003c \"Size of Base: \" \u003c\u003c sizeof(Base) \u003c\u003c \" bytes\" \u003c\u003c std::endl; 在这个例子中，sizeof(Base) 返回的是包含虚函数表指针的对象大小。\n五、sizeof 的其他最佳实践 在编译时确定大小：sizeof 在编译时执行，因此其结果在运行时是不可变的。这意味着 sizeof 可以用于数组声明、静态断言和模板元编程中，提供了极大的灵活性和性能优化。\n与 decltype 结合使用：在 C++11 及更高版本中，sizeof 可以与 decltype 结合使用，以确保类型的安全性。例如：\n1 2 int x = 5; std::cout \u003c\u003c \"Size of x: \" \u003c\u003c sizeof(decltype(x)) \u003c\u003c \" bytes\" \u003c\u003c std::endl; 括号使用：对于类型名，必须使用括号，如 sizeof(int)；而对于变量，括号是可选的，如 sizeof x 和 sizeof(x) 都是合法的。\n",
+  "wordCount" : "1964",
+  "inLanguage": "zh",
+  "datePublished": "2023-09-19T16:00:43+08:00",
+  "dateModified": "2023-09-19T16:00:43+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/sizeof%E8%BF%90%E7%AE%97%E7%AC%A6/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Sizeof运算符
+    </h1>
+    <div class="post-meta"><span title='2023-09-19 16:00:43 +0800 CST'>2023-09-19</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e4%bb%80%e4%b9%88%e6%98%af-sizeof-%e8%bf%90%e7%ae%97%e7%ac%a6" aria-label="一、什么是 sizeof 运算符？">一、什么是 <code>sizeof</code> 运算符？</a></li>
+                    <li>
+                        <a href="#%e4%ba%8csizeof-%e8%bf%90%e7%ae%97%e7%ac%a6%e7%9a%84%e4%bd%bf%e7%94%a8%e5%9c%ba%e6%99%af" aria-label="二、sizeof 运算符的使用场景">二、<code>sizeof</code> 运算符的使用场景</a><ul>
+                            
+                    <li>
+                        <a href="#21-%e5%9f%ba%e6%9c%ac%e6%95%b0%e6%8d%ae%e7%b1%bb%e5%9e%8b" aria-label="2.1 基本数据类型">2.1 基本数据类型</a></li>
+                    <li>
+                        <a href="#22-%e7%94%a8%e6%88%b7%e5%ae%9a%e4%b9%89%e7%9a%84%e7%b1%bb%e5%9e%8b%e7%bb%93%e6%9e%84%e4%bd%93%e5%92%8c%e7%b1%bb" aria-label="2.2 用户定义的类型（结构体和类）">2.2 用户定义的类型（结构体和类）</a></li>
+                    <li>
+                        <a href="#23-%e6%95%b0%e7%bb%84" aria-label="2.3 数组">2.3 数组</a></li>
+                    <li>
+                        <a href="#24-%e6%8c%87%e9%92%88" aria-label="2.4 指针">2.4 指针</a></li>
+                    <li>
+                        <a href="#25-%e5%ad%97%e7%ac%a6%e4%b8%b2%e5%ad%97%e9%9d%a2%e9%87%8f" aria-label="2.5 字符串字面量">2.5 字符串字面量</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%89sizeof-%e8%bf%90%e7%ae%97%e7%ac%a6%e7%9a%84%e9%99%90%e5%88%b6" aria-label="三、sizeof 运算符的限制">三、<code>sizeof</code> 运算符的限制</a><ul>
+                            
+                    <li>
+                        <a href="#31-%e5%8a%a8%e6%80%81%e5%88%86%e9%85%8d%e7%9a%84%e6%95%b0%e7%bb%84" aria-label="3.1 动态分配的数组">3.1 动态分配的数组</a></li>
+                    <li>
+                        <a href="#32-%e4%b8%8d%e5%ae%8c%e5%85%a8%e7%b1%bb%e5%9e%8b" aria-label="3.2 不完全类型">3.2 不完全类型</a></li>
+                    <li>
+                        <a href="#33-%e5%87%bd%e6%95%b0" aria-label="3.3 函数">3.3 函数</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%9b%9b%e7%89%b9%e6%ae%8a%e6%83%85%e5%86%b5%e8%99%9a%e5%87%bd%e6%95%b0%e8%a1%a8%e6%8c%87%e9%92%88%e7%9a%84%e5%a4%a7%e5%b0%8f" aria-label="四、特殊情况：虚函数表指针的大小">四、特殊情况：虚函数表指针的大小</a></li>
+                    <li>
+                        <a href="#%e4%ba%94sizeof-%e7%9a%84%e5%85%b6%e4%bb%96%e6%9c%80%e4%bd%b3%e5%ae%9e%e8%b7%b5" aria-label="五、sizeof 的其他最佳实践">五、<code>sizeof</code> 的其他最佳实践</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p><code>sizeof</code> 运算符是一个极为常用且强大的工具。它能够在编译时计算任意数据类型或对象在内存中占用的字节数。</p>
+<hr>
+<h3 id="一什么是-sizeof-运算符">一、什么是 <code>sizeof</code> 运算符？<a hidden class="anchor" aria-hidden="true" href="#一什么是-sizeof-运算符">#</a></h3>
+<p><code>sizeof</code> 是一个内置于 C++ 的运算符，用于获取数据类型或对象在内存中所占的字节数。它在<strong>编译</strong>时计算结果，意味着无需等待运行时，就能确定某一类型或对象的大小。这一特性使得 <code>sizeof</code> 在系统编程、内存管理及平台无关的编程中扮演了重要角色。</p>
+<hr>
+<h3 id="二sizeof-运算符的使用场景">二、<code>sizeof</code> 运算符的使用场景<a hidden class="anchor" aria-hidden="true" href="#二sizeof-运算符的使用场景">#</a></h3>
+<h4 id="21-基本数据类型">2.1 基本数据类型<a hidden class="anchor" aria-hidden="true" href="#21-基本数据类型">#</a></h4>
+<p>C++ 提供了多个基本数据类型（如 <code>int</code>、<code>char</code>、<code>float</code>、<code>double</code> 等），不同的平台可能为相同的数据类型分配不同大小的内存。通过 <code>sizeof</code>，我们可以在编译时确定数据类型在当前平台上的大小。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Size of int: &#34;</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; bytes&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Size of char: &#34;</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; bytes&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Size of double: &#34;</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">double</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; bytes&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>不出幺蛾子的话，在 32 位系统上，<code>int</code> 通常占用 4 个字节，而 <code>double</code> 可能占用 8 个字节。不同编译器和平台的差异使得 <code>sizeof</code> 成为编写可移植代码的关键工具。</p>
+<h4 id="22-用户定义的类型结构体和类">2.2 用户定义的类型（结构体和类）<a hidden class="anchor" aria-hidden="true" href="#22-用户定义的类型结构体和类">#</a></h4>
+<p><code>sizeof</code> 还可以用于计算用户定义类型（如 <code>struct</code>、<code>class</code>、<code>union</code>）的大小。这在系统编程中尤为重要，帮助我们理解复杂数据结构在内存中的布局。需要注意的是，结构体的大小可能会因编译器的内存对齐（padding）策略而变化。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">MyStruct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">a</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">double</span> <span class="n">c</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Size of MyStruct: &#34;</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">MyStruct</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; bytes&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>内存对齐和填充</strong>：在某些系统上，为了提高内存访问效率，编译器可能会在结构体的成员之间插入填充字节（padding）。这使得结构体的实际大小通常大于其成员的字节和。了解这一机制对优化数据结构在系统内存中的布局尤为重要。</p>
+<h4 id="23-数组">2.3 数组<a hidden class="anchor" aria-hidden="true" href="#23-数组">#</a></h4>
+<p>使用 <code>sizeof</code> 可以获取数组的总大小（即元素大小乘以数组元素个数）。但必须注意，<code>sizeof</code> 只能返回<strong>静态数组</strong>的总大小。如果数组是动态分配的，<code>sizeof</code> 只会返回指针的大小，而不是数组的大小。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">arr</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Size of arr: &#34;</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; bytes&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>重要注意</strong>：如果数组是通过指针传递给函数的，<code>sizeof</code> 返回的将是指针的大小，而不是数组的大小。这一点对于处理动态内存分配尤为重要。</p>
+<h4 id="24-指针">2.4 指针<a hidden class="anchor" aria-hidden="true" href="#24-指针">#</a></h4>
+<p><code>sizeof</code> 可以用于指针类型，返回指针本身的大小，而不是指针所指向的数据类型的大小。通常在 32 位系统上，指针大小为 4 字节；而在 64 位系统上，指针大小为 8 字节。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span><span class="o">*</span> <span class="n">ptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Size of pointer: &#34;</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ptr</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; bytes&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>无论指针指向的是什么类型的数据，<code>sizeof</code> 返回的始终是指针本身的大小。这在动态内存分配中，尤其是多级指针的使用时，需要特别注意。</p>
+<h4 id="25-字符串字面量">2.5 字符串字面量<a hidden class="anchor" aria-hidden="true" href="#25-字符串字面量">#</a></h4>
+<p>C++ 支持使用 <code>sizeof</code> 获取字符串字面量的大小，这包括字符串本身的字符数以及末尾的空字符 <code>\0</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Size of string literal &#39;Hello&#39;: &#34;</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="s">&#34;Hello&#34;</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; bytes&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="c1">// 输出 6
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中，<code>sizeof(&quot;Hello&quot;)</code> 返回的大小为 6，因为它包括了末尾的空字符 <code>\0</code>。</p>
+<hr>
+<h3 id="三sizeof-运算符的限制">三、<code>sizeof</code> 运算符的限制<a hidden class="anchor" aria-hidden="true" href="#三sizeof-运算符的限制">#</a></h3>
+<p>尽管 <code>sizeof</code> 是一个非常强大的工具，但它并非在所有场景下都适用。在某些特殊情况下，使用 <code>sizeof</code> 会产生意料之外的结果。</p>
+<h4 id="31-动态分配的数组">3.1 动态分配的数组<a hidden class="anchor" aria-hidden="true" href="#31-动态分配的数组">#</a></h4>
+<p>对于动态分配的数组，<code>sizeof</code> 返回的仅仅是指针的大小，而不是数组的大小。这是因为 <code>sizeof</code> 无法在编译时确定堆上分配的数组的大小。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span><span class="o">*</span> <span class="n">arr</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Size of arr: &#34;</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; bytes&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="c1">// 返回指针的大小，而不是数组的大小
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">delete</span><span class="p">[]</span> <span class="n">arr</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>解决方案</strong>：如果需要获取动态数组的大小，可以通过额外的变量存储数组的长度，或使用 C++ 提供的标准容器（如 <code>std::vector</code>），它们可以在运行时管理数组的大小。</p>
+<h4 id="32-不完全类型">3.2 不完全类型<a hidden class="anchor" aria-hidden="true" href="#32-不完全类型">#</a></h4>
+<p><code>sizeof</code> 不能用于不完全类型（Incomplete Type），如前向声明的类或结构体。这是因为编译器无法知道不完全类型的内存布局。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">MyStruct</span><span class="p">;</span> <span class="c1">// 前向声明
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// std::cout &lt;&lt; sizeof(MyStruct) &lt;&lt; std::endl; // 错误，MyStruct 是不完全类型
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>尝试对不完全类型使用 <code>sizeof</code> 会导致编译错误，因此必须确保类型在使用 <code>sizeof</code> 之前已经完全定义。</p>
+<h4 id="33-函数">3.3 函数<a hidden class="anchor" aria-hidden="true" href="#33-函数">#</a></h4>
+<p><code>sizeof</code> 运算符不能用于函数类型。函数本质上是指向内存中的一段指令，<code>sizeof</code> 只能操作数据类型或对象，而不能直接获取函数的大小。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">myFunction</span><span class="p">()</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// std::cout &lt;&lt; sizeof(myFunction) &lt;&lt; std::endl; // 错误，不能对函数使用 sizeof
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="四特殊情况虚函数表指针的大小">四、特殊情况：虚函数表指针的大小<a hidden class="anchor" aria-hidden="true" href="#四特殊情况虚函数表指针的大小">#</a></h3>
+<p>对于包含虚函数的类，编译器会在类的对象中添加一个指向虚函数表的指针（vptr）。这个指针占用了内存，且 <code>sizeof</code> 计算的对象大小包含了 vptr，开发者也无法直接访问或操作它的大小。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Base</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">func</span><span class="p">()</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Size of Base: &#34;</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Base</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; bytes&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中，<code>sizeof(Base)</code> 返回的是包含虚函数表指针的对象大小。</p>
+<hr>
+<h3 id="五sizeof-的其他最佳实践">五、<code>sizeof</code> 的其他最佳实践<a hidden class="anchor" aria-hidden="true" href="#五sizeof-的其他最佳实践">#</a></h3>
+<ul>
+<li>
+<p><strong>在编译时确定大小</strong>：<code>sizeof</code> 在编译时执行，因此其结果在运行时是不可变的。这意味着 <code>sizeof</code> 可以用于数组声明、静态断言和模板元编程中，提供了极大的灵活性和性能优化。</p>
+</li>
+<li>
+<p><strong>与 <code>decltype</code> 结合使用</strong>：在 C++11 及更高版本中，<code>sizeof</code> 可以与 <code>decltype</code> 结合使用，以确保类型的安全性。例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Size of x: &#34;</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; bytes&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p><strong>括号使用</strong>：对于类型名，必须使用括号，如 <code>sizeof(int)</code>；而对于变量，括号是可选的，如 <code>sizeof x</code> 和 <code>sizeof(x)</code> 都是合法的。</p>
+</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84const%E4%B8%8Econstexpr/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>CPP中的const与constexpr</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/cpp%E5%87%BD%E6%95%B0%E8%BF%94%E5%9B%9E%E5%80%BC%E7%9A%84%E5%AD%98%E5%82%A8%E4%BD%8D%E7%BD%AE%E4%B8%8E%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>CPP函数返回值的存储位置与优化策略</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
