@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CPP中的函数适配器 | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="C&#43;&#43; 中，通用的函数适配器 std::bind 是一个强大而灵活的工具。它允许将可调用对象及其参数进行绑定，并生成一个新的可调用对象。在涉及回调机制、延迟函数执行、">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0%E9%80%82%E9%85%8D%E5%99%A8/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0%E9%80%82%E9%85%8D%E5%99%A8/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="CPP中的函数适配器" />
+<meta property="og:description" content="C&#43;&#43; 中，通用的函数适配器 std::bind 是一个强大而灵活的工具。它允许将可调用对象及其参数进行绑定，并生成一个新的可调用对象。在涉及回调机制、延迟函数执行、" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0%E9%80%82%E9%85%8D%E5%99%A8/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-08-25T16:40:32+08:00" />
+<meta property="article:modified_time" content="2024-08-25T16:40:32+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CPP中的函数适配器"/>
+<meta name="twitter:description" content="C&#43;&#43; 中，通用的函数适配器 std::bind 是一个强大而灵活的工具。它允许将可调用对象及其参数进行绑定，并生成一个新的可调用对象。在涉及回调机制、延迟函数执行、"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "CPP中的函数适配器",
+      "item": "https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0%E9%80%82%E9%85%8D%E5%99%A8/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CPP中的函数适配器",
+  "name": "CPP中的函数适配器",
+  "description": "C++ 中，通用的函数适配器 std::bind 是一个强大而灵活的工具。它允许将可调用对象及其参数进行绑定，并生成一个新的可调用对象。在涉及回调机制、延迟函数执行、",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\rC++ 中，通用的函数适配器 std::bind 是一个强大而灵活的工具。它允许将可调用对象及其参数进行绑定，并生成一个新的可调用对象。在涉及回调机制、延迟函数执行、函数参数部分绑定等场景中，std::bind 的作用尤为突出。\n一、什么是 std::bind？ std::bind 是 C++ 标准库中的一个模板函数，用来将可调用对象（如普通函数、成员函数、Lambda 函数、仿函数等）与参数绑定在一起，生成一个新的函数对象或 std::function 对象。\n其核心函数原型如下：\n1 2 template\u003c class Fx, class... Args \u003e function\u003c\u003e bind(Fx\u0026\u0026 fx, Args\u0026\u0026... args); Fx：可调用对象的类型，可以是普通函数、成员函数、Lambda 表达式、仿函数，甚至是另一个 std::function 对象。 Args：可变参数模板，表示要绑定的参数，可以是值、引用或占位符 std::placeholders::_n。 返回值：std::bind 返回一个新的可调用对象，通常为 std::function 类型的实例，可以像调用普通函数一样使用。\n二、std::bind 的基本用法 2.1 普通函数的绑定 普通函数是 std::bind 支持的最基本的可调用对象。通过 std::bind，我们可以将部分参数绑定，从而生成一个新的函数对象。\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 #include #include void show(int bh, const std::string\u0026 message) { std::cout \u003c\u003c \"编号 \" \u003c\u003c bh \u003c\u003c \"：\" \u003c\u003c message \u003c\u003c std::endl; } int main() { using namespace std::placeholders; // 绑定普通函数，生成一个新的可调用对象 std::function\u003cvoid(int, const std::string\u0026)\u003e fn1 = std::bind(show, _1, _2); fn1(1, \"我是一只傻傻鸟。\"); // 调用绑定后的函数对象 // 调整参数顺序的绑定 std::function\u003cvoid(const std::string\u0026, int)\u003e fn2 = std::bind(show, _2, _1); fn2(\"我是一只傻傻鸟。\", 2); // 交换参数位置后调用 } 在这个例子中：\n_1 和 _2 是占位符，表示我们可以在调用 fn1 和 fn2 时指定这些参数。 std::bind 返回了一个新的函数对象 fn1 和 fn2，它们可以接受相应的参数并调用原函数 show。 三、支持多种可调用对象 std::bind 可以绑定多种类型的可调用对象，包括普通函数、成员函数、Lambda 表达式、仿函数等。\n3.1 绑定静态成员函数 静态成员函数的本质与普通函数类似，因此可以直接通过 std::bind 进行绑定。\n1 2 3 4 5 6 7 8 9 10 11 12 struct AA { static void show(int bh, const std::string\u0026 message) { std::cout \u003c\u003c \"编号 \" \u003c\u003c bh \u003c\u003c \"：\" \u003c\u003c message \u003c\u003c std::endl; } }; int main() { using namespace std::placeholders; std::function\u003cvoid(int, const std::string\u0026)\u003e fn3 = std::bind(AA::show, _1, _2); fn3(2, \"我是一只傻傻鸟。\"); } 3.2 绑定仿函数 仿函数（即重载了 operator() 的类）也可以通过 std::bind 进行绑定。仿函数常用于自定义函数对象或策略模式。\n1 2 3 4 5 6 7 8 9 10 11 12 13 struct BB { void operator()(int bh, const std::string\u0026 message) { std::cout \u003c\u003c \"编号 \" \u003c\u003c bh \u003c\u003c \"：\" \u003c\u003c message \u003c\u003c std::endl; } }; int main() { using namespace std::placeholders; BB bb; std::function\u003cvoid(int, const std::string\u0026)\u003e fn4 = std::bind(bb, _1, _2); fn4(3, \"我是一只傻傻鸟。\"); } 3.3 绑定 Lambda 表达式 Lambda 表达式是 C++11 引入的一种轻量级可调用对象，也可以通过 std::bind 进行部分参数绑定。\n1 2 3 4 5 6 7 8 int main() { auto lambda = [](int bh, const std::string\u0026 message) { std::cout \u003c\u003c \"编号 \" \u003c\u003c bh \u003c\u003c \"：\" \u003c\u003c message \u003c\u003c std::endl; }; std::function\u003cvoid(int, const std::string\u0026)\u003e fn5 = std::bind(lambda, std::placeholders::_1, std::placeholders::_2); fn5(4, \"我是一只傻傻鸟。\"); } 3.4 绑定类的非静态成员函数 绑定非静态成员函数时，必须传递类实例的指针或引用，确保调用时有具体的对象来操作。\n1 2 3 4 5 6 7 8 9 10 11 struct CC { void show(int bh, const std::string\u0026 message) { std::cout \u003c\u003c \"编号 \" \u003c\u003c bh \u003c\u003c \"：\" \u003c\u003c message \u003c\u003c std::endl; } }; int main() { CC cc; std::function\u003cvoid(int, const std::string\u0026)\u003e fn6 = std::bind(\u0026CC::show, \u0026cc, std::placeholders::_1, std::placeholders::_2); fn6(5, \"我是一只傻傻鸟。\"); } 在绑定非静态成员函数时，\u0026CC::show 表示成员函数指针，而 \u0026cc 表示该成员函数操作的实例。\n3.5 绑定可转换为函数指针的类对象 通过类型转换操作符，类的实例也可以被转换为函数指针，从而通过 std::bind 进行绑定。\n1 2 3 4 5 6 7 8 9 10 11 12 struct DD { using Fun = void (*)(int, const std::string\u0026); operator Fun() const { return show; } }; int main() { DD dd; std::function\u003cvoid(int, const std::string\u0026)\u003e fn7 = std::bind(dd, std::placeholders::_1, std::placeholders::_2); fn7(6, \"我是一只傻傻鸟。\"); } 四、std::bind 的参数占位符与参数绑定 在使用 std::bind 进行绑定时，我们可以选择哪些参数在绑定时固定，哪些参数在调用时动态传入。这里需要使用 std::placeholders::_n 占位符。\n_1, _2, _3 等占位符用于表示调用时的参数。 非占位符参数将在绑定时固定。 1 2 3 4 5 6 7 int main() { using namespace std::placeholders; // 将第一个参数固定为 3，只需传递剩余的参数 std::function\u003cvoid(const std::string\u0026)\u003e fn8 = std::bind(show, 3, _1); fn8(\"我是一只傻傻鸟。\"); } 五、总结 std::bind 是 C++ 中极其强大的函数适配器，它通过绑定可调用对象及其参数生成新的函数对象，从而提供了灵活的参数绑定和调用方式。无论是处理普通函数、成员函数，还是仿函数和 Lambda 表达式，std::bind 都能够简化代码并提高可读性。理解 std::bind 的用法，能够帮助开发者编写更为简洁和通用的代码，尤其是在需要延迟执行、回调函数或函数适配器的场景中。\n",
+  "wordCount" : "1774",
+  "inLanguage": "zh",
+  "datePublished": "2024-08-25T16:40:32+08:00",
+  "dateModified": "2024-08-25T16:40:32+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0%E9%80%82%E9%85%8D%E5%99%A8/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      CPP中的函数适配器
+    </h1>
+    <div class="post-meta"><span title='2024-08-25 16:40:32 +0800 CST'>2024-08-25</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e4%bb%80%e4%b9%88%e6%98%af-stdbind" aria-label="一、什么是 std::bind？">一、什么是 <code>std::bind</code>？</a></li>
+                    <li>
+                        <a href="#%e4%ba%8cstdbind-%e7%9a%84%e5%9f%ba%e6%9c%ac%e7%94%a8%e6%b3%95" aria-label="二、std::bind 的基本用法">二、<code>std::bind</code> 的基本用法</a><ul>
+                            
+                    <li>
+                        <a href="#21-%e6%99%ae%e9%80%9a%e5%87%bd%e6%95%b0%e7%9a%84%e7%bb%91%e5%ae%9a" aria-label="2.1 普通函数的绑定">2.1 普通函数的绑定</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%89%e6%94%af%e6%8c%81%e5%a4%9a%e7%a7%8d%e5%8f%af%e8%b0%83%e7%94%a8%e5%af%b9%e8%b1%a1" aria-label="三、支持多种可调用对象">三、支持多种可调用对象</a><ul>
+                            
+                    <li>
+                        <a href="#31-%e7%bb%91%e5%ae%9a%e9%9d%99%e6%80%81%e6%88%90%e5%91%98%e5%87%bd%e6%95%b0" aria-label="3.1 绑定静态成员函数">3.1 绑定静态成员函数</a></li>
+                    <li>
+                        <a href="#32-%e7%bb%91%e5%ae%9a%e4%bb%bf%e5%87%bd%e6%95%b0" aria-label="3.2 绑定仿函数">3.2 绑定仿函数</a></li>
+                    <li>
+                        <a href="#33-%e7%bb%91%e5%ae%9a-lambda-%e8%a1%a8%e8%be%be%e5%bc%8f" aria-label="3.3 绑定 Lambda 表达式">3.3 绑定 Lambda 表达式</a></li>
+                    <li>
+                        <a href="#34-%e7%bb%91%e5%ae%9a%e7%b1%bb%e7%9a%84%e9%9d%9e%e9%9d%99%e6%80%81%e6%88%90%e5%91%98%e5%87%bd%e6%95%b0" aria-label="3.4 绑定类的非静态成员函数">3.4 绑定类的非静态成员函数</a></li>
+                    <li>
+                        <a href="#35-%e7%bb%91%e5%ae%9a%e5%8f%af%e8%bd%ac%e6%8d%a2%e4%b8%ba%e5%87%bd%e6%95%b0%e6%8c%87%e9%92%88%e7%9a%84%e7%b1%bb%e5%af%b9%e8%b1%a1" aria-label="3.5 绑定可转换为函数指针的类对象">3.5 绑定可转换为函数指针的类对象</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%9b%9bstdbind-%e7%9a%84%e5%8f%82%e6%95%b0%e5%8d%a0%e4%bd%8d%e7%ac%a6%e4%b8%8e%e5%8f%82%e6%95%b0%e7%bb%91%e5%ae%9a" aria-label="四、std::bind 的参数占位符与参数绑定">四、<code>std::bind</code> 的参数占位符与参数绑定</a></li>
+                    <li>
+                        <a href="#%e4%ba%94%e6%80%bb%e7%bb%93" aria-label="五、总结">五、总结</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>C++ 中，通用的函数适配器 <code>std::bind</code> 是一个强大而灵活的工具。它允许将可调用对象及其参数进行绑定，并生成一个新的可调用对象。在涉及回调机制、延迟函数执行、函数参数部分绑定等场景中，<code>std::bind</code> 的作用尤为突出。</p>
+<hr>
+<h3 id="一什么是-stdbind">一、什么是 <code>std::bind</code>？<a hidden class="anchor" aria-hidden="true" href="#一什么是-stdbind">#</a></h3>
+<p><code>std::bind</code> 是 C++ 标准库中的一个模板函数，用来将可调用对象（如普通函数、成员函数、Lambda 函数、仿函数等）与参数绑定在一起，生成一个新的函数对象或 <code>std::function</code> 对象。</p>
+<p>其核心函数原型如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span> <span class="k">class</span> <span class="nc">Fx</span><span class="p">,</span> <span class="k">class</span><span class="err">... </span><span class="nc">Args</span> <span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">function</span><span class="o">&lt;&gt;</span> <span class="n">bind</span><span class="p">(</span><span class="n">Fx</span><span class="o">&amp;&amp;</span> <span class="n">fx</span><span class="p">,</span> <span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span> <span class="n">args</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong><code>Fx</code></strong>：可调用对象的类型，可以是普通函数、成员函数、Lambda 表达式、仿函数，甚至是另一个 <code>std::function</code> 对象。</li>
+<li><strong><code>Args</code></strong>：可变参数模板，表示要绑定的参数，可以是值、引用或占位符 <code>std::placeholders::_n</code>。</li>
+</ul>
+<p><strong>返回值</strong>：<code>std::bind</code> 返回一个新的可调用对象，通常为 <code>std::function</code> 类型的实例，可以像调用普通函数一样使用。</p>
+<hr>
+<h3 id="二stdbind-的基本用法">二、<code>std::bind</code> 的基本用法<a hidden class="anchor" aria-hidden="true" href="#二stdbind-的基本用法">#</a></h3>
+<h4 id="21-普通函数的绑定">2.1 普通函数的绑定<a hidden class="anchor" aria-hidden="true" href="#21-普通函数的绑定">#</a></h4>
+<p>普通函数是 <code>std::bind</code> 支持的最基本的可调用对象。通过 <code>std::bind</code>，我们可以将部分参数绑定，从而生成一个新的函数对象。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;functional&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">show</span><span class="p">(</span><span class="kt">int</span> <span class="n">bh</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">message</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;编号 &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bh</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;：&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">message</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="o">::</span><span class="n">placeholders</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 绑定普通函数，生成一个新的可调用对象
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">fn1</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">show</span><span class="p">,</span> <span class="n">_1</span><span class="p">,</span> <span class="n">_2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fn1</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>  <span class="c1">// 调用绑定后的函数对象
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 调整参数顺序的绑定
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">,</span> <span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">fn2</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">show</span><span class="p">,</span> <span class="n">_2</span><span class="p">,</span> <span class="n">_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fn2</span><span class="p">(</span><span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>  <span class="c1">// 交换参数位置后调用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中：</p>
+<ul>
+<li><code>_1</code> 和 <code>_2</code> 是占位符，表示我们可以在调用 <code>fn1</code> 和 <code>fn2</code> 时指定这些参数。</li>
+<li><code>std::bind</code> 返回了一个新的函数对象 <code>fn1</code> 和 <code>fn2</code>，它们可以接受相应的参数并调用原函数 <code>show</code>。</li>
+</ul>
+<hr>
+<h3 id="三支持多种可调用对象">三、支持多种可调用对象<a hidden class="anchor" aria-hidden="true" href="#三支持多种可调用对象">#</a></h3>
+<p><code>std::bind</code> 可以绑定多种类型的可调用对象，包括普通函数、成员函数、Lambda 表达式、仿函数等。</p>
+<h4 id="31-绑定静态成员函数">3.1 绑定静态成员函数<a hidden class="anchor" aria-hidden="true" href="#31-绑定静态成员函数">#</a></h4>
+<p>静态成员函数的本质与普通函数类似，因此可以直接通过 <code>std::bind</code> 进行绑定。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">AA</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">static</span> <span class="kt">void</span> <span class="nf">show</span><span class="p">(</span><span class="kt">int</span> <span class="n">bh</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">message</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;编号 &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bh</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;：&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">message</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="o">::</span><span class="n">placeholders</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">fn3</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">AA</span><span class="o">::</span><span class="n">show</span><span class="p">,</span> <span class="n">_1</span><span class="p">,</span> <span class="n">_2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fn3</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="32-绑定仿函数">3.2 绑定仿函数<a hidden class="anchor" aria-hidden="true" href="#32-绑定仿函数">#</a></h4>
+<p>仿函数（即重载了 <code>operator()</code> 的类）也可以通过 <code>std::bind</code> 进行绑定。仿函数常用于自定义函数对象或策略模式。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">BB</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">operator</span><span class="p">()(</span><span class="kt">int</span> <span class="n">bh</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">message</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;编号 &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bh</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;：&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">message</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="o">::</span><span class="n">placeholders</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">BB</span> <span class="n">bb</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">fn4</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">bb</span><span class="p">,</span> <span class="n">_1</span><span class="p">,</span> <span class="n">_2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fn4</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="33-绑定-lambda-表达式">3.3 绑定 Lambda 表达式<a hidden class="anchor" aria-hidden="true" href="#33-绑定-lambda-表达式">#</a></h4>
+<p>Lambda 表达式是 C++11 引入的一种轻量级可调用对象，也可以通过 <code>std::bind</code> 进行部分参数绑定。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">lambda</span> <span class="o">=</span> <span class="p">[](</span><span class="kt">int</span> <span class="n">bh</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">message</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;编号 &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bh</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;：&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">message</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">fn5</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">placeholders</span><span class="o">::</span><span class="n">_1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">placeholders</span><span class="o">::</span><span class="n">_2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fn5</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="34-绑定类的非静态成员函数">3.4 绑定类的非静态成员函数<a hidden class="anchor" aria-hidden="true" href="#34-绑定类的非静态成员函数">#</a></h4>
+<p>绑定非静态成员函数时，必须传递类实例的指针或引用，确保调用时有具体的对象来操作。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">CC</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">show</span><span class="p">(</span><span class="kt">int</span> <span class="n">bh</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">message</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;编号 &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bh</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;：&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">message</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CC</span> <span class="n">cc</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">fn6</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">CC</span><span class="o">::</span><span class="n">show</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">cc</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">placeholders</span><span class="o">::</span><span class="n">_1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">placeholders</span><span class="o">::</span><span class="n">_2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fn6</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在绑定非静态成员函数时，<code>&amp;CC::show</code> 表示成员函数指针，而 <code>&amp;cc</code> 表示该成员函数操作的实例。</p>
+<h4 id="35-绑定可转换为函数指针的类对象">3.5 绑定可转换为函数指针的类对象<a hidden class="anchor" aria-hidden="true" href="#35-绑定可转换为函数指针的类对象">#</a></h4>
+<p>通过类型转换操作符，类的实例也可以被转换为函数指针，从而通过 <code>std::bind</code> 进行绑定。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">DD</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">using</span> <span class="n">Fun</span> <span class="o">=</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="kt">int</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">operator</span> <span class="nf">Fun</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">show</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DD</span> <span class="n">dd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">fn7</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">dd</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">placeholders</span><span class="o">::</span><span class="n">_1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">placeholders</span><span class="o">::</span><span class="n">_2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fn7</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="四stdbind-的参数占位符与参数绑定">四、<code>std::bind</code> 的参数占位符与参数绑定<a hidden class="anchor" aria-hidden="true" href="#四stdbind-的参数占位符与参数绑定">#</a></h3>
+<p>在使用 <code>std::bind</code> 进行绑定时，我们可以选择哪些参数在绑定时固定，哪些参数在调用时动态传入。这里需要使用 <code>std::placeholders::_n</code> 占位符。</p>
+<ul>
+<li><code>_1</code>, <code>_2</code>, <code>_3</code> 等占位符用于表示调用时的参数。</li>
+<li>非占位符参数将在绑定时固定。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="o">::</span><span class="n">placeholders</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 将第一个参数固定为 3，只需传递剩余的参数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">fn8</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">show</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fn8</span><span class="p">(</span><span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="五总结">五、总结<a hidden class="anchor" aria-hidden="true" href="#五总结">#</a></h3>
+<p><code>std::bind</code> 是 C++ 中极其强大的函数适配器，它通过绑定可调用对象及其参数生成新的函数对象，从而提供了灵活的参数绑定和调用方式。无论是处理普通函数、成员函数，还是仿函数和 Lambda 表达式，<code>std::bind</code> 都能够简化代码并提高可读性。理解 <code>std::bind</code> 的用法，能够帮助开发者编写更为简洁和通用的代码，尤其是在需要延迟执行、回调函数或函数适配器的场景中。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%8F%AF%E8%B0%83%E7%94%A8%E5%AF%B9%E8%B1%A1%E5%8C%85%E8%A3%85%E5%99%A8/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>CPP中的可调用对象包装器</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%AD%E7%9A%84%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>消息队列中的回调函数</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

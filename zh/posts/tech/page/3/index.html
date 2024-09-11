@@ -219,6 +219,54 @@ code.has-jax {
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Linux的僵尸进程
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在 Linux 和其他类 Unix 系统中，进程管理是保证系统稳定性和高效运行的重要组成部分。其中，僵尸进程（Zombie Process）是一个特殊但常见的问题。...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-09-30 08:59:03 +0800 CST'>2023-09-30</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to Linux的僵尸进程" href="https://oheyu.github.io/zh/posts/tech/linux%E7%9A%84%E5%83%B5%E5%B0%B8%E8%BF%9B%E7%A8%8B/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">进程间的通信
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>进程间通信（IPC，Inter-Process Communication）是 Linux 操作系统中的一个重要组成部分，它允许多个独立进程之间共享数据、...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-09-29 08:39:02 +0800 CST'>2023-09-29</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to 进程间的通信" href="https://oheyu.github.io/zh/posts/tech/%E8%BF%9B%E7%A8%8B%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">共享内存初探
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在操作系统中，进程是独立的执行实体，拥有自己的独立地址空间，无法直接访问其他进程的内存。然而，在多进程程序中，有时需要多个进程之间共享数据，...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-09-27 22:13:57 +0800 CST'>2023-09-27</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to 共享内存初探" href="https://oheyu.github.io/zh/posts/tech/%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E5%88%9D%E6%8E%A2/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Fork函数的工作原理
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在 Linux 系统编程中，fork() 函数是创建新进程的基础工具之一。它允许进程在运行时创建自己的副本，即子进程，从而实现并行处理。今天，我们来详细探...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-09-25 17:08:06 +0800 CST'>2023-09-25</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to Fork函数的工作原理" href="https://oheyu.github.io/zh/posts/tech/fork%E5%87%BD%E6%95%B0%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">左值与右值
     </h2>
   </header>
@@ -228,60 +276,12 @@ code.has-jax {
   <footer class="entry-footer"><span title='2023-09-24 16:55:52 +0800 CST'>2023-09-24</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
   <a class="entry-link" aria-label="post link to 左值与右值" href="https://oheyu.github.io/zh/posts/tech/%E5%B7%A6%E5%80%BC%E4%B8%8E%E5%8F%B3%E5%80%BC/"></a>
 </article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Lock_guard与unique_lock
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>在现代 C&#43;&#43; 多线程编程中，锁机制是确保线程安全访问共享资源的关键手段。C&#43;&#43; 标准库为开发者提供了多种锁管理工具，其中最常用的是 std::lock_guard 和 std::un...</p>
-  </div>
-  <footer class="entry-footer"><span title='2023-09-22 16:44:33 +0800 CST'>2023-09-22</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to Lock_guard与unique_lock" href="https://oheyu.github.io/zh/posts/tech/lock_guard%E4%B8%8Eunique_lock/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">CPP中的const与constexpr
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>在 C&#43;&#43; 中，const和constexpr是两个非常重要的关键字，它们的主要功能是保证变量和表达式在不同上下文中的不可修改性。然而，虽然这两个关...</p>
-  </div>
-  <footer class="entry-footer"><span title='2023-09-20 16:10:28 +0800 CST'>2023-09-20</span>&nbsp;·&nbsp;3 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to CPP中的const与constexpr" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84const%E4%B8%8Econstexpr/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Sizeof运算符
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>sizeof 运算符是一个极为常用且强大的工具。它能够在编译时计算任意数据类型或对象在内存中占用的字节数。 一、什么是 sizeof 运算符？ sizeof 是一个内置于 C&#43;&#43; 的运算符，...</p>
-  </div>
-  <footer class="entry-footer"><span title='2023-09-19 16:00:43 +0800 CST'>2023-09-19</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to Sizeof运算符" href="https://oheyu.github.io/zh/posts/tech/sizeof%E8%BF%90%E7%AE%97%E7%AC%A6/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">CPP函数返回值的存储位置与优化策略
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>不论是那个编程语言，函数返回值是一个极其重要的概念，它不仅影响代码的逻辑，还直接关系到程序的性能。在不同的场景下，函数返回值的处理方式会对程...</p>
-  </div>
-  <footer class="entry-footer"><span title='2023-09-17 15:39:19 +0800 CST'>2023-09-17</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to CPP函数返回值的存储位置与优化策略" href="https://oheyu.github.io/zh/posts/tech/cpp%E5%87%BD%E6%95%B0%E8%BF%94%E5%9B%9E%E5%80%BC%E7%9A%84%E5%AD%98%E5%82%A8%E4%BD%8D%E7%BD%AE%E4%B8%8E%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5/"></a>
-</article>
 <footer class="page-footer">
   <nav class="pagination">
     <a class="prev" href="https://oheyu.github.io/zh/posts/tech/page/2/">
-      «&nbsp;上一页&nbsp;2/12
+      «&nbsp;上一页&nbsp;2/13
     </a>
-    <a class="next" href="https://oheyu.github.io/zh/posts/tech/page/4/">下一页&nbsp;4/12&nbsp;»
+    <a class="next" href="https://oheyu.github.io/zh/posts/tech/page/4/">下一页&nbsp;4/13&nbsp;»
     </a>
   </nav>
 </footer>
