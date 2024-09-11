@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>数组指针 | 史玉浩的个人博客</title>
+<meta name="keywords" content="Data Structure">
+<meta name="description" content="在 C&#43;&#43; 编程中，指针和数组是两个非常基础且重要的概念。数组指针（Pointer to Array）是指向数组的指针，它们在多维数组、动态内存分配、函数">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/%E6%95%B0%E7%BB%84%E6%8C%87%E9%92%88/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/%E6%95%B0%E7%BB%84%E6%8C%87%E9%92%88/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="数组指针" />
+<meta property="og:description" content="在 C&#43;&#43; 编程中，指针和数组是两个非常基础且重要的概念。数组指针（Pointer to Array）是指向数组的指针，它们在多维数组、动态内存分配、函数" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/%E6%95%B0%E7%BB%84%E6%8C%87%E9%92%88/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-10-13T10:21:22+08:00" />
+<meta property="article:modified_time" content="2023-10-13T10:21:22+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="数组指针"/>
+<meta name="twitter:description" content="在 C&#43;&#43; 编程中，指针和数组是两个非常基础且重要的概念。数组指针（Pointer to Array）是指向数组的指针，它们在多维数组、动态内存分配、函数"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "数组指针",
+      "item": "https://oheyu.github.io/zh/posts/tech/%E6%95%B0%E7%BB%84%E6%8C%87%E9%92%88/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "数组指针",
+  "name": "数组指针",
+  "description": "在 C++ 编程中，指针和数组是两个非常基础且重要的概念。数组指针（Pointer to Array）是指向数组的指针，它们在多维数组、动态内存分配、函数",
+  "keywords": [
+    "Data Structure"
+  ],
+  "articleBody": "\r在 C++ 编程中，指针和数组是两个非常基础且重要的概念。数组指针（Pointer to Array）是指向数组的指针，它们在多维数组、动态内存分配、函数参数传递等场景中发挥了重要作用。\n一、什么是数组指针？ 数组指针是一个指向整个数组的指针，而不是单个元素的指针。它的用途在于处理更复杂的数组操作，尤其是多维数组和需要作为参数传递数组的场景。\n与指向单个元素的指针不同，数组指针是指向数组类型的指针，而不是基本类型。例如，一个指向 int[10] 的数组指针并不是 int*，而是 int (*)[10]。这在需要处理多个维度的数据结构时尤为重要。\n二、数组指针的声明 数组指针的声明形式比普通指针稍微复杂，需要同时指定数组的类型和维度。在声明时，需要通过括号明确指针与数组的关系，否则编译器将其解释为错误的类型。\n2.1 一维数组指针的声明 1 int (*ptr)[10]; // 声明一个指向包含10个 int 类型元素的数组的指针 在这里，ptr 是一个指向包含 10 个 int 元素的数组的指针。括号 () 用于区分 ptr 是指向数组的，而不是指向单个 int 元素的普通指针 int* ptr。\n2.2 多维数组指针的声明 当处理多维数组时，数组指针可以指向整个二维数组的一行或者整个数组：\n1 int (*ptr2D)[4]; // 声明一个指向含有4个 int 元素的二维数组的指针 对于更高维的数组，声明时需要明确所有维度。\n三、数组指针的初始化 数组指针的初始化是通过指向已有的数组进行的。这意味着在声明数组指针后，我们可以通过现有数组的地址进行初始化。\n1 2 int arr[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}; int (*ptr)[10] = \u0026arr; // ptr 指向数组 arr 的地址 注意，这里使用 \u0026arr 来获取数组的地址，而不是 arr。因为 arr 本身是指向数组第一个元素的指针，而 \u0026arr 是整个数组的地址，符合 ptr 的类型 int (*)[10]。\n四、使用数组指针 数组指针的主要作用是在操作数组时能够高效处理复杂的数据结构。数组指针可以用来访问、遍历数组元素，特别是在多维数组的场景中更加实用。\n4.1 访问数组元素 通过数组指针访问数组元素时，使用解引用操作符 * 来获取数组，然后再通过索引来访问具体的元素。\n1 2 3 4 5 6 7 8 9 10 11 #include int main() { int arr[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}; int (*ptr)[10] = \u0026arr; std::cout \u003c\u003c \"Element at index 0: \" \u003c\u003c (*ptr)[0] \u003c\u003c std::endl; std::cout \u003c\u003c \"Element at index 5: \" \u003c\u003c (*ptr)[5] \u003c\u003c std::endl; return 0; } 这里，(*ptr)[i] 用于访问数组 arr 中的元素。\n4.2 遍历数组 数组指针可以用于遍历整个数组：\n1 2 3 for (int i = 0; i \u003c 10; ++i) { std::cout \u003c\u003c (*ptr)[i] \u003c\u003c \" \"; } 这段代码遍历并输出数组中的每个元素。\n五、多维数组与数组指针 数组指针在处理多维数组时显得尤为强大。多维数组实际上是数组的数组，数组指针的使用可以简化对多维数组的访问。\n5.1 声明指向二维数组的指针 1 2 3 4 5 6 7 int arr[3][4] = { {1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12} }; int (*ptr)[4] = arr; // 声明一个指向包含 4 个 int 元素的二维数组的指针 此时，ptr 是指向数组 arr 中每一行的指针，每一行包含 4 个 int 元素。\n5.2 访问二维数组的元素 通过数组指针，遍历和访问二维数组变得更加方便。\n1 2 3 4 5 6 for (int i = 0; i \u003c 3; ++i) { for (int j = 0; j \u003c 4; ++j) { std::cout \u003c\u003c ptr[i][j] \u003c\u003c \" \"; } std::cout \u003c\u003c std::endl; } 这种方式可以高效地处理二维数组中的每个元素。\n六、将数组指针作为函数参数 在将多维数组作为参数传递给函数时，数组指针极为有用。通过数组指针传递多维数组，可以避免直接传递数组的复杂性，提高代码的灵活性。\n6.1 将二维数组指针传递给函数 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 void printArray(int (*ptr)[4], int rows) { for (int i = 0; i \u003c rows; ++i) { for (int j = 0; j \u003c 4; ++j) { std::cout \u003c\u003c ptr[i][j] \u003c\u003c \" \"; } std::cout \u003c\u003c std::endl; } } int main() { int arr[3][4] = { {1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12} }; printArray(arr, 3); // 将二维数组的指针传递给函数 } 在这个例子中，函数 printArray 接受一个指向包含 4 个 int 元素的数组的指针 int (*ptr)[4]，并使用该指针遍历二维数组的内容。\n七、常见的错误与注意事项 指针与数组大小的匹配：数组指针在声明时必须包含数组的大小信息，例如 int (*ptr)[10]。如果数组的维度与指针声明不匹配，编译器会报错。\n数组越界：在使用数组指针时，确保访问的索引在合法范围内，否则可能会导致内存访问错误，进而引发未定义行为。\n内存布局的理解：理解数组在内存中的布局对于正确使用数组指针至关重要。特别是在多维数组中，数组指针操作的对象是整行或整列，而不是单个元素。\n",
+  "wordCount" : "1633",
+  "inLanguage": "zh",
+  "datePublished": "2023-10-13T10:21:22+08:00",
+  "dateModified": "2023-10-13T10:21:22+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/%E6%95%B0%E7%BB%84%E6%8C%87%E9%92%88/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      数组指针
+    </h1>
+    <div class="post-meta"><span title='2023-10-13 10:21:22 +0800 CST'>2023-10-13</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e4%bb%80%e4%b9%88%e6%98%af%e6%95%b0%e7%bb%84%e6%8c%87%e9%92%88" aria-label="一、什么是数组指针？">一、什么是数组指针？</a></li>
+                    <li>
+                        <a href="#%e4%ba%8c%e6%95%b0%e7%bb%84%e6%8c%87%e9%92%88%e7%9a%84%e5%a3%b0%e6%98%8e" aria-label="二、数组指针的声明">二、数组指针的声明</a><ul>
+                            
+                    <li>
+                        <a href="#21-%e4%b8%80%e7%bb%b4%e6%95%b0%e7%bb%84%e6%8c%87%e9%92%88%e7%9a%84%e5%a3%b0%e6%98%8e" aria-label="2.1 一维数组指针的声明">2.1 一维数组指针的声明</a></li>
+                    <li>
+                        <a href="#22-%e5%a4%9a%e7%bb%b4%e6%95%b0%e7%bb%84%e6%8c%87%e9%92%88%e7%9a%84%e5%a3%b0%e6%98%8e" aria-label="2.2 多维数组指针的声明">2.2 多维数组指针的声明</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%89%e6%95%b0%e7%bb%84%e6%8c%87%e9%92%88%e7%9a%84%e5%88%9d%e5%a7%8b%e5%8c%96" aria-label="三、数组指针的初始化">三、数组指针的初始化</a></li>
+                    <li>
+                        <a href="#%e5%9b%9b%e4%bd%bf%e7%94%a8%e6%95%b0%e7%bb%84%e6%8c%87%e9%92%88" aria-label="四、使用数组指针">四、使用数组指针</a><ul>
+                            
+                    <li>
+                        <a href="#41-%e8%ae%bf%e9%97%ae%e6%95%b0%e7%bb%84%e5%85%83%e7%b4%a0" aria-label="4.1 访问数组元素">4.1 访问数组元素</a></li>
+                    <li>
+                        <a href="#42-%e9%81%8d%e5%8e%86%e6%95%b0%e7%bb%84" aria-label="4.2 遍历数组">4.2 遍历数组</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%94%e5%a4%9a%e7%bb%b4%e6%95%b0%e7%bb%84%e4%b8%8e%e6%95%b0%e7%bb%84%e6%8c%87%e9%92%88" aria-label="五、多维数组与数组指针">五、多维数组与数组指针</a><ul>
+                            
+                    <li>
+                        <a href="#51-%e5%a3%b0%e6%98%8e%e6%8c%87%e5%90%91%e4%ba%8c%e7%bb%b4%e6%95%b0%e7%bb%84%e7%9a%84%e6%8c%87%e9%92%88" aria-label="5.1 声明指向二维数组的指针">5.1 声明指向二维数组的指针</a></li>
+                    <li>
+                        <a href="#52-%e8%ae%bf%e9%97%ae%e4%ba%8c%e7%bb%b4%e6%95%b0%e7%bb%84%e7%9a%84%e5%85%83%e7%b4%a0" aria-label="5.2 访问二维数组的元素">5.2 访问二维数组的元素</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%85%ad%e5%b0%86%e6%95%b0%e7%bb%84%e6%8c%87%e9%92%88%e4%bd%9c%e4%b8%ba%e5%87%bd%e6%95%b0%e5%8f%82%e6%95%b0" aria-label="六、将数组指针作为函数参数">六、将数组指针作为函数参数</a><ul>
+                            
+                    <li>
+                        <a href="#61-%e5%b0%86%e4%ba%8c%e7%bb%b4%e6%95%b0%e7%bb%84%e6%8c%87%e9%92%88%e4%bc%a0%e9%80%92%e7%bb%99%e5%87%bd%e6%95%b0" aria-label="6.1 将二维数组指针传递给函数">6.1 将二维数组指针传递给函数</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%83%e5%b8%b8%e8%a7%81%e7%9a%84%e9%94%99%e8%af%af%e4%b8%8e%e6%b3%a8%e6%84%8f%e4%ba%8b%e9%a1%b9" aria-label="七、常见的错误与注意事项">七、常见的错误与注意事项</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>在 C++ 编程中，指针和数组是两个非常基础且重要的概念。数组指针（Pointer to Array）是指向数组的指针，它们在多维数组、动态内存分配、函数参数传递等场景中发挥了重要作用。</p>
+<hr>
+<h3 id="一什么是数组指针">一、什么是数组指针？<a hidden class="anchor" aria-hidden="true" href="#一什么是数组指针">#</a></h3>
+<p>数组指针是一个指向整个数组的指针，而不是单个元素的指针。它的用途在于处理更复杂的数组操作，尤其是多维数组和需要作为参数传递数组的场景。</p>
+<p>与指向单个元素的指针不同，数组指针是指向数组类型的指针，而不是基本类型。例如，一个指向 <code>int[10]</code> 的数组指针并不是 <code>int*</code>，而是 <code>int (*)[10]</code>。这在需要处理多个维度的数据结构时尤为重要。</p>
+<hr>
+<h3 id="二数组指针的声明">二、数组指针的声明<a hidden class="anchor" aria-hidden="true" href="#二数组指针的声明">#</a></h3>
+<p>数组指针的声明形式比普通指针稍微复杂，需要同时指定数组的类型和维度。在声明时，需要通过括号明确指针与数组的关系，否则编译器将其解释为错误的类型。</p>
+<h4 id="21-一维数组指针的声明">2.1 一维数组指针的声明<a hidden class="anchor" aria-hidden="true" href="#21-一维数组指针的声明">#</a></h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">ptr</span><span class="p">)[</span><span class="mi">10</span><span class="p">];</span>  <span class="c1">// 声明一个指向包含10个 int 类型元素的数组的指针
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这里，<code>ptr</code> 是一个指向包含 10 个 <code>int</code> 元素的数组的指针。括号 <code>()</code> 用于区分 <code>ptr</code> 是指向数组的，而不是指向单个 <code>int</code> 元素的普通指针 <code>int* ptr</code>。</p>
+<h4 id="22-多维数组指针的声明">2.2 多维数组指针的声明<a hidden class="anchor" aria-hidden="true" href="#22-多维数组指针的声明">#</a></h4>
+<p>当处理多维数组时，数组指针可以指向整个二维数组的一行或者整个数组：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">ptr2D</span><span class="p">)[</span><span class="mi">4</span><span class="p">];</span>  <span class="c1">// 声明一个指向含有4个 int 元素的二维数组的指针
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>对于更高维的数组，声明时需要明确所有维度。</p>
+<hr>
+<h3 id="三数组指针的初始化">三、数组指针的初始化<a hidden class="anchor" aria-hidden="true" href="#三数组指针的初始化">#</a></h3>
+<p>数组指针的初始化是通过指向已有的数组进行的。这意味着在声明数组指针后，我们可以通过现有数组的地址进行初始化。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">arr</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">ptr</span><span class="p">)[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">arr</span><span class="p">;</span>  <span class="c1">// ptr 指向数组 arr 的地址
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>注意，这里使用 <code>&amp;arr</code> 来获取数组的地址，而不是 <code>arr</code>。因为 <code>arr</code> 本身是指向数组第一个元素的指针，而 <code>&amp;arr</code> 是整个数组的地址，符合 <code>ptr</code> 的类型 <code>int (*)[10]</code>。</p>
+<hr>
+<h3 id="四使用数组指针">四、使用数组指针<a hidden class="anchor" aria-hidden="true" href="#四使用数组指针">#</a></h3>
+<p>数组指针的主要作用是在操作数组时能够高效处理复杂的数据结构。数组指针可以用来访问、遍历数组元素，特别是在多维数组的场景中更加实用。</p>
+<h4 id="41-访问数组元素">4.1 访问数组元素<a hidden class="anchor" aria-hidden="true" href="#41-访问数组元素">#</a></h4>
+<p>通过数组指针访问数组元素时，使用解引用操作符 <code>*</code> 来获取数组，然后再通过索引来访问具体的元素。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">arr</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">ptr</span><span class="p">)[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">arr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Element at index 0: &#34;</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="o">*</span><span class="n">ptr</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Element at index 5: &#34;</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="o">*</span><span class="n">ptr</span><span class="p">)[</span><span class="mi">5</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里，<code>(*ptr)[i]</code> 用于访问数组 <code>arr</code> 中的元素。</p>
+<h4 id="42-遍历数组">4.2 遍历数组<a hidden class="anchor" aria-hidden="true" href="#42-遍历数组">#</a></h4>
+<p>数组指针可以用于遍历整个数组：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="o">*</span><span class="n">ptr</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; &#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这段代码遍历并输出数组中的每个元素。</p>
+<hr>
+<h3 id="五多维数组与数组指针">五、多维数组与数组指针<a hidden class="anchor" aria-hidden="true" href="#五多维数组与数组指针">#</a></h3>
+<p>数组指针在处理多维数组时显得尤为强大。多维数组实际上是数组的数组，数组指针的使用可以简化对多维数组的访问。</p>
+<h4 id="51-声明指向二维数组的指针">5.1 声明指向二维数组的指针<a hidden class="anchor" aria-hidden="true" href="#51-声明指向二维数组的指针">#</a></h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">arr</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">ptr</span><span class="p">)[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span><span class="p">;</span>  <span class="c1">// 声明一个指向包含 4 个 int 元素的二维数组的指针
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>此时，<code>ptr</code> 是指向数组 <code>arr</code> 中每一行的指针，每一行包含 4 个 <code>int</code> 元素。</p>
+<h4 id="52-访问二维数组的元素">5.2 访问二维数组的元素<a hidden class="anchor" aria-hidden="true" href="#52-访问二维数组的元素">#</a></h4>
+<p>通过数组指针，遍历和访问二维数组变得更加方便。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; &#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这种方式可以高效地处理二维数组中的每个元素。</p>
+<hr>
+<h3 id="六将数组指针作为函数参数">六、将数组指针作为函数参数<a hidden class="anchor" aria-hidden="true" href="#六将数组指针作为函数参数">#</a></h3>
+<p>在将多维数组作为参数传递给函数时，数组指针极为有用。通过数组指针传递多维数组，可以避免直接传递数组的复杂性，提高代码的灵活性。</p>
+<h4 id="61-将二维数组指针传递给函数">6.1 将二维数组指针传递给函数<a hidden class="anchor" aria-hidden="true" href="#61-将二维数组指针传递给函数">#</a></h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">printArray</span><span class="p">(</span><span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">ptr</span><span class="p">)[</span><span class="mi">4</span><span class="p">],</span> <span class="kt">int</span> <span class="n">rows</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">rows</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; &#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">arr</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">printArray</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>  <span class="c1">// 将二维数组的指针传递给函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中，函数 <code>printArray</code> 接受一个指向包含 4 个 <code>int</code> 元素的数组的指针 <code>int (*ptr)[4]</code>，并使用该指针遍历二维数组的内容。</p>
+<hr>
+<h3 id="七常见的错误与注意事项">七、常见的错误与注意事项<a hidden class="anchor" aria-hidden="true" href="#七常见的错误与注意事项">#</a></h3>
+<ul>
+<li>
+<p><strong>指针与数组大小的匹配</strong>：数组指针在声明时必须包含数组的大小信息，例如 <code>int (*ptr)[10]</code>。如果数组的维度与指针声明不匹配，编译器会报错。</p>
+</li>
+<li>
+<p><strong>数组越界</strong>：在使用数组指针时，确保访问的索引在合法范围内，否则可能会导致内存访问错误，进而引发未定义行为。</p>
+</li>
+<li>
+<p><strong>内存布局的理解</strong>：理解数组在内存中的布局对于正确使用数组指针至关重要。特别是在多维数组中，数组指针操作的对象是整行或整列，而不是单个元素。</p>
+</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/data-structure/">Data Structure</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/%E5%B8%B8%E5%BC%95%E7%94%A8%E4%B8%8E%E4%B8%B4%E6%97%B6%E5%8F%98%E9%87%8F%E7%9A%84%E8%87%AA%E5%8A%A8%E5%88%9B%E5%BB%BA/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>常引用与临时变量的自动创建</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/raii%E8%B5%84%E6%BA%90%E8%8E%B7%E5%8F%96%E5%8D%B3%E5%88%9D%E5%A7%8B%E5%8C%96/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>RAII：资源获取即初始化</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

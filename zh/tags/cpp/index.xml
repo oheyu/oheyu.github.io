@@ -6,8 +6,22 @@
     <description>Recent content in CPP on 史玉浩的个人博客</description>
     <generator>Hugo -- 0.127.0</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sun, 24 Sep 2023 16:55:52 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 30 Oct 2023 10:41:50 +0800</lastBuildDate>
     <atom:link href="https://oheyu.github.io/zh/tags/cpp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>常引用与临时变量的自动创建</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E5%B8%B8%E5%BC%95%E7%94%A8%E4%B8%8E%E4%B8%B4%E6%97%B6%E5%8F%98%E9%87%8F%E7%9A%84%E8%87%AA%E5%8A%A8%E5%88%9B%E5%BB%BA/</link>
+      <pubDate>Mon, 30 Oct 2023 10:41:50 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E5%B8%B8%E5%BC%95%E7%94%A8%E4%B8%8E%E4%B8%B4%E6%97%B6%E5%8F%98%E9%87%8F%E7%9A%84%E8%87%AA%E5%8A%A8%E5%88%9B%E5%BB%BA/</guid>
+      <description>在 C++ 编程中，引用（References）是一个非常常用的特性，允许我们通过别名来引用已有的变量。通常情况下，引用要求引用的类型和实际变量类型</description>
+    </item>
+    <item>
+      <title>RAII：资源获取即初始化</title>
+      <link>https://oheyu.github.io/zh/posts/tech/raii%E8%B5%84%E6%BA%90%E8%8E%B7%E5%8F%96%E5%8D%B3%E5%88%9D%E5%A7%8B%E5%8C%96/</link>
+      <pubDate>Sat, 07 Oct 2023 10:07:35 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/raii%E8%B5%84%E6%BA%90%E8%8E%B7%E5%8F%96%E5%8D%B3%E5%88%9D%E5%A7%8B%E5%8C%96/</guid>
+      <description>在 C++ 编程中，资源管理是一项至关重要的任务，尤其是在内存分配、文件操作、网络连接等与系统资源密切相关的场景中。RAII（Resource Acquisition Is I</description>
+    </item>
     <item>
       <title>左值与右值</title>
       <link>https://oheyu.github.io/zh/posts/tech/%E5%B7%A6%E5%80%BC%E4%B8%8E%E5%8F%B3%E5%80%BC/</link>
