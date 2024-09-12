@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CPP中的原子类型 | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="在并发环境中，如何保证数据在多个线程之间的同步与一致性是一个关键问题。传统的同步方式使用互斥锁（mutex）来保护共享数据，但锁的使用带来了">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%8E%9F%E5%AD%90%E7%B1%BB%E5%9E%8B/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%8E%9F%E5%AD%90%E7%B1%BB%E5%9E%8B/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="CPP中的原子类型" />
+<meta property="og:description" content="在并发环境中，如何保证数据在多个线程之间的同步与一致性是一个关键问题。传统的同步方式使用互斥锁（mutex）来保护共享数据，但锁的使用带来了" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%8E%9F%E5%AD%90%E7%B1%BB%E5%9E%8B/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-08-09T20:59:01+08:00" />
+<meta property="article:modified_time" content="2024-08-09T20:59:01+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CPP中的原子类型"/>
+<meta name="twitter:description" content="在并发环境中，如何保证数据在多个线程之间的同步与一致性是一个关键问题。传统的同步方式使用互斥锁（mutex）来保护共享数据，但锁的使用带来了"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "CPP中的原子类型",
+      "item": "https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%8E%9F%E5%AD%90%E7%B1%BB%E5%9E%8B/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CPP中的原子类型",
+  "name": "CPP中的原子类型",
+  "description": "在并发环境中，如何保证数据在多个线程之间的同步与一致性是一个关键问题。传统的同步方式使用互斥锁（mutex）来保护共享数据，但锁的使用带来了",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\r在并发环境中，如何保证数据在多个线程之间的同步与一致性是一个关键问题。传统的同步方式使用互斥锁（mutex）来保护共享数据，但锁的使用带来了额外的开销。为了解决这个问题，C++11 提供了 atomic 模板类，它允许在不使用锁的情况下安全地进行多线程编程。atomic 提供了对基础数据类型的原子操作支持，能够有效避免竞争条件，提升并发性能。\n一、什么是 atomic？ atomic 是 C++11 提供的一个模板类，用于在多线程环境中安全地操作基础数据类型。它通过底层 CPU 提供的指令集，保证了对变量的操作是原子性的，即每个操作要么完整地执行，要么根本不执行，不会因为线程切换导致数据不一致。\n支持的类型 atomic 模板类支持以下类型：\n基础整型（如 int、long、unsigned int） 布尔类型（bool） 指针类型 值得注意的是，atomic 不支持浮点类型和自定义数据类型。\n二、atomic 的常用操作 atomic 提供了一组线程安全的操作，用于读取、修改、比较交换等。其主要操作函数包括：\n构造函数\natomic() noexcept：默认构造函数，初始化一个原子变量。 atomic(T val) noexcept：使用初始值 val 初始化原子变量。 atomic(const atomic\u0026) = delete：禁用拷贝构造函数，防止原子变量被复制。 赋值操作\natomic\u0026 operator=(const atomic\u0026) = delete：禁用赋值操作，防止赋值导致的竞争问题。 常用方法\nvoid store(const T val) noexcept：存储一个值 val 到原子变量。 T load() noexcept：读取原子变量的值。 T fetch_add(const T val) noexcept：将原子变量的值与 val 相加，并返回原值。 T fetch_sub(const T val) noexcept：将原子变量的值减去 val，并返回原值。 T exchange(const T val) noexcept：将原子变量的值替换为 val，并返回原值。 bool compare_exchange_strong(T \u0026expect, const T val) noexcept：比较原子变量的值与 expect，如果相等则将其替换为 val，并返回 true；否则将原子变量的值更新为 expect，并返回 false。 性能查询\nbool is_lock_free()：查询某原子类型的操作是否是无锁的。如果返回 true，表示操作由 CPU 原生指令直接支持；如果返回 false，表示编译器使用了内部的锁机制来保证操作的安全性。 三、原子操作示例 以下是一些 atomic 操作的示例，展示了如何在多线程环境中安全地使用原子变量。\n示例 1：基本操作 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 #include #include // 引入原子类型头文件 int main() { std::atomic\u003cint\u003e a = 3; // 初始化原子变量 a std::cout \u003c\u003c \"a = \" \u003c\u003c a.load() \u003c\u003c std::endl; // 输出当前值：3 a.store(8); // 存储新值 8 std::cout \u003c\u003c \"a = \" \u003c\u003c a.load() \u003c\u003c std::endl; // 输出更新后的值：8 int old = a.fetch_add(5); // a 的值加 5，返回原值 std::cout \u003c\u003c \"old = \" \u003c\u003c old \u003c\u003c \"，a = \" \u003c\u003c a.load() \u003c\u003c std::endl; // 输出：old = 8，a = 13 old = a.fetch_sub(2); // a 的值减去 2，返回原值 std::cout \u003c\u003c \"old = \" \u003c\u003c old \u003c\u003c \"，a = \" \u003c\u003c a.load() \u003c\u003c std::endl; // 输出：old = 13，a = 11 } 示例 2：比较交换（CAS） CAS（Compare-And-Swap）是实现无锁算法的基础操作。它允许我们在读取原子变量时，检查其当前值是否与预期值匹配，如果匹配则进行更新。\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 #include #include int main() { std::atomic\u003cint\u003e ii = 3; // 原子变量 int expect = 4; // 预期值 int val = 5; // 新的值 // 比较原子变量 ii 的值与 expect // 如果相等则将其替换为 val bool bret = ii.compare_exchange_strong(expect, val); std::cout \u003c\u003c \"bret = \" \u003c\u003c bret \u003c\u003c std::endl; // 输出比较结果，false 因为 ii != expect std::cout \u003c\u003c \"ii = \" \u003c\u003c ii \u003c\u003c std::endl; // 输出原子变量的当前值 std::cout \u003c\u003c \"expect = \" \u003c\u003c expect \u003c\u003c std::endl; // 输出 expect 被更新为 ii 的值 } 在这个例子中，compare_exchange_strong() 尝试将 ii 的值从 3 更新为 5，但由于 expect 是 4，因此操作失败，ii 保持原值 3，同时 expect 被更新为 ii 的当前值。\n四、使用场景 4.1 计数器 原子整型可以用作计数器，在并发环境下安全地递增或递减。\n1 2 3 4 5 std::atomic\u003cint\u003e counter(0); void increment() { counter.fetch_add(1); // 线程安全的递增操作 } 4.2 布尔开关 原子布尔型可以用作线程间的信号传递，用来实现轻量级的开关机制。\n1 2 3 4 5 6 7 8 std::atomic\u003cbool\u003e flag(false); void worker_thread() { while (!flag.load()) { // 等待 flag 被设置为 true } // 开始执行任务 } 4.3 无锁队列 原子操作是实现无锁数据结构的基础，CAS 指令可以保证数据结构的线程安全性，而无需使用互斥锁。无锁队列广泛应用于高性能、多线程场景中。\n总结 atomic 是 C++11 中为多线程编程提供的重要工具。它利用底层硬件的支持，实现了对基础数据类型的无锁访问和修改操作。在适当的场景下使用原子操作，能够避免锁带来的性能开销，并且能够简化代码逻辑。然而，虽然原子操作可以避免锁的使用，但它们也有自己的局限性。\n",
+  "wordCount" : "1756",
+  "inLanguage": "zh",
+  "datePublished": "2024-08-09T20:59:01+08:00",
+  "dateModified": "2024-08-09T20:59:01+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%8E%9F%E5%AD%90%E7%B1%BB%E5%9E%8B/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      CPP中的原子类型
+    </h1>
+    <div class="post-meta"><span title='2024-08-09 20:59:01 +0800 CST'>2024-08-09</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e4%bb%80%e4%b9%88%e6%98%af-atomict" aria-label="一、什么是 atomic&amp;lt;T&amp;gt;？">一、什么是 <code>atomic&lt;T&gt;</code>？</a><ul>
+                            
+                    <li>
+                        <a href="#%e6%94%af%e6%8c%81%e7%9a%84%e7%b1%bb%e5%9e%8b" aria-label="支持的类型">支持的类型</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%8catomict-%e7%9a%84%e5%b8%b8%e7%94%a8%e6%93%8d%e4%bd%9c" aria-label="二、atomic&amp;lt;T&amp;gt; 的常用操作">二、<code>atomic&lt;T&gt;</code> 的常用操作</a></li>
+                    <li>
+                        <a href="#%e4%b8%89%e5%8e%9f%e5%ad%90%e6%93%8d%e4%bd%9c%e7%a4%ba%e4%be%8b" aria-label="三、原子操作示例">三、原子操作示例</a><ul>
+                            
+                    <li>
+                        <a href="#%e7%a4%ba%e4%be%8b-1%e5%9f%ba%e6%9c%ac%e6%93%8d%e4%bd%9c" aria-label="示例 1：基本操作">示例 1：基本操作</a></li>
+                    <li>
+                        <a href="#%e7%a4%ba%e4%be%8b-2%e6%af%94%e8%be%83%e4%ba%a4%e6%8d%a2cas" aria-label="示例 2：比较交换（CAS）">示例 2：比较交换（CAS）</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%9b%9b%e4%bd%bf%e7%94%a8%e5%9c%ba%e6%99%af" aria-label="四、使用场景">四、使用场景</a><ul>
+                            
+                    <li>
+                        <a href="#41-%e8%ae%a1%e6%95%b0%e5%99%a8" aria-label="4.1 计数器">4.1 <strong>计数器</strong></a></li>
+                    <li>
+                        <a href="#42-%e5%b8%83%e5%b0%94%e5%bc%80%e5%85%b3" aria-label="4.2 布尔开关">4.2 <strong>布尔开关</strong></a></li>
+                    <li>
+                        <a href="#43-%e6%97%a0%e9%94%81%e9%98%9f%e5%88%97" aria-label="4.3 无锁队列">4.3 <strong>无锁队列</strong></a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e6%80%bb%e7%bb%93" aria-label="总结">总结</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>在并发环境中，如何保证数据在多个线程之间的同步与一致性是一个关键问题。传统的同步方式使用互斥锁（<code>mutex</code>）来保护共享数据，但锁的使用带来了额外的开销。为了解决这个问题，C++11 提供了 <code>atomic&lt;T&gt;</code> 模板类，它允许在不使用锁的情况下安全地进行多线程编程。<code>atomic&lt;T&gt;</code> 提供了对基础数据类型的原子操作支持，能够有效避免竞争条件，提升并发性能。</p>
+<hr>
+<h3 id="一什么是-atomict">一、什么是 <code>atomic&lt;T&gt;</code>？<a hidden class="anchor" aria-hidden="true" href="#一什么是-atomict">#</a></h3>
+<p><code>atomic&lt;T&gt;</code> 是 C++11 提供的一个模板类，用于在多线程环境中安全地操作基础数据类型。它通过底层 CPU 提供的指令集，保证了对变量的操作是原子性的，即每个操作要么完整地执行，要么根本不执行，不会因为线程切换导致数据不一致。</p>
+<h4 id="支持的类型">支持的类型<a hidden class="anchor" aria-hidden="true" href="#支持的类型">#</a></h4>
+<p><code>atomic&lt;T&gt;</code> 模板类支持以下类型：</p>
+<ul>
+<li>基础整型（如 <code>int</code>、<code>long</code>、<code>unsigned int</code>）</li>
+<li>布尔类型（<code>bool</code>）</li>
+<li>指针类型</li>
+</ul>
+<p>值得注意的是，<strong><code>atomic&lt;T&gt;</code> 不支持浮点类型和自定义数据类型</strong>。</p>
+<hr>
+<h3 id="二atomict-的常用操作">二、<code>atomic&lt;T&gt;</code> 的常用操作<a hidden class="anchor" aria-hidden="true" href="#二atomict-的常用操作">#</a></h3>
+<p><code>atomic&lt;T&gt;</code> 提供了一组线程安全的操作，用于读取、修改、比较交换等。其主要操作函数包括：</p>
+<ol>
+<li>
+<p><strong>构造函数</strong></p>
+<ul>
+<li><code>atomic() noexcept</code>：默认构造函数，初始化一个原子变量。</li>
+<li><code>atomic(T val) noexcept</code>：使用初始值 <code>val</code> 初始化原子变量。</li>
+<li><code>atomic(const atomic&amp;) = delete</code>：禁用拷贝构造函数，防止原子变量被复制。</li>
+</ul>
+</li>
+<li>
+<p><strong>赋值操作</strong></p>
+<ul>
+<li><code>atomic&amp; operator=(const atomic&amp;) = delete</code>：禁用赋值操作，防止赋值导致的竞争问题。</li>
+</ul>
+</li>
+<li>
+<p><strong>常用方法</strong></p>
+<ul>
+<li><code>void store(const T val) noexcept</code>：存储一个值 <code>val</code> 到原子变量。</li>
+<li><code>T load() noexcept</code>：读取原子变量的值。</li>
+<li><code>T fetch_add(const T val) noexcept</code>：将原子变量的值与 <code>val</code> 相加，并返回原值。</li>
+<li><code>T fetch_sub(const T val) noexcept</code>：将原子变量的值减去 <code>val</code>，并返回原值。</li>
+<li><code>T exchange(const T val) noexcept</code>：将原子变量的值替换为 <code>val</code>，并返回原值。</li>
+<li><code>bool compare_exchange_strong(T &amp;expect, const T val) noexcept</code>：比较原子变量的值与 <code>expect</code>，如果相等则将其替换为 <code>val</code>，并返回 <code>true</code>；否则将原子变量的值更新为 <code>expect</code>，并返回 <code>false</code>。</li>
+</ul>
+</li>
+<li>
+<p><strong>性能查询</strong></p>
+<ul>
+<li><code>bool is_lock_free()</code>：查询某原子类型的操作是否是无锁的。如果返回 <code>true</code>，表示操作由 CPU 原生指令直接支持；如果返回 <code>false</code>，表示编译器使用了内部的锁机制来保证操作的安全性。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="三原子操作示例">三、原子操作示例<a hidden class="anchor" aria-hidden="true" href="#三原子操作示例">#</a></h3>
+<p>以下是一些 <code>atomic&lt;T&gt;</code> 操作的示例，展示了如何在多线程环境中安全地使用原子变量。</p>
+<h4 id="示例-1基本操作">示例 1：基本操作<a hidden class="anchor" aria-hidden="true" href="#示例-1基本操作">#</a></h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;atomic&gt;</span><span class="cp"> </span><span class="c1">// 引入原子类型头文件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span> <span class="c1">// 初始化原子变量 a
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;a = &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">a</span><span class="p">.</span><span class="n">load</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="c1">// 输出当前值：3
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="n">a</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span> <span class="c1">// 存储新值 8
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;a = &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">a</span><span class="p">.</span><span class="n">load</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="c1">// 输出更新后的值：8
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">old</span> <span class="o">=</span> <span class="n">a</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span> <span class="c1">// a 的值加 5，返回原值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;old = &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">old</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;，a = &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">a</span><span class="p">.</span><span class="n">load</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="c1">// 输出：old = 8，a = 13
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="n">old</span> <span class="o">=</span> <span class="n">a</span><span class="p">.</span><span class="n">fetch_sub</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span> <span class="c1">// a 的值减去 2，返回原值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;old = &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">old</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;，a = &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">a</span><span class="p">.</span><span class="n">load</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="c1">// 输出：old = 13，a = 11
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="示例-2比较交换cas">示例 2：比较交换（CAS）<a hidden class="anchor" aria-hidden="true" href="#示例-2比较交换cas">#</a></h4>
+<p>CAS（Compare-And-Swap）是实现无锁算法的基础操作。它允许我们在读取原子变量时，检查其当前值是否与预期值匹配，如果匹配则进行更新。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;atomic&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ii</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>  <span class="c1">// 原子变量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">expect</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>           <span class="c1">// 预期值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">val</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>              <span class="c1">// 新的值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 比较原子变量 ii 的值与 expect
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 如果相等则将其替换为 val
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">bool</span> <span class="n">bret</span> <span class="o">=</span> <span class="n">ii</span><span class="p">.</span><span class="n">compare_exchange_strong</span><span class="p">(</span><span class="n">expect</span><span class="p">,</span> <span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;bret = &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bret</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="c1">// 输出比较结果，false 因为 ii != expect
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;ii = &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">ii</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>     <span class="c1">// 输出原子变量的当前值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;expect = &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">expect</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="c1">// 输出 expect 被更新为 ii 的值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中，<code>compare_exchange_strong()</code> 尝试将 <code>ii</code> 的值从 <code>3</code> 更新为 <code>5</code>，但由于 <code>expect</code> 是 <code>4</code>，因此操作失败，<code>ii</code> 保持原值 <code>3</code>，同时 <code>expect</code> 被更新为 <code>ii</code> 的当前值。</p>
+<hr>
+<h3 id="四使用场景">四、使用场景<a hidden class="anchor" aria-hidden="true" href="#四使用场景">#</a></h3>
+<h4 id="41-计数器">4.1 <strong>计数器</strong><a hidden class="anchor" aria-hidden="true" href="#41-计数器">#</a></h4>
+<p>原子整型可以用作计数器，在并发环境下安全地递增或递减。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">counter</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">increment</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">counter</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// 线程安全的递增操作
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="42-布尔开关">4.2 <strong>布尔开关</strong><a hidden class="anchor" aria-hidden="true" href="#42-布尔开关">#</a></h4>
+<p>原子布尔型可以用作线程间的信号传递，用来实现轻量级的开关机制。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">flag</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">worker_thread</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">flag</span><span class="p">.</span><span class="n">load</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 等待 flag 被设置为 true
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 开始执行任务
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="43-无锁队列">4.3 <strong>无锁队列</strong><a hidden class="anchor" aria-hidden="true" href="#43-无锁队列">#</a></h4>
+<p>原子操作是实现无锁数据结构的基础，CAS 指令可以保证数据结构的线程安全性，而无需使用互斥锁。无锁队列广泛应用于高性能、多线程场景中。</p>
+<hr>
+<h3 id="总结">总结<a hidden class="anchor" aria-hidden="true" href="#总结">#</a></h3>
+<p><code>atomic&lt;T&gt;</code> 是 C++11 中为多线程编程提供的重要工具。它利用底层硬件的支持，实现了对基础数据类型的无锁访问和修改操作。在适当的场景下使用原子操作，能够避免锁带来的性能开销，并且能够简化代码逻辑。然而，虽然原子操作可以避免锁的使用，但它们也有自己的局限性。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/cpp%E7%9A%84%E8%99%9A%E5%87%BD%E6%95%B0%E5%8F%8A%E5%85%B6%E6%9B%BF%E4%BB%A3%E5%93%81/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>CPP的虚函数及其替代品</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>条件变量</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CPP11中的线程支持 | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="在 C&#43;&#43;11 之前，C&#43;&#43; 没有原生的线程支持，开发者需要依赖于操作系统提供的线程库，不同平台的实现各不相同，这导致了跨平台开发的复杂性。C&#43;&#43;11 引入">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/cpp11%E4%B8%AD%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%94%AF%E6%8C%81/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/cpp11%E4%B8%AD%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%94%AF%E6%8C%81/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="CPP11中的线程支持" />
+<meta property="og:description" content="在 C&#43;&#43;11 之前，C&#43;&#43; 没有原生的线程支持，开发者需要依赖于操作系统提供的线程库，不同平台的实现各不相同，这导致了跨平台开发的复杂性。C&#43;&#43;11 引入" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/cpp11%E4%B8%AD%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%94%AF%E6%8C%81/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-07-24T09:33:07+08:00" />
+<meta property="article:modified_time" content="2024-07-24T09:33:07+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CPP11中的线程支持"/>
+<meta name="twitter:description" content="在 C&#43;&#43;11 之前，C&#43;&#43; 没有原生的线程支持，开发者需要依赖于操作系统提供的线程库，不同平台的实现各不相同，这导致了跨平台开发的复杂性。C&#43;&#43;11 引入"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "CPP11中的线程支持",
+      "item": "https://oheyu.github.io/zh/posts/tech/cpp11%E4%B8%AD%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%94%AF%E6%8C%81/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CPP11中的线程支持",
+  "name": "CPP11中的线程支持",
+  "description": "在 C++11 之前，C++ 没有原生的线程支持，开发者需要依赖于操作系统提供的线程库，不同平台的实现各不相同，这导致了跨平台开发的复杂性。C++11 引入",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\r在 C++11 之前，C++ 没有原生的线程支持，开发者需要依赖于操作系统提供的线程库，不同平台的实现各不相同，这导致了跨平台开发的复杂性。C++11 引入了标准线程库，使线程的创建和管理变得更加统一、易用且跨平台。\n一、线程的创建 在 C++11 中，可以通过 std::thread 类创建线程。std::thread 类提供了几种不同的构造方式，用于灵活地创建线程并执行任务。以下是几种常见的线程创建方法：\n1.1 头文件与基本概念 使用线程需要包含头文件：\n1 #include 线程的基本构造函数如下：\n默认构造函数：thread() noexcept 创建一个空线程对象，不执行任何任务，也不创建子线程。\n带参数的构造函数：\n1 2 template\u003c class Function, class... Args \u003e explicit thread(Function\u0026\u0026 fx, Args\u0026\u0026... args); 这个构造函数用于创建线程并启动任务。fx 是任务函数，args 是传递给任务函数的参数。fx 可以是普通函数、lambda 表达式、类成员函数等。\n1.2 创建线程的注意事项 不可复制：std::thread 不支持复制，线程对象之间不能拷贝。 任务结束后自动终止：线程的任务函数执行完毕后，线程将自动终止。 主线程退出影响子线程：如果主线程退出，所有尚未完成的子线程会被强行终止。因此在实际编程中，通常需要通过 join() 或 detach() 处理子线程的资源。 二、使用不同方式创建线程的示例 2.1 使用普通函数创建线程 普通函数是最常见的线程任务类型。在下面的例子中，func 是一个普通函数，接收两个参数并通过 std::thread 创建多个线程来执行它。\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 #include #include #include void func(int bh, const std::string\u0026 str) { for (int ii = 1; ii \u003c= 10; ii++) { std::cout \u003c\u003c \"第\" \u003c\u003c ii \u003c\u003c \"次表白：亲爱的\" \u003c\u003c bh \u003c\u003c \"号，\" \u003c\u003c str \u003c\u003c std::endl; Sleep(1); // 模拟工作负载，休眠1秒 } } int main() { std::thread t1(func, 3, \"我是一只傻傻鸟。\"); // 创建线程 t1，执行 func std::thread t2(func, 8, \"我有一只小小鸟。\"); // 创建线程 t2，执行 func t1.join(); // 主线程等待 t1 结束 t2.join(); // 主线程等待 t2 结束 return 0; } 2.2 使用 lambda 表达式创建线程 C++11 提供了 lambda 表达式的支持，简化了函数对象的创建。以下是使用 lambda 表达式创建线程的例子：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 #include #include #include int main() { auto f = [](int bh, const std::string\u0026 str) { for (int ii = 1; ii \u003c= 10; ii++) { std::cout \u003c\u003c \"第\" \u003c\u003c ii \u003c\u003c \"次表白：亲爱的\" \u003c\u003c bh \u003c\u003c \"号，\" \u003c\u003c str \u003c\u003c std::endl; Sleep(1); // 模拟工作负载，休眠1秒 } }; std::thread t3(f, 3, \"我是一只傻傻鸟。\"); // 使用 lambda 表达式创建线程 t3.join(); // 主线程等待 t3 结束 return 0; } 2.3 使用仿函数（Functor）创建线程 仿函数是通过重载 operator() 实现的类，可以像普通函数一样调用。以下是通过仿函数创建线程的例子：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 #include #include #include class MyThread { public: void operator()(int bh, const std::string\u0026 str) { for (int ii = 1; ii \u003c= 10; ii++) { std::cout \u003c\u003c \"第\" \u003c\u003c ii \u003c\u003c \"次表白：亲爱的\" \u003c\u003c bh \u003c\u003c \"号，\" \u003c\u003c str \u003c\u003c std::endl; Sleep(1); // 模拟工作负载，休眠1秒 } } }; int main() { std::thread t4(MyThread(), 3, \"我是一只傻傻鸟。\"); // 创建线程并使用仿函数执行任务 t4.join(); // 主线程等待 t4 结束 return 0; } 2.4 使用类的静态成员函数创建线程 静态成员函数不依赖于具体的对象，因此可以直接使用类名调用。以下是通过静态成员函数创建线程的例子：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 #include #include #include class MyThread { public: static void func(int bh, const std::string\u0026 str) { for (int ii = 1; ii \u003c= 10; ii++) { std::cout \u003c\u003c \"第\" \u003c\u003c ii \u003c\u003c \"次表白：亲爱的\" \u003c\u003c bh \u003c\u003c \"号，\" \u003c\u003c str \u003c\u003c std::endl; Sleep(1); // 模拟工作负载，休眠1秒 } } }; int main() { std::thread t5(MyThread::func, 3, \"我是一只傻傻鸟。\"); // 使用静态成员函数创建线程 t5.join(); // 主线程等待 t5 结束 return 0; } 2.5 使用类的非静态成员函数创建线程 非静态成员函数与特定的对象实例关联，调用时需要传递对象指针。以下是通过非静态成员函数创建线程的例子：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 #include #include #include class MyThread { public: void func(int bh, const std::string\u0026 str) { for (int ii = 1; ii \u003c= 10; ii++) { std::cout \u003c\u003c \"第\" \u003c\u003c ii \u003c\u003c \"次表白：亲爱的\" \u003c\u003c bh \u003c\u003c \"号，\" \u003c\u003c str \u003c\u003c std::endl; Sleep(1); // 模拟工作负载，休眠1秒 } } }; int main() { MyThread obj; // 创建类的对象 std::thread t6(\u0026MyThread::func, \u0026obj, 3, \"我是一只傻傻鸟。\"); // 创建线程，并绑定对象成员函数 t6.join(); // 主线程等待 t6 结束 return 0; } 三、总结 C++11 通过 std::thread 类为多线程编程提供了跨平台、统一的接口。开发者可以使用普通函数、lambda 表达式、仿函数、类的静态和非静态成员函数来创建线程。每种方式都有其使用场景和优势，开发者应根据实际需求选择合适的线程创建方法。\n注意事项：\nstd::thread 不支持复制，只能通过移动操作来转移资源。 在使用非静态成员函数时，需要传递类对象的指针，确保对象的生命周期比线程长。 join() 用于阻塞主线程，等待子线程结束；detach() 可以使子线程与主线程分离，独立运行。 ",
+  "wordCount" : "1898",
+  "inLanguage": "zh",
+  "datePublished": "2024-07-24T09:33:07+08:00",
+  "dateModified": "2024-07-24T09:33:07+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/cpp11%E4%B8%AD%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%94%AF%E6%8C%81/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      CPP11中的线程支持
+    </h1>
+    <div class="post-meta"><span title='2024-07-24 09:33:07 +0800 CST'>2024-07-24</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e7%ba%bf%e7%a8%8b%e7%9a%84%e5%88%9b%e5%bb%ba" aria-label="一、线程的创建">一、线程的创建</a><ul>
+                            
+                    <li>
+                        <a href="#11-%e5%a4%b4%e6%96%87%e4%bb%b6%e4%b8%8e%e5%9f%ba%e6%9c%ac%e6%a6%82%e5%bf%b5" aria-label="1.1 头文件与基本概念">1.1 头文件与基本概念</a></li>
+                    <li>
+                        <a href="#12-%e5%88%9b%e5%bb%ba%e7%ba%bf%e7%a8%8b%e7%9a%84%e6%b3%a8%e6%84%8f%e4%ba%8b%e9%a1%b9" aria-label="1.2 创建线程的注意事项">1.2 创建线程的注意事项</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%8c%e4%bd%bf%e7%94%a8%e4%b8%8d%e5%90%8c%e6%96%b9%e5%bc%8f%e5%88%9b%e5%bb%ba%e7%ba%bf%e7%a8%8b%e7%9a%84%e7%a4%ba%e4%be%8b" aria-label="二、使用不同方式创建线程的示例">二、使用不同方式创建线程的示例</a><ul>
+                            
+                    <li>
+                        <a href="#21-%e4%bd%bf%e7%94%a8%e6%99%ae%e9%80%9a%e5%87%bd%e6%95%b0%e5%88%9b%e5%bb%ba%e7%ba%bf%e7%a8%8b" aria-label="2.1 使用普通函数创建线程">2.1 使用普通函数创建线程</a></li>
+                    <li>
+                        <a href="#22-%e4%bd%bf%e7%94%a8-lambda-%e8%a1%a8%e8%be%be%e5%bc%8f%e5%88%9b%e5%bb%ba%e7%ba%bf%e7%a8%8b" aria-label="2.2 使用 lambda 表达式创建线程">2.2 使用 lambda 表达式创建线程</a></li>
+                    <li>
+                        <a href="#23-%e4%bd%bf%e7%94%a8%e4%bb%bf%e5%87%bd%e6%95%b0functor%e5%88%9b%e5%bb%ba%e7%ba%bf%e7%a8%8b" aria-label="2.3 使用仿函数（Functor）创建线程">2.3 使用仿函数（Functor）创建线程</a></li>
+                    <li>
+                        <a href="#24-%e4%bd%bf%e7%94%a8%e7%b1%bb%e7%9a%84%e9%9d%99%e6%80%81%e6%88%90%e5%91%98%e5%87%bd%e6%95%b0%e5%88%9b%e5%bb%ba%e7%ba%bf%e7%a8%8b" aria-label="2.4 使用类的静态成员函数创建线程">2.4 使用类的静态成员函数创建线程</a></li>
+                    <li>
+                        <a href="#25-%e4%bd%bf%e7%94%a8%e7%b1%bb%e7%9a%84%e9%9d%9e%e9%9d%99%e6%80%81%e6%88%90%e5%91%98%e5%87%bd%e6%95%b0%e5%88%9b%e5%bb%ba%e7%ba%bf%e7%a8%8b" aria-label="2.5 使用类的非静态成员函数创建线程">2.5 使用类的非静态成员函数创建线程</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%89%e6%80%bb%e7%bb%93" aria-label="三、总结">三、总结</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>在 C++11 之前，C++ 没有原生的线程支持，开发者需要依赖于操作系统提供的线程库，不同平台的实现各不相同，这导致了跨平台开发的复杂性。C++11 引入了标准线程库，使线程的创建和管理变得更加统一、易用且跨平台。</p>
+<hr>
+<h3 id="一线程的创建">一、线程的创建<a hidden class="anchor" aria-hidden="true" href="#一线程的创建">#</a></h3>
+<p>在 C++11 中，可以通过 <code>std::thread</code> 类创建线程。<code>std::thread</code> 类提供了几种不同的构造方式，用于灵活地创建线程并执行任务。以下是几种常见的线程创建方法：</p>
+<h4 id="11-头文件与基本概念">1.1 头文件与基本概念<a hidden class="anchor" aria-hidden="true" href="#11-头文件与基本概念">#</a></h4>
+<p>使用线程需要包含头文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;thread&gt;</span><span class="cp">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>线程的基本构造函数如下：</p>
+<ul>
+<li>
+<p><strong>默认构造函数</strong>：<code>thread() noexcept</code> 创建一个空线程对象，不执行任何任务，也不创建子线程。</p>
+</li>
+<li>
+<p><strong>带参数的构造函数</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span> <span class="k">class</span> <span class="nc">Function</span><span class="p">,</span> <span class="k">class</span><span class="err">... </span><span class="nc">Args</span> <span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">explicit</span> <span class="kr">thread</span><span class="p">(</span><span class="n">Function</span><span class="o">&amp;&amp;</span> <span class="n">fx</span><span class="p">,</span> <span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span> <span class="n">args</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个构造函数用于创建线程并启动任务。<code>fx</code> 是任务函数，<code>args</code> 是传递给任务函数的参数。<code>fx</code> 可以是普通函数、lambda 表达式、类成员函数等。</p>
+</li>
+</ul>
+<h4 id="12-创建线程的注意事项">1.2 创建线程的注意事项<a hidden class="anchor" aria-hidden="true" href="#12-创建线程的注意事项">#</a></h4>
+<ul>
+<li><strong>不可复制</strong>：<code>std::thread</code> 不支持复制，线程对象之间不能拷贝。</li>
+<li><strong>任务结束后自动终止</strong>：线程的任务函数执行完毕后，线程将自动终止。</li>
+<li><strong>主线程退出影响子线程</strong>：如果主线程退出，所有尚未完成的子线程会被强行终止。因此在实际编程中，通常需要通过 <code>join()</code> 或 <code>detach()</code> 处理子线程的资源。</li>
+</ul>
+<hr>
+<h3 id="二使用不同方式创建线程的示例">二、使用不同方式创建线程的示例<a hidden class="anchor" aria-hidden="true" href="#二使用不同方式创建线程的示例">#</a></h3>
+<h4 id="21-使用普通函数创建线程">2.1 使用普通函数创建线程<a hidden class="anchor" aria-hidden="true" href="#21-使用普通函数创建线程">#</a></h4>
+<p>普通函数是最常见的线程任务类型。在下面的例子中，<code>func</code> 是一个普通函数，接收两个参数并通过 <code>std::thread</code> 创建多个线程来执行它。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;thread&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="n">bh</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">str</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">ii</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">ii</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">;</span> <span class="n">ii</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;第&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">ii</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;次表白：亲爱的&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bh</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;号，&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">str</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>   <span class="c1">// 模拟工作负载，休眠1秒
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">t1</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>  <span class="c1">// 创建线程 t1，执行 func
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">t2</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s">&#34;我有一只小小鸟。&#34;</span><span class="p">);</span>  <span class="c1">// 创建线程 t2，执行 func
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="n">t1</span><span class="p">.</span><span class="n">join</span><span class="p">();</span> <span class="c1">// 主线程等待 t1 结束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">t2</span><span class="p">.</span><span class="n">join</span><span class="p">();</span> <span class="c1">// 主线程等待 t2 结束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="22-使用-lambda-表达式创建线程">2.2 使用 lambda 表达式创建线程<a hidden class="anchor" aria-hidden="true" href="#22-使用-lambda-表达式创建线程">#</a></h4>
+<p>C++11 提供了 lambda 表达式的支持，简化了函数对象的创建。以下是使用 lambda 表达式创建线程的例子：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;thread&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">f</span> <span class="o">=</span> <span class="p">[](</span><span class="kt">int</span> <span class="n">bh</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">str</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">ii</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">ii</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">;</span> <span class="n">ii</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;第&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">ii</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;次表白：亲爱的&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bh</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;号，&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">str</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>  <span class="c1">// 模拟工作负载，休眠1秒
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">t3</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>  <span class="c1">// 使用 lambda 表达式创建线程
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">t3</span><span class="p">.</span><span class="n">join</span><span class="p">();</span> <span class="c1">// 主线程等待 t3 结束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="23-使用仿函数functor创建线程">2.3 使用仿函数（Functor）创建线程<a hidden class="anchor" aria-hidden="true" href="#23-使用仿函数functor创建线程">#</a></h4>
+<p>仿函数是通过重载 <code>operator()</code> 实现的类，可以像普通函数一样调用。以下是通过仿函数创建线程的例子：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;thread&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyThread</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="kt">int</span> <span class="n">bh</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">str</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">ii</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">ii</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">;</span> <span class="n">ii</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;第&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">ii</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;次表白：亲爱的&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bh</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;号，&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">str</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>  <span class="c1">// 模拟工作负载，休眠1秒
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">t4</span><span class="p">(</span><span class="n">MyThread</span><span class="p">(),</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>  <span class="c1">// 创建线程并使用仿函数执行任务
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">t4</span><span class="p">.</span><span class="n">join</span><span class="p">();</span> <span class="c1">// 主线程等待 t4 结束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="24-使用类的静态成员函数创建线程">2.4 使用类的静态成员函数创建线程<a hidden class="anchor" aria-hidden="true" href="#24-使用类的静态成员函数创建线程">#</a></h4>
+<p>静态成员函数不依赖于具体的对象，因此可以直接使用类名调用。以下是通过静态成员函数创建线程的例子：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;thread&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyThread</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">static</span> <span class="kt">void</span> <span class="n">func</span><span class="p">(</span><span class="kt">int</span> <span class="n">bh</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">str</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">ii</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">ii</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">;</span> <span class="n">ii</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;第&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">ii</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;次表白：亲爱的&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bh</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;号，&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">str</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>  <span class="c1">// 模拟工作负载，休眠1秒
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">t5</span><span class="p">(</span><span class="n">MyThread</span><span class="o">::</span><span class="n">func</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>  <span class="c1">// 使用静态成员函数创建线程
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">t5</span><span class="p">.</span><span class="n">join</span><span class="p">();</span> <span class="c1">// 主线程等待 t5 结束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="25-使用类的非静态成员函数创建线程">2.5 使用类的非静态成员函数创建线程<a hidden class="anchor" aria-hidden="true" href="#25-使用类的非静态成员函数创建线程">#</a></h4>
+<p>非静态成员函数与特定的对象实例关联，调用时需要传递对象指针。以下是通过非静态成员函数创建线程的例子：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;thread&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyThread</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="n">func</span><span class="p">(</span><span class="kt">int</span> <span class="n">bh</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">str</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">ii</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">ii</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">;</span> <span class="n">ii</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;第&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">ii</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;次表白：亲爱的&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bh</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;号，&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">str</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>  <span class="c1">// 模拟工作负载，休眠1秒
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MyThread</span> <span class="n">obj</span><span class="p">;</span>  <span class="c1">// 创建类的对象
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">t6</span><span class="p">(</span><span class="o">&amp;</span><span class="n">MyThread</span><span class="o">::</span><span class="n">func</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">obj</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>  <span class="c1">// 创建线程，并绑定对象成员函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="n">t6</span><span class="p">.</span><span class="n">join</span><span class="p">();</span> <span class="c1">// 主线程等待 t6 结束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="三总结">三、总结<a hidden class="anchor" aria-hidden="true" href="#三总结">#</a></h3>
+<p>C++11 通过 <code>std::thread</code> 类为多线程编程提供了跨平台、统一的接口。开发者可以使用普通函数、lambda 表达式、仿函数、类的静态和非静态成员函数来创建线程。每种方式都有其使用场景和优势，开发者应根据实际需求选择合适的线程创建方法。</p>
+<p><strong>注意事项</strong>：</p>
+<ul>
+<li><code>std::thread</code> 不支持复制，只能通过移动操作来转移资源。</li>
+<li>在使用非静态成员函数时，需要传递类对象的指针，确保对象的生命周期比线程长。</li>
+<li><code>join()</code> 用于阻塞主线程，等待子线程结束；<code>detach()</code> 可以使子线程与主线程分离，独立运行。</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/%E7%BA%BF%E7%A8%8B%E8%B5%84%E6%BA%90%E7%9A%84%E5%9B%9E%E6%94%B6/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>线程资源的回收</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/memcpy%E5%87%BD%E6%95%B0%E8%AF%A6%E8%A7%A3/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>memcpy()函数详解</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

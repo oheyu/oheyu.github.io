@@ -219,69 +219,69 @@ code.has-jax {
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">CPP中的内联函数
+    <h2 class="entry-hint-parent">进程间的通信
     </h2>
   </header>
   <div class="entry-content">
-    <p>在C&#43;&#43;编程中，内联函数（inline function）是一个强大的优化工具，它允许编译器将函数调用直接展开为内联代码，从而减少函数调用的开...</p>
+    <p>进程间通信（IPC，Inter-Process Communication）是 Linux 操作系统中的一个重要组成部分，它允许多个独立进程之间共享数据、...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-09-13 11:23:38 +0800 CST'>2023-09-13</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to CPP中的内联函数" href="https://oheyu.github.io/zh/posts/tech/cpp%E4%B8%AD%E7%9A%84%E5%86%85%E8%81%94%E5%87%BD%E6%95%B0/"></a>
+  <footer class="entry-footer"><span title='2023-09-29 08:39:02 +0800 CST'>2023-09-29</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to 进程间的通信" href="https://oheyu.github.io/zh/posts/tech/%E8%BF%9B%E7%A8%8B%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">CPP智能指针初探
+    <h2 class="entry-hint-parent">共享内存初探
     </h2>
   </header>
   <div class="entry-content">
-    <p>在 C&#43;&#43; 编程中，内存管理始终是一个关键问题，尤其是在手动管理动态分配内存时，容易引发内存泄漏、悬空指针等问题。为了解决这些问题，C&#43;&#43;11 引入了...</p>
+    <p>在操作系统中，进程是独立的执行实体，拥有自己的独立地址空间，无法直接访问其他进程的内存。然而，在多进程程序中，有时需要多个进程之间共享数据，...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-09-10 11:17:32 +0800 CST'>2023-09-10</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to CPP智能指针初探" href="https://oheyu.github.io/zh/posts/tech/cpp%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E5%88%9D%E6%8E%A2/"></a>
+  <footer class="entry-footer"><span title='2023-09-27 22:13:57 +0800 CST'>2023-09-27</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to 共享内存初探" href="https://oheyu.github.io/zh/posts/tech/%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E5%88%9D%E6%8E%A2/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">冷不丁儿的内存就泄漏了
+    <h2 class="entry-hint-parent">Fork函数的工作原理
     </h2>
   </header>
   <div class="entry-content">
-    <p>在 C&#43;&#43; 编程中，内存泄漏是一个经常遇到的重大问题，特别是在涉及动态内存管理的场景中。如果程序在分配内存后没有及时释放，可能导致系统内存逐渐被耗尽...</p>
+    <p>在 Linux 系统编程中，fork() 函数是创建新进程的基础工具之一。它允许进程在运行时创建自己的副本，即子进程，从而实现并行处理。今天，我们来详细探...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-09-09 11:05:16 +0800 CST'>2023-09-09</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to 冷不丁儿的内存就泄漏了" href="https://oheyu.github.io/zh/posts/tech/%E5%86%B7%E4%B8%8D%E4%B8%81%E5%84%BF%E7%9A%84%E5%86%85%E5%AD%98%E5%B0%B1%E6%B3%84%E6%BC%8F%E4%BA%86/"></a>
+  <footer class="entry-footer"><span title='2023-09-25 17:08:06 +0800 CST'>2023-09-25</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to Fork函数的工作原理" href="https://oheyu.github.io/zh/posts/tech/fork%E5%87%BD%E6%95%B0%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">冒泡排序
+    <h2 class="entry-hint-parent">左值与右值
     </h2>
   </header>
   <div class="entry-content">
-    <p>一、引言 冒泡排序（Bubble Sort）是一种基础且直观的排序算法，它通过反复遍历待排序的数组，每次比较相邻的元素，如果顺序错误则交换它们的...</p>
+    <p>最近写代码，对左值（lvalue） 和 右值（rvalue） 两个概念感到有些拿不准，总结一下。 一、左值（lvalue）与右值（rvalue）的基...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-09-03 10:53:37 +0800 CST'>2023-09-03</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to 冒泡排序" href="https://oheyu.github.io/zh/posts/tech/%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/"></a>
+  <footer class="entry-footer"><span title='2023-09-24 16:55:52 +0800 CST'>2023-09-24</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to 左值与右值" href="https://oheyu.github.io/zh/posts/tech/%E5%B7%A6%E5%80%BC%E4%B8%8E%E5%8F%B3%E5%80%BC/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">CPP模板参数推导与显示指定的原理及应用场景
+    <h2 class="entry-hint-parent">Lock_guard与unique_lock
     </h2>
   </header>
   <div class="entry-content">
-    <p>C&#43;&#43; 的模板机制是其强大功能的核心之一，它允许编写通用的代码，并根据不同的类型进行实例化。然而，C&#43;&#43; 中的模板使用过程中，有时我们可以依赖编译器...</p>
+    <p>在现代 C&#43;&#43; 多线程编程中，锁机制是确保线程安全访问共享资源的关键手段。C&#43;&#43; 标准库为开发者提供了多种锁管理工具，其中最常用的是 std::lock_guard 和 std::un...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-08-31 21:42:05 +0800 CST'>2023-08-31</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to CPP模板参数推导与显示指定的原理及应用场景" href="https://oheyu.github.io/zh/posts/tech/cpp%E6%A8%A1%E6%9D%BF%E5%8F%82%E6%95%B0%E6%8E%A8%E5%AF%BC%E4%B8%8E%E6%98%BE%E7%A4%BA%E6%8C%87%E5%AE%9A%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/"></a>
+  <footer class="entry-footer"><span title='2023-09-22 16:44:33 +0800 CST'>2023-09-22</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to Lock_guard与unique_lock" href="https://oheyu.github.io/zh/posts/tech/lock_guard%E4%B8%8Eunique_lock/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">
     <a class="prev" href="https://oheyu.github.io/zh/posts/tech/page/4/">
-      «&nbsp;上一页&nbsp;4/13
+      «&nbsp;上一页&nbsp;4/14
     </a>
-    <a class="next" href="https://oheyu.github.io/zh/posts/tech/page/6/">下一页&nbsp;6/13&nbsp;»
+    <a class="next" href="https://oheyu.github.io/zh/posts/tech/page/6/">下一页&nbsp;6/14&nbsp;»
     </a>
   </nav>
 </footer>

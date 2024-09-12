@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Call_once实现线程安全的单次执行 | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="在多线程编程中，经常会遇到这样的需求：某些函数或操作只能被调用一次，特别是在初始化某些全局或共享资源时。C&#43;&#43;11 提供了一个简洁的解决方案：">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/call_once%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E5%8D%95%E6%AC%A1%E6%89%A7%E8%A1%8C/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/call_once%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E5%8D%95%E6%AC%A1%E6%89%A7%E8%A1%8C/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="Call_once实现线程安全的单次执行" />
+<meta property="og:description" content="在多线程编程中，经常会遇到这样的需求：某些函数或操作只能被调用一次，特别是在初始化某些全局或共享资源时。C&#43;&#43;11 提供了一个简洁的解决方案：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/call_once%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E5%8D%95%E6%AC%A1%E6%89%A7%E8%A1%8C/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-07-31T10:22:02+08:00" />
+<meta property="article:modified_time" content="2024-07-31T10:22:02+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Call_once实现线程安全的单次执行"/>
+<meta name="twitter:description" content="在多线程编程中，经常会遇到这样的需求：某些函数或操作只能被调用一次，特别是在初始化某些全局或共享资源时。C&#43;&#43;11 提供了一个简洁的解决方案："/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Call_once实现线程安全的单次执行",
+      "item": "https://oheyu.github.io/zh/posts/tech/call_once%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E5%8D%95%E6%AC%A1%E6%89%A7%E8%A1%8C/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Call_once实现线程安全的单次执行",
+  "name": "Call_once实现线程安全的单次执行",
+  "description": "在多线程编程中，经常会遇到这样的需求：某些函数或操作只能被调用一次，特别是在初始化某些全局或共享资源时。C++11 提供了一个简洁的解决方案：",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\r在多线程编程中，经常会遇到这样的需求：某些函数或操作只能被调用一次，特别是在初始化某些全局或共享资源时。C++11 提供了一个简洁的解决方案：std::call_once()，它能够保证在多线程环境中某个函数仅被执行一次，而不会引发竞争条件（Race Condition）。\n一、为什么需要 std::call_once()？ 在多线程环境中，如果多个线程试图同时初始化某些共享资源，会引发不确定的行为。例如，两个线程可能同时执行初始化逻辑，导致资源被初始化多次，进而引发逻辑错误。为了避免这种情况，我们需要确保初始化逻辑只会被执行一次。传统的加锁机制（如 std::mutex）虽然可以解决这个问题，但它的效率较低，且可能导致线程频繁阻塞。\n为了解决这个问题，C++11 引入了 std::call_once()，它结合了 std::once_flag，能够高效地确保某个函数在多线程环境下只被调用一次。相比于传统的加锁机制，std::call_once() 更轻量，也更适合这种单次初始化的场景。\n二、 std::call_once() 的用法 std::call_once() 是一个模板函数，其原型如下：\n1 2 template\u003c class Callable, class... Args \u003e void call_once( std::once_flag\u0026 flag, Callable\u0026\u0026 fn, Args\u0026\u0026... args ); flag 是一个 std::once_flag 对象，用于记录某个操作是否已经执行过。 fn 是需要执行的函数或可调用对象（可以是普通函数、lambda、函数对象等）。 args 是传递给 fn 的参数。 当 std::call_once() 被调用时，它会检查 std::once_flag 的状态。如果 flag 的状态表明函数从未执行过，则 fn 会被执行，之后 flag 会被设置为 “已执行”。即使多个线程同时调用 std::call_once()，也只有一个线程会真正执行 fn。\n三、示例：多线程中的 std::call_once() 下面的例子演示了如何使用 std::call_once() 来保证某个函数只被执行一次。\n示例代码： 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 #include #include // 包含 std::thread。 #include // 包含 std::once_flag 和 std::call_once。 #include // 包含 std::chrono::seconds。 using namespace std; // 定义 once_flag 对象，用于标记某个操作是否已经执行。 once_flag onceflag; // 打算只被执行一次的函数。 void once_func(const int bh, const string\u0026 str) { cout \u003c\u003c \"once_func() bh = \" \u003c\u003c bh \u003c\u003c \", str = \" \u003c\u003c str \u003c\u003c endl; } // 模拟多个线程执行的函数。 void func(int bh, const string\u0026 str) { // 确保 once_func 只被执行一次。 call_once(onceflag, once_func, 0, \"各位观众，我要开始表白了。\"); // 模拟多次表白的操作。 for (int ii = 1; ii \u003c= 3; ii++) { cout \u003c\u003c \"第\" \u003c\u003c ii \u003c\u003c \"次表白：亲爱的\" \u003c\u003c bh \u003c\u003c \"号，\" \u003c\u003c str \u003c\u003c endl; this_thread::sleep_for(chrono::seconds(1)); // 休眠1秒。 } } int main() { // 创建两个线程，模拟多个线程并发执行。 thread t1(func, 3, \"我是一只傻傻鸟。\"); thread t2(func, 8, \"我有一只小小鸟。\"); // 等待线程结束。 t1.join(); t2.join(); } 输出： 1 2 3 4 5 6 7 once_func() bh = 0, str = 各位观众，我要开始表白了。 第1次表白：亲爱的3号，我是一只傻傻鸟。 第1次表白：亲爱的8号，我有一只小小鸟。 第2次表白：亲爱的3号，我是一只傻傻鸟。 第2次表白：亲爱的8号，我有一只小小鸟。 第3次表白：亲爱的3号，我是一只傻傻鸟。 第3次表白：亲爱的8号，我有一只小小鸟。 四、代码解析 once_flag 的使用： 在代码中，我们声明了一个全局变量 onceflag，它用于标记某个操作（即 once_func()）是否已经被执行过。这个对象是 std::call_once() 保证函数只被执行一次的核心。\nstd::call_once()： 在每个线程的执行函数 func() 中，调用了 std::call_once(onceflag, once_func, ...)，其中 onceflag 是用于标记的 once_flag 对象，而 once_func 是需要保证只执行一次的函数。即使有多个线程并发调用 std::call_once()，只有一个线程会真正执行 once_func()，其他线程会跳过该函数的执行。\n线程并发执行： 两个线程 t1 和 t2 被创建并执行，分别调用 func() 函数。尽管两个线程都调用了 std::call_once()，但我们可以看到，once_func() 只被执行了一次。\n确保资源的正确回收： 使用 t1.join() 和 t2.join() 来等待线程完成并确保资源正确回收。\n五、 std::call_once() 的应用场景 std::call_once() 最常见的应用场景是线程安全的单例模式（Singleton Pattern）。在单例模式中，我们希望某个对象只被初始化一次，无论有多少个线程试图访问它。例如：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 class Singleton { private: static Singleton* instance; static once_flag flag; Singleton() { cout \u003c\u003c \"Singleton 构造函数执行\" \u003c\u003c endl; } public: static Singleton* getInstance() { call_once(flag, []() { instance = new Singleton(); }); return instance; } }; Singleton* Singleton::instance = nullptr; once_flag Singleton::flag; 在这个例子中，Singleton::getInstance() 使用 std::call_once() 来确保 Singleton 对象只被初始化一次，即使有多个线程同时调用 getInstance()。\n六、总结 std::call_once() 提供了一种高效、安全的方法来保证某个函数在多线程环境下只被执行一次。它结合 std::once_flag，避免了传统锁机制带来的性能开销，简化了代码结构，同时大大提高了并发编程中的安全性。\n无论是在实现单例模式、初始化全局资源，还是处理某些仅需执行一次的操作时，std::call_once() 都是一个非常值得推荐的工具。\n",
+  "wordCount" : "1969",
+  "inLanguage": "zh",
+  "datePublished": "2024-07-31T10:22:02+08:00",
+  "dateModified": "2024-07-31T10:22:02+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/call_once%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E5%8D%95%E6%AC%A1%E6%89%A7%E8%A1%8C/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Call_once实现线程安全的单次执行
+    </h1>
+    <div class="post-meta"><span title='2024-07-31 10:22:02 +0800 CST'>2024-07-31</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e4%b8%ba%e4%bb%80%e4%b9%88%e9%9c%80%e8%a6%81-stdcall_once" aria-label="一、为什么需要 std::call_once()？">一、为什么需要 <code>std::call_once()</code>？</a></li>
+                    <li>
+                        <a href="#%e4%ba%8c-stdcall_once-%e7%9a%84%e7%94%a8%e6%b3%95" aria-label="二、 std::call_once() 的用法">二、 <code>std::call_once()</code> 的用法</a></li>
+                    <li>
+                        <a href="#%e4%b8%89%e7%a4%ba%e4%be%8b%e5%a4%9a%e7%ba%bf%e7%a8%8b%e4%b8%ad%e7%9a%84-stdcall_once" aria-label="三、示例：多线程中的 std::call_once()">三、示例：多线程中的 <code>std::call_once()</code></a><ul>
+                            
+                    <li>
+                        <a href="#%e7%a4%ba%e4%be%8b%e4%bb%a3%e7%a0%81" aria-label="示例代码：">示例代码：</a></li>
+                    <li>
+                        <a href="#%e8%be%93%e5%87%ba" aria-label="输出：">输出：</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%9b%9b%e4%bb%a3%e7%a0%81%e8%a7%a3%e6%9e%90" aria-label="四、代码解析">四、代码解析</a></li>
+                    <li>
+                        <a href="#%e4%ba%94-stdcall_once-%e7%9a%84%e5%ba%94%e7%94%a8%e5%9c%ba%e6%99%af" aria-label="五、 std::call_once() 的应用场景">五、 <code>std::call_once()</code> 的应用场景</a></li>
+                    <li>
+                        <a href="#%e5%85%ad%e6%80%bb%e7%bb%93" aria-label="六、总结">六、总结</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>在多线程编程中，经常会遇到这样的需求：某些函数或操作只能被调用一次，特别是在初始化某些全局或共享资源时。C++11 提供了一个简洁的解决方案：<code>std::call_once()</code>，它能够保证在多线程环境中某个函数仅被执行一次，而不会引发竞争条件（Race Condition）。</p>
+<hr>
+<h3 id="一为什么需要-stdcall_once">一、为什么需要 <code>std::call_once()</code>？<a hidden class="anchor" aria-hidden="true" href="#一为什么需要-stdcall_once">#</a></h3>
+<p>在多线程环境中，如果多个线程试图同时初始化某些共享资源，会引发不确定的行为。例如，两个线程可能同时执行初始化逻辑，导致资源被初始化多次，进而引发逻辑错误。为了避免这种情况，我们需要确保初始化逻辑只会被执行一次。传统的加锁机制（如 <code>std::mutex</code>）虽然可以解决这个问题，但它的效率较低，且可能导致线程频繁阻塞。</p>
+<p>为了解决这个问题，C++11 引入了 <code>std::call_once()</code>，它结合了 <code>std::once_flag</code>，能够高效地确保某个函数在多线程环境下只被调用一次。相比于传统的加锁机制，<code>std::call_once()</code> 更轻量，也更适合这种单次初始化的场景。</p>
+<hr>
+<h3 id="二-stdcall_once-的用法">二、 <code>std::call_once()</code> 的用法<a hidden class="anchor" aria-hidden="true" href="#二-stdcall_once-的用法">#</a></h3>
+<p><code>std::call_once()</code> 是一个模板函数，其原型如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span> <span class="k">class</span> <span class="nc">Callable</span><span class="p">,</span> <span class="k">class</span><span class="err">... </span><span class="nc">Args</span> <span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">call_once</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">once_flag</span><span class="o">&amp;</span> <span class="n">flag</span><span class="p">,</span> <span class="n">Callable</span><span class="o">&amp;&amp;</span> <span class="n">fn</span><span class="p">,</span> <span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span> <span class="n">args</span> <span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>flag</code> 是一个 <code>std::once_flag</code> 对象，用于记录某个操作是否已经执行过。</li>
+<li><code>fn</code> 是需要执行的函数或可调用对象（可以是普通函数、lambda、函数对象等）。</li>
+<li><code>args</code> 是传递给 <code>fn</code> 的参数。</li>
+</ul>
+<p>当 <code>std::call_once()</code> 被调用时，它会检查 <code>std::once_flag</code> 的状态。如果 <code>flag</code> 的状态表明函数从未执行过，则 <code>fn</code> 会被执行，之后 <code>flag</code> 会被设置为 &ldquo;已执行&rdquo;。即使多个线程同时调用 <code>std::call_once()</code>，也只有一个线程会真正执行 <code>fn</code>。</p>
+<hr>
+<h3 id="三示例多线程中的-stdcall_once">三、示例：多线程中的 <code>std::call_once()</code><a hidden class="anchor" aria-hidden="true" href="#三示例多线程中的-stdcall_once">#</a></h3>
+<p>下面的例子演示了如何使用 <code>std::call_once()</code> 来保证某个函数只被执行一次。</p>
+<h4 id="示例代码">示例代码：<a hidden class="anchor" aria-hidden="true" href="#示例代码">#</a></h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;thread&gt;</span><span class="cp">        </span><span class="c1">// 包含 std::thread。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#include</span> <span class="cpf">&lt;mutex&gt;</span><span class="cp">         </span><span class="c1">// 包含 std::once_flag 和 std::call_once。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#include</span> <span class="cpf">&lt;chrono&gt;</span><span class="cp">        </span><span class="c1">// 包含 std::chrono::seconds。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 定义 once_flag 对象，用于标记某个操作是否已经执行。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">once_flag</span> <span class="n">onceflag</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 打算只被执行一次的函数。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="nf">once_func</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">bh</span><span class="p">,</span> <span class="k">const</span> <span class="n">string</span><span class="o">&amp;</span> <span class="n">str</span><span class="p">)</span>  <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;once_func() bh = &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bh</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;, str = &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">str</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 模拟多个线程执行的函数。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="n">bh</span><span class="p">,</span> <span class="k">const</span> <span class="n">string</span><span class="o">&amp;</span> <span class="n">str</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 确保 once_func 只被执行一次。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">call_once</span><span class="p">(</span><span class="n">onceflag</span><span class="p">,</span> <span class="n">once_func</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#34;各位观众，我要开始表白了。&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 模拟多次表白的操作。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">ii</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">ii</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">;</span> <span class="n">ii</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;第&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">ii</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;次表白：亲爱的&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">bh</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;号，&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">str</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">this_thread</span><span class="o">::</span><span class="n">sleep_for</span><span class="p">(</span><span class="n">chrono</span><span class="o">::</span><span class="n">seconds</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>    <span class="c1">// 休眠1秒。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 创建两个线程，模拟多个线程并发执行。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kr">thread</span> <span class="n">t1</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#34;我是一只傻傻鸟。&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">thread</span> <span class="n">t2</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s">&#34;我有一只小小鸟。&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 等待线程结束。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">t1</span><span class="p">.</span><span class="n">join</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">t2</span><span class="p">.</span><span class="n">join</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="输出">输出：<a hidden class="anchor" aria-hidden="true" href="#输出">#</a></h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">once_func() bh = 0, str = 各位观众，我要开始表白了。
+</span></span><span class="line"><span class="cl">第1次表白：亲爱的3号，我是一只傻傻鸟。
+</span></span><span class="line"><span class="cl">第1次表白：亲爱的8号，我有一只小小鸟。
+</span></span><span class="line"><span class="cl">第2次表白：亲爱的3号，我是一只傻傻鸟。
+</span></span><span class="line"><span class="cl">第2次表白：亲爱的8号，我有一只小小鸟。
+</span></span><span class="line"><span class="cl">第3次表白：亲爱的3号，我是一只傻傻鸟。
+</span></span><span class="line"><span class="cl">第3次表白：亲爱的8号，我有一只小小鸟。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="四代码解析">四、代码解析<a hidden class="anchor" aria-hidden="true" href="#四代码解析">#</a></h3>
+<ol>
+<li>
+<p><strong><code>once_flag</code> 的使用</strong>：
+在代码中，我们声明了一个全局变量 <code>onceflag</code>，它用于标记某个操作（即 <code>once_func()</code>）是否已经被执行过。这个对象是 <code>std::call_once()</code> 保证函数只被执行一次的核心。</p>
+</li>
+<li>
+<p><strong><code>std::call_once()</code></strong>：
+在每个线程的执行函数 <code>func()</code> 中，调用了 <code>std::call_once(onceflag, once_func, ...)</code>，其中 <code>onceflag</code> 是用于标记的 <code>once_flag</code> 对象，而 <code>once_func</code> 是需要保证只执行一次的函数。即使有多个线程并发调用 <code>std::call_once()</code>，只有一个线程会真正执行 <code>once_func()</code>，其他线程会跳过该函数的执行。</p>
+</li>
+<li>
+<p><strong>线程并发执行</strong>：
+两个线程 <code>t1</code> 和 <code>t2</code> 被创建并执行，分别调用 <code>func()</code> 函数。尽管两个线程都调用了 <code>std::call_once()</code>，但我们可以看到，<code>once_func()</code> 只被执行了一次。</p>
+</li>
+<li>
+<p><strong>确保资源的正确回收</strong>：
+使用 <code>t1.join()</code> 和 <code>t2.join()</code> 来等待线程完成并确保资源正确回收。</p>
+</li>
+</ol>
+<hr>
+<h3 id="五-stdcall_once-的应用场景">五、 <code>std::call_once()</code> 的应用场景<a hidden class="anchor" aria-hidden="true" href="#五-stdcall_once-的应用场景">#</a></h3>
+<p><code>std::call_once()</code> 最常见的应用场景是线程安全的<strong>单例模式</strong>（Singleton Pattern）。在单例模式中，我们希望某个对象只被初始化一次，无论有多少个线程试图访问它。例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Singleton</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">private</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">static</span> <span class="n">Singleton</span><span class="o">*</span> <span class="n">instance</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">static</span> <span class="n">once_flag</span> <span class="n">flag</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Singleton</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Singleton 构造函数执行&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">static</span> <span class="n">Singleton</span><span class="o">*</span> <span class="n">getInstance</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">call_once</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="p">[]()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">});</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">instance</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Singleton</span><span class="o">*</span> <span class="n">Singleton</span><span class="o">::</span><span class="n">instance</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">once_flag</span> <span class="n">Singleton</span><span class="o">::</span><span class="n">flag</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这个例子中，<code>Singleton::getInstance()</code> 使用 <code>std::call_once()</code> 来确保 <code>Singleton</code> 对象只被初始化一次，即使有多个线程同时调用 <code>getInstance()</code>。</p>
+<hr>
+<h3 id="六总结">六、总结<a hidden class="anchor" aria-hidden="true" href="#六总结">#</a></h3>
+<p><code>std::call_once()</code> 提供了一种高效、安全的方法来保证某个函数在多线程环境下只被执行一次。它结合 <code>std::once_flag</code>，避免了传统锁机制带来的性能开销，简化了代码结构，同时大大提高了并发编程中的安全性。</p>
+<p>无论是在实现单例模式、初始化全局资源，还是处理某些仅需执行一次的操作时，<code>std::call_once()</code> 都是一个非常值得推荐的工具。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/%E5%86%8D%E6%8E%A2cpp%E4%B8%AD%E7%9A%84%E4%BA%92%E6%96%A5%E9%94%81/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>再探CPP中的互斥锁</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/this_thread/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>This_thread</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
