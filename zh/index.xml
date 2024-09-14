@@ -107,6 +107,20 @@
       <description>memcpy() 函数是 C 标准库中用于内存操作的一个重要函数，它被广泛用于在内存中复制数据块。在系统编程和低级数据操作中，memcpy() 是一个常用且高效的</description>
     </item>
     <item>
+      <title>智能指针之unique_ptr</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E4%B9%8Bunique_ptr/</link>
+      <pubDate>Thu, 23 Nov 2023 10:49:23 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E4%B9%8Bunique_ptr/</guid>
+      <description>随着 C++11 标准的引入，智能指针成为了现代 C++ 编程中资源管理的核心工具。其中，unique_ptr 是一种独占式的智能指针，负责管理动态分配的对象，确</description>
+    </item>
+    <item>
+      <title>可变参数模板</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E5%8F%AF%E5%8F%98%E5%8F%82%E6%95%B0%E6%A8%A1%E6%9D%BF/</link>
+      <pubDate>Mon, 20 Nov 2023 10:02:12 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E5%8F%AF%E5%8F%98%E5%8F%82%E6%95%B0%E6%A8%A1%E6%9D%BF/</guid>
+      <description>C++11 引入了 可变参数模板（Variadic Templates），这是该标准新增的最强大和最灵活的特性之一。可变参数模板允许函数和类模板接受任意数</description>
+    </item>
+    <item>
       <title>完美转发</title>
       <link>https://oheyu.github.io/zh/posts/tech/%E5%AE%8C%E7%BE%8E%E8%BD%AC%E5%8F%91/</link>
       <pubDate>Fri, 17 Nov 2023 22:01:06 +0800</pubDate>
