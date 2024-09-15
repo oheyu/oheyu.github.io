@@ -107,6 +107,27 @@
       <description>memcpy() 函数是 C 标准库中用于内存操作的一个重要函数，它被广泛用于在内存中复制数据块。在系统编程和低级数据操作中，memcpy() 是一个常用且高效的</description>
     </item>
     <item>
+      <title>Sockaddr_in结构体</title>
+      <link>https://oheyu.github.io/zh/posts/tech/sockaddr_in%E7%BB%93%E6%9E%84%E4%BD%93/</link>
+      <pubDate>Mon, 11 Dec 2023 22:18:58 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/sockaddr_in%E7%BB%93%E6%9E%84%E4%BD%93/</guid>
+      <description>这些个结构体哟！！！ 一、sockaddr_in 结构体概述 1.1 定义与作用 sockaddr_in 是用于 IPv4 网络编程的地址结构体，包含了 IP 地址和端口号等信息。在使用套接字</description>
+    </item>
+    <item>
+      <title>Hostent结构体</title>
+      <link>https://oheyu.github.io/zh/posts/tech/hostent%E7%BB%93%E6%9E%84%E4%BD%93/</link>
+      <pubDate>Thu, 07 Dec 2023 22:09:50 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/hostent%E7%BB%93%E6%9E%84%E4%BD%93/</guid>
+      <description>这万恶的结构体啊！！！ 一、hostent 结构体概述 1.1 定义与作用 hostent 结构体用于描述主机的信息，包括主机名、别名、地址类型、地址长度和地址列表等。</description>
+    </item>
+    <item>
+      <title>Socket函数剖析</title>
+      <link>https://oheyu.github.io/zh/posts/tech/socket%E5%87%BD%E6%95%B0%E5%89%96%E6%9E%90/</link>
+      <pubDate>Sat, 25 Nov 2023 21:39:21 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/socket%E5%87%BD%E6%95%B0%E5%89%96%E6%9E%90/</guid>
+      <description>之前也断断续续接触过Linux下的网络编程，相关内容一放下就很难记起来，还是用得太少。今天开始，准备系统地、持续地学习一下相关内容。今天，就</description>
+    </item>
+    <item>
       <title>智能指针之unique_ptr</title>
       <link>https://oheyu.github.io/zh/posts/tech/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E4%B9%8Bunique_ptr/</link>
       <pubDate>Thu, 23 Nov 2023 10:49:23 +0800</pubDate>

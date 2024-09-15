@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Socket函数剖析 | 史玉浩的个人博客</title>
+<meta name="keywords" content="Linux">
+<meta name="description" content="之前也断断续续接触过Linux下的网络编程，相关内容一放下就很难记起来，还是用得太少。今天开始，准备系统地、持续地学习一下相关内容。今天，就">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/socket%E5%87%BD%E6%95%B0%E5%89%96%E6%9E%90/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/socket%E5%87%BD%E6%95%B0%E5%89%96%E6%9E%90/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="Socket函数剖析" />
+<meta property="og:description" content="之前也断断续续接触过Linux下的网络编程，相关内容一放下就很难记起来，还是用得太少。今天开始，准备系统地、持续地学习一下相关内容。今天，就" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/socket%E5%87%BD%E6%95%B0%E5%89%96%E6%9E%90/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-11-25T21:39:21+08:00" />
+<meta property="article:modified_time" content="2023-11-25T21:39:21+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Socket函数剖析"/>
+<meta name="twitter:description" content="之前也断断续续接触过Linux下的网络编程，相关内容一放下就很难记起来，还是用得太少。今天开始，准备系统地、持续地学习一下相关内容。今天，就"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Socket函数剖析",
+      "item": "https://oheyu.github.io/zh/posts/tech/socket%E5%87%BD%E6%95%B0%E5%89%96%E6%9E%90/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Socket函数剖析",
+  "name": "Socket函数剖析",
+  "description": "之前也断断续续接触过Linux下的网络编程，相关内容一放下就很难记起来，还是用得太少。今天开始，准备系统地、持续地学习一下相关内容。今天，就",
+  "keywords": [
+    "Linux"
+  ],
+  "articleBody": "\r之前也断断续续接触过Linux下的网络编程，相关内容一放下就很难记起来，还是用得太少。今天开始，准备系统地、持续地学习一下相关内容。今天，就用socket() 函数作为正式开始吧。\n一、socket() 函数的基础 1.1 函数原型 1 2 3 4 #include #include int socket(int domain, int type, int protocol); 1.2 参数解析 domain（协议族）：\nAF_INET：IPv4 互联网协议。 AF_INET6：IPv6 互联网协议。 AF_UNIX / AF_LOCAL：本地通信（Unix 域套接字）。 AF_PACKET：底层套接字，可直接操作链路层。 type（套接字类型）：\nSOCK_STREAM：面向连接的字节流（TCP）。 SOCK_DGRAM：无连接的数据报（UDP）。 SOCK_RAW：原始套接字，可用于自定义协议。 protocol（协议）：\n通常设置为 0，由系统自动选择合适的协议。 可以指定特定协议，如 IPPROTO_TCP、IPPROTO_UDP。 1.3 返回值 成功：返回套接字文件描述符（非负整数）。 失败：返回 -1，并设置 errno 以指示错误原因。 1.4 套接字的生命周期 创建套接字：socket() 绑定地址：bind() 监听连接（服务器端）：listen() 接受连接（服务器端）：accept() 建立连接（客户端）：connect() 数据传输：send() / recv() 或 read() / write() 关闭连接：close() 或 shutdown() 二、深入理解 socket() 的工作原理 2.1 套接字在内核中的表示 在 Linux 内核中，套接字是一种特殊的文件，遵循“一切皆文件”的哲学。socket() 调用返回的文件描述符实际上是一个索引，指向内核空间中的 struct socket 结构。\n2.2 协议栈的分层 网络协议栈通常分为五层（大家貌似更加偏向于四层）：\n物理层：传输比特流的物理媒介。 数据链路层：MAC 地址、帧的传输。 网络层：IP 地址、路由选择。 传输层：TCP、UDP 协议，提供端到端通信。 应用层：HTTP、FTP 等具体应用协议。 socket() 函数主要涉及传输层和网络层，通过指定 domain、type、protocol，可以灵活选择所需的通信方式。\n2.3 套接字类型的深入分析 SOCK_STREAM（TCP）：\n提供可靠的、面向连接的字节流服务。 数据无边界，需自行解析消息。 适用于要求数据完整性和顺序性的应用。 SOCK_DGRAM（UDP）：\n提供无连接的、尽最大努力交付的数据报服务。 数据有边界，每个 send() / recv() 对应一个数据报。 适用于实时性要求高，但可容忍部分数据丢失的应用。 SOCK_RAW（原始套接字）：\n允许直接访问下层协议，如 IP 层。 可用于实现自定义协议或网络工具（如 ping、traceroute）。 需要 root 权限。 三、socket() 的高级用法和技巧 3.1 套接字选项的灵活配置 使用 setsockopt() 和 getsockopt() 函数，可以设置和获取套接字的各种选项，优化网络应用的性能和行为。\n3.1.1 常用套接字选项 SO_REUSEADDR：允许重用本地地址和端口，解决“地址已在使用”错误。 SO_RCVBUF / SO_SNDBUF：设置接收和发送缓冲区大小，优化吞吐量。 SO_KEEPALIVE：启用心跳机制，检测连接是否存活。 TCP_NODELAY：禁用 Nagle 算法，降低小包延迟。 3.1.2 示例：设置 SO_REUSEADDR 1 2 3 4 5 6 int opt = 1; if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, \u0026opt, sizeof(opt)) \u003c 0) { perror(\"setsockopt SO_REUSEADDR failed\"); close(sockfd); exit(EXIT_FAILURE); } 3.2 非阻塞套接字与多路复用 3.2.1 非阻塞模式 设置方法：使用 fcntl() 函数，将套接字设置为非阻塞模式。 1 2 3 4 #include int flags = fcntl(sockfd, F_GETFL, 0); fcntl(sockfd, F_SETFL, flags | O_NONBLOCK); 应用场景：高性能服务器，需要同时处理大量连接，避免阻塞在某个套接字上。 3.2.2 多路复用技术 select()：早期的 I/O 多路复用函数，支持的文件描述符数量有限（FD_SETSIZE）。 poll()：改进了 select() 的一些缺点，但仍存在性能问题。 epoll()：Linux 特有，高效处理大量并发连接，适用于高性能服务器。 3.2.3 示例：使用 epoll 实现高并发 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 #include int epfd = epoll_create1(0); struct epoll_event ev, events[MAX_EVENTS]; ev.events = EPOLLIN; ev.data.fd = sockfd; epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, \u0026ev); int nfds = epoll_wait(epfd, events, MAX_EVENTS, -1); for (int i = 0; i \u003c nfds; ++i) { if (events[i].events \u0026 EPOLLIN) { // 处理可读事件 } } 3.3 信号驱动式套接字 概念：利用信号机制处理套接字事件，减少阻塞等待。 设置方法：使用 fcntl() 设置 O_ASYNC 标志，并指定信号接收者。 1 2 fcntl(sockfd, F_SETFL, flags | O_ASYNC); fcntl(sockfd, F_SETOWN, getpid()); 应用场景：适用于对实时性要求高的应用，但编程复杂度较大。 四、常见陷阱与问题解析 4.1 bind() 失败：地址已在使用 原因：套接字在关闭后，操作系统会将其置于 TIME_WAIT 状态，暂时无法重用地址和端口。 解决方案： 设置 SO_REUSEADDR 选项。 但需注意，这可能导致端口被不正确地重用，带来安全风险。 4.2 SIGPIPE 信号导致程序崩溃 原因：向已关闭的套接字写入数据，会触发 SIGPIPE 信号，默认行为是终止进程。 解决方案： 捕获并忽略 SIGPIPE 信号。 1 signal(SIGPIPE, SIG_IGN); 在 send() 时使用 MSG_NOSIGNAL 标志。 1 send(sockfd, buf, len, MSG_NOSIGNAL); 4.3 网络字节序与主机字节序 问题：不同体系结构的主机可能使用不同的字节序（大端或小端）。 解决方案：使用标准函数进行转换。 1 2 3 4 uint16_t htons(uint16_t hostshort); // 主机字节序转网络字节序（短整数） uint32_t htonl(uint32_t hostlong); // 主机字节序转网络字节序（长整数） uint16_t ntohs(uint16_t netshort); // 网络字节序转主机字节序（短整数） uint32_t ntohl(uint32_t netlong); // 网络字节序转主机字节序（长整数） 4.4 粘包与拆包问题 现象：在 TCP 协议中，由于流式传输，数据可能会出现粘包或拆包，需要自行处理消息边界。 解决方案： 定义应用层协议，添加消息头，指定数据长度。 使用定界符（如 \\n）标识消息结束。 五、实践经验与独到见解 5.1 深刻理解阻塞与非阻塞模式 阻塞模式：编程简单，但在高并发场景下性能有限，可能导致线程或进程数量过多。 非阻塞模式：需要配合多路复用，编程复杂度较高，但能显著提升性能。 建议：根据应用需求选择合适的模式，小型应用可采用阻塞模式，追求高性能时应使用非阻塞模式并结合 epoll 等机制。\n5.2 合理设置套接字选项，提升性能 发送缓冲区与接收缓冲区：根据网络状况和应用需求，适当调整缓冲区大小，避免过小导致频繁的系统调用，过大则浪费内存。 TCP_NODELAY：在需要低延迟的小数据传输时，禁用 Nagle 算法，防止数据延迟发送。 5.3 充分考虑异常和错误处理 网络编程中的异常情况多样：对方关闭连接、网络波动、超时等。 健壮的错误处理：检查每个系统调用的返回值，处理可能的错误，确保程序的稳定性。 5.4 安全性考虑 防止资源泄漏：及时关闭未使用的套接字，防止文件描述符耗尽。 防御性编程：验证输入数据的合法性，防止缓冲区溢出和其他安全漏洞。 5.5 学习和使用高效的网络库 Boost.Asio：跨平台的 C++ 网络库，支持同步和异步 I/O，封装了复杂的细节。 libevent / libev / libuv：高性能事件驱动库，可用于构建高并发网络应用。 建议：在理解底层原理的基础上，合理使用成熟的网络库，加快开发速度，提高代码质量。\n",
+  "wordCount" : "2583",
+  "inLanguage": "zh",
+  "datePublished": "2023-11-25T21:39:21+08:00",
+  "dateModified": "2023-11-25T21:39:21+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/socket%E5%87%BD%E6%95%B0%E5%89%96%E6%9E%90/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Socket函数剖析
+    </h1>
+    <div class="post-meta"><span title='2023-11-25 21:39:21 +0800 CST'>2023-11-25</span>&nbsp;·&nbsp;6 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80socket-%e5%87%bd%e6%95%b0%e7%9a%84%e5%9f%ba%e7%a1%80" aria-label="一、socket() 函数的基础">一、<code>socket()</code> 函数的基础</a><ul>
+                            
+                    <li>
+                        <a href="#11-%e5%87%bd%e6%95%b0%e5%8e%9f%e5%9e%8b" aria-label="1.1 函数原型">1.1 函数原型</a></li>
+                    <li>
+                        <a href="#12-%e5%8f%82%e6%95%b0%e8%a7%a3%e6%9e%90" aria-label="1.2 参数解析">1.2 参数解析</a></li>
+                    <li>
+                        <a href="#13-%e8%bf%94%e5%9b%9e%e5%80%bc" aria-label="1.3 返回值">1.3 返回值</a></li>
+                    <li>
+                        <a href="#14-%e5%a5%97%e6%8e%a5%e5%ad%97%e7%9a%84%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f" aria-label="1.4 套接字的生命周期">1.4 套接字的生命周期</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%8c%e6%b7%b1%e5%85%a5%e7%90%86%e8%a7%a3-socket-%e7%9a%84%e5%b7%a5%e4%bd%9c%e5%8e%9f%e7%90%86" aria-label="二、深入理解 socket() 的工作原理">二、深入理解 <code>socket()</code> 的工作原理</a><ul>
+                            
+                    <li>
+                        <a href="#21-%e5%a5%97%e6%8e%a5%e5%ad%97%e5%9c%a8%e5%86%85%e6%a0%b8%e4%b8%ad%e7%9a%84%e8%a1%a8%e7%a4%ba" aria-label="2.1 套接字在内核中的表示">2.1 套接字在内核中的表示</a></li>
+                    <li>
+                        <a href="#22-%e5%8d%8f%e8%ae%ae%e6%a0%88%e7%9a%84%e5%88%86%e5%b1%82" aria-label="2.2 协议栈的分层">2.2 协议栈的分层</a></li>
+                    <li>
+                        <a href="#23-%e5%a5%97%e6%8e%a5%e5%ad%97%e7%b1%bb%e5%9e%8b%e7%9a%84%e6%b7%b1%e5%85%a5%e5%88%86%e6%9e%90" aria-label="2.3 套接字类型的深入分析">2.3 套接字类型的深入分析</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%89socket-%e7%9a%84%e9%ab%98%e7%ba%a7%e7%94%a8%e6%b3%95%e5%92%8c%e6%8a%80%e5%b7%a7" aria-label="三、socket() 的高级用法和技巧">三、<code>socket()</code> 的高级用法和技巧</a><ul>
+                            
+                    <li>
+                        <a href="#31-%e5%a5%97%e6%8e%a5%e5%ad%97%e9%80%89%e9%a1%b9%e7%9a%84%e7%81%b5%e6%b4%bb%e9%85%8d%e7%bd%ae" aria-label="3.1 套接字选项的灵活配置">3.1 套接字选项的灵活配置</a><ul>
+                            
+                    <li>
+                        <a href="#311-%e5%b8%b8%e7%94%a8%e5%a5%97%e6%8e%a5%e5%ad%97%e9%80%89%e9%a1%b9" aria-label="3.1.1 常用套接字选项">3.1.1 常用套接字选项</a></li>
+                    <li>
+                        <a href="#312-%e7%a4%ba%e4%be%8b%e8%ae%be%e7%bd%ae-so_reuseaddr" aria-label="3.1.2 示例：设置 SO_REUSEADDR">3.1.2 示例：设置 <code>SO_REUSEADDR</code></a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#32-%e9%9d%9e%e9%98%bb%e5%a1%9e%e5%a5%97%e6%8e%a5%e5%ad%97%e4%b8%8e%e5%a4%9a%e8%b7%af%e5%a4%8d%e7%94%a8" aria-label="3.2 非阻塞套接字与多路复用">3.2 非阻塞套接字与多路复用</a><ul>
+                            
+                    <li>
+                        <a href="#321-%e9%9d%9e%e9%98%bb%e5%a1%9e%e6%a8%a1%e5%bc%8f" aria-label="3.2.1 非阻塞模式">3.2.1 非阻塞模式</a></li>
+                    <li>
+                        <a href="#322-%e5%a4%9a%e8%b7%af%e5%a4%8d%e7%94%a8%e6%8a%80%e6%9c%af" aria-label="3.2.2 多路复用技术">3.2.2 多路复用技术</a></li>
+                    <li>
+                        <a href="#323-%e7%a4%ba%e4%be%8b%e4%bd%bf%e7%94%a8-epoll-%e5%ae%9e%e7%8e%b0%e9%ab%98%e5%b9%b6%e5%8f%91" aria-label="3.2.3 示例：使用 epoll 实现高并发">3.2.3 示例：使用 <code>epoll</code> 实现高并发</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#33-%e4%bf%a1%e5%8f%b7%e9%a9%b1%e5%8a%a8%e5%bc%8f%e5%a5%97%e6%8e%a5%e5%ad%97" aria-label="3.3 信号驱动式套接字">3.3 信号驱动式套接字</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%9b%9b%e5%b8%b8%e8%a7%81%e9%99%b7%e9%98%b1%e4%b8%8e%e9%97%ae%e9%a2%98%e8%a7%a3%e6%9e%90" aria-label="四、常见陷阱与问题解析">四、常见陷阱与问题解析</a><ul>
+                            
+                    <li>
+                        <a href="#41-bind-%e5%a4%b1%e8%b4%a5%e5%9c%b0%e5%9d%80%e5%b7%b2%e5%9c%a8%e4%bd%bf%e7%94%a8" aria-label="4.1 bind() 失败：地址已在使用">4.1 <code>bind()</code> 失败：地址已在使用</a></li>
+                    <li>
+                        <a href="#42-sigpipe-%e4%bf%a1%e5%8f%b7%e5%af%bc%e8%87%b4%e7%a8%8b%e5%ba%8f%e5%b4%a9%e6%ba%83" aria-label="4.2 SIGPIPE 信号导致程序崩溃">4.2 <code>SIGPIPE</code> 信号导致程序崩溃</a></li>
+                    <li>
+                        <a href="#43-%e7%bd%91%e7%bb%9c%e5%ad%97%e8%8a%82%e5%ba%8f%e4%b8%8e%e4%b8%bb%e6%9c%ba%e5%ad%97%e8%8a%82%e5%ba%8f" aria-label="4.3 网络字节序与主机字节序">4.3 网络字节序与主机字节序</a></li>
+                    <li>
+                        <a href="#44-%e7%b2%98%e5%8c%85%e4%b8%8e%e6%8b%86%e5%8c%85%e9%97%ae%e9%a2%98" aria-label="4.4 粘包与拆包问题">4.4 粘包与拆包问题</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%94%e5%ae%9e%e8%b7%b5%e7%bb%8f%e9%aa%8c%e4%b8%8e%e7%8b%ac%e5%88%b0%e8%a7%81%e8%a7%a3" aria-label="五、实践经验与独到见解">五、实践经验与独到见解</a><ul>
+                            
+                    <li>
+                        <a href="#51-%e6%b7%b1%e5%88%bb%e7%90%86%e8%a7%a3%e9%98%bb%e5%a1%9e%e4%b8%8e%e9%9d%9e%e9%98%bb%e5%a1%9e%e6%a8%a1%e5%bc%8f" aria-label="5.1 深刻理解阻塞与非阻塞模式">5.1 深刻理解阻塞与非阻塞模式</a></li>
+                    <li>
+                        <a href="#52-%e5%90%88%e7%90%86%e8%ae%be%e7%bd%ae%e5%a5%97%e6%8e%a5%e5%ad%97%e9%80%89%e9%a1%b9%e6%8f%90%e5%8d%87%e6%80%a7%e8%83%bd" aria-label="5.2 合理设置套接字选项，提升性能">5.2 合理设置套接字选项，提升性能</a></li>
+                    <li>
+                        <a href="#53-%e5%85%85%e5%88%86%e8%80%83%e8%99%91%e5%bc%82%e5%b8%b8%e5%92%8c%e9%94%99%e8%af%af%e5%a4%84%e7%90%86" aria-label="5.3 充分考虑异常和错误处理">5.3 充分考虑异常和错误处理</a></li>
+                    <li>
+                        <a href="#54-%e5%ae%89%e5%85%a8%e6%80%a7%e8%80%83%e8%99%91" aria-label="5.4 安全性考虑">5.4 安全性考虑</a></li>
+                    <li>
+                        <a href="#55-%e5%ad%a6%e4%b9%a0%e5%92%8c%e4%bd%bf%e7%94%a8%e9%ab%98%e6%95%88%e7%9a%84%e7%bd%91%e7%bb%9c%e5%ba%93" aria-label="5.5 学习和使用高效的网络库">5.5 学习和使用高效的网络库</a>
+                    </li>
+                </ul>
+                </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<p>之前也断断续续接触过Linux下的网络编程，相关内容一放下就很难记起来，还是用得太少。今天开始，准备系统地、持续地学习一下相关内容。今天，就用<code>socket()</code> 函数作为正式开始吧。</p>
+<hr>
+<h2 id="一socket-函数的基础">一、<code>socket()</code> 函数的基础<a hidden class="anchor" aria-hidden="true" href="#一socket-函数的基础">#</a></h2>
+<h3 id="11-函数原型">1.1 函数原型<a hidden class="anchor" aria-hidden="true" href="#11-函数原型">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/socket.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">socket</span><span class="p">(</span><span class="kt">int</span> <span class="n">domain</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">protocol</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="12-参数解析">1.2 参数解析<a hidden class="anchor" aria-hidden="true" href="#12-参数解析">#</a></h3>
+<ul>
+<li>
+<p><strong><code>domain</code>（协议族）</strong>：</p>
+<ul>
+<li><code>AF_INET</code>：IPv4 互联网协议。</li>
+<li><code>AF_INET6</code>：IPv6 互联网协议。</li>
+<li><code>AF_UNIX</code> / <code>AF_LOCAL</code>：本地通信（Unix 域套接字）。</li>
+<li><code>AF_PACKET</code>：底层套接字，可直接操作链路层。</li>
+</ul>
+</li>
+<li>
+<p><strong><code>type</code>（套接字类型）</strong>：</p>
+<ul>
+<li><code>SOCK_STREAM</code>：面向连接的字节流（TCP）。</li>
+<li><code>SOCK_DGRAM</code>：无连接的数据报（UDP）。</li>
+<li><code>SOCK_RAW</code>：原始套接字，可用于自定义协议。</li>
+</ul>
+</li>
+<li>
+<p><strong><code>protocol</code>（协议）</strong>：</p>
+<ul>
+<li>通常设置为 <code>0</code>，由系统自动选择合适的协议。</li>
+<li>可以指定特定协议，如 <code>IPPROTO_TCP</code>、<code>IPPROTO_UDP</code>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="13-返回值">1.3 返回值<a hidden class="anchor" aria-hidden="true" href="#13-返回值">#</a></h3>
+<ul>
+<li><strong>成功</strong>：返回套接字文件描述符（非负整数）。</li>
+<li><strong>失败</strong>：返回 <code>-1</code>，并设置 <code>errno</code> 以指示错误原因。</li>
+</ul>
+<h3 id="14-套接字的生命周期">1.4 套接字的生命周期<a hidden class="anchor" aria-hidden="true" href="#14-套接字的生命周期">#</a></h3>
+<ol>
+<li><strong>创建套接字</strong>：<code>socket()</code></li>
+<li><strong>绑定地址</strong>：<code>bind()</code></li>
+<li><strong>监听连接</strong>（服务器端）：<code>listen()</code></li>
+<li><strong>接受连接</strong>（服务器端）：<code>accept()</code></li>
+<li><strong>建立连接</strong>（客户端）：<code>connect()</code></li>
+<li><strong>数据传输</strong>：<code>send()</code> / <code>recv()</code> 或 <code>read()</code> / <code>write()</code></li>
+<li><strong>关闭连接</strong>：<code>close()</code> 或 <code>shutdown()</code></li>
+</ol>
+<hr>
+<h2 id="二深入理解-socket-的工作原理">二、深入理解 <code>socket()</code> 的工作原理<a hidden class="anchor" aria-hidden="true" href="#二深入理解-socket-的工作原理">#</a></h2>
+<h3 id="21-套接字在内核中的表示">2.1 套接字在内核中的表示<a hidden class="anchor" aria-hidden="true" href="#21-套接字在内核中的表示">#</a></h3>
+<p>在 Linux 内核中，套接字是一种特殊的文件，遵循“一切皆文件”的哲学。<code>socket()</code> 调用返回的文件描述符实际上是一个索引，指向内核空间中的 <code>struct socket</code> 结构。</p>
+<h3 id="22-协议栈的分层">2.2 协议栈的分层<a hidden class="anchor" aria-hidden="true" href="#22-协议栈的分层">#</a></h3>
+<p>网络协议栈通常分为五层（大家貌似更加偏向于四层）：</p>
+<ol>
+<li><strong>物理层</strong>：传输比特流的物理媒介。</li>
+<li><strong>数据链路层</strong>：MAC 地址、帧的传输。</li>
+<li><strong>网络层</strong>：IP 地址、路由选择。</li>
+<li><strong>传输层</strong>：TCP、UDP 协议，提供端到端通信。</li>
+<li><strong>应用层</strong>：HTTP、FTP 等具体应用协议。</li>
+</ol>
+<p><code>socket()</code> 函数主要涉及传输层和网络层，通过指定 <code>domain</code>、<code>type</code>、<code>protocol</code>，可以灵活选择所需的通信方式。</p>
+<h3 id="23-套接字类型的深入分析">2.3 套接字类型的深入分析<a hidden class="anchor" aria-hidden="true" href="#23-套接字类型的深入分析">#</a></h3>
+<ul>
+<li>
+<p><strong><code>SOCK_STREAM</code>（TCP）</strong>：</p>
+<ul>
+<li>提供可靠的、面向连接的字节流服务。</li>
+<li>数据无边界，需自行解析消息。</li>
+<li>适用于要求数据完整性和顺序性的应用。</li>
+</ul>
+</li>
+<li>
+<p><strong><code>SOCK_DGRAM</code>（UDP）</strong>：</p>
+<ul>
+<li>提供无连接的、尽最大努力交付的数据报服务。</li>
+<li>数据有边界，每个 <code>send()</code> / <code>recv()</code> 对应一个数据报。</li>
+<li>适用于实时性要求高，但可容忍部分数据丢失的应用。</li>
+</ul>
+</li>
+<li>
+<p><strong><code>SOCK_RAW</code>（原始套接字）</strong>：</p>
+<ul>
+<li>允许直接访问下层协议，如 IP 层。</li>
+<li>可用于实现自定义协议或网络工具（如 <code>ping</code>、<code>traceroute</code>）。</li>
+<li>需要 root 权限。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="三socket-的高级用法和技巧">三、<code>socket()</code> 的高级用法和技巧<a hidden class="anchor" aria-hidden="true" href="#三socket-的高级用法和技巧">#</a></h2>
+<h3 id="31-套接字选项的灵活配置">3.1 套接字选项的灵活配置<a hidden class="anchor" aria-hidden="true" href="#31-套接字选项的灵活配置">#</a></h3>
+<p>使用 <code>setsockopt()</code> 和 <code>getsockopt()</code> 函数，可以设置和获取套接字的各种选项，优化网络应用的性能和行为。</p>
+<h4 id="311-常用套接字选项">3.1.1 常用套接字选项<a hidden class="anchor" aria-hidden="true" href="#311-常用套接字选项">#</a></h4>
+<ul>
+<li><strong><code>SO_REUSEADDR</code></strong>：允许重用本地地址和端口，解决“地址已在使用”错误。</li>
+<li><strong><code>SO_RCVBUF</code> / <code>SO_SNDBUF</code></strong>：设置接收和发送缓冲区大小，优化吞吐量。</li>
+<li><strong><code>SO_KEEPALIVE</code></strong>：启用心跳机制，检测连接是否存活。</li>
+<li><strong><code>TCP_NODELAY</code></strong>：禁用 Nagle 算法，降低小包延迟。</li>
+</ul>
+<h4 id="312-示例设置-so_reuseaddr">3.1.2 示例：设置 <code>SO_REUSEADDR</code><a hidden class="anchor" aria-hidden="true" href="#312-示例设置-so_reuseaddr">#</a></h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">opt</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">setsockopt</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span> <span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">SO_REUSEADDR</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">opt</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">opt</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">perror</span><span class="p">(</span><span class="s">&#34;setsockopt SO_REUSEADDR failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">close</span><span class="p">(</span><span class="n">sockfd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="32-非阻塞套接字与多路复用">3.2 非阻塞套接字与多路复用<a hidden class="anchor" aria-hidden="true" href="#32-非阻塞套接字与多路复用">#</a></h3>
+<h4 id="321-非阻塞模式">3.2.1 非阻塞模式<a hidden class="anchor" aria-hidden="true" href="#321-非阻塞模式">#</a></h4>
+<ul>
+<li><strong>设置方法</strong>：使用 <code>fcntl()</code> 函数，将套接字设置为非阻塞模式。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">flags</span> <span class="o">=</span> <span class="nf">fcntl</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span> <span class="n">F_GETFL</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">fcntl</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span> <span class="n">F_SETFL</span><span class="p">,</span> <span class="n">flags</span> <span class="o">|</span> <span class="n">O_NONBLOCK</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>应用场景</strong>：高性能服务器，需要同时处理大量连接，避免阻塞在某个套接字上。</li>
+</ul>
+<h4 id="322-多路复用技术">3.2.2 多路复用技术<a hidden class="anchor" aria-hidden="true" href="#322-多路复用技术">#</a></h4>
+<ul>
+<li><strong><code>select()</code></strong>：早期的 I/O 多路复用函数，支持的文件描述符数量有限（<code>FD_SETSIZE</code>）。</li>
+<li><strong><code>poll()</code></strong>：改进了 <code>select()</code> 的一些缺点，但仍存在性能问题。</li>
+<li><strong><code>epoll()</code></strong>：Linux 特有，高效处理大量并发连接，适用于高性能服务器。</li>
+</ul>
+<h4 id="323-示例使用-epoll-实现高并发">3.2.3 示例：使用 <code>epoll</code> 实现高并发<a hidden class="anchor" aria-hidden="true" href="#323-示例使用-epoll-实现高并发">#</a></h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/epoll.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">epfd</span> <span class="o">=</span> <span class="nf">epoll_create1</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">epoll_event</span> <span class="n">ev</span><span class="p">,</span> <span class="n">events</span><span class="p">[</span><span class="n">MAX_EVENTS</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">ev</span><span class="p">.</span><span class="n">events</span> <span class="o">=</span> <span class="n">EPOLLIN</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">ev</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">fd</span> <span class="o">=</span> <span class="n">sockfd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nf">epoll_ctl</span><span class="p">(</span><span class="n">epfd</span><span class="p">,</span> <span class="n">EPOLL_CTL_ADD</span><span class="p">,</span> <span class="n">sockfd</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ev</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">nfds</span> <span class="o">=</span> <span class="nf">epoll_wait</span><span class="p">(</span><span class="n">epfd</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">MAX_EVENTS</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nfds</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">events</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">events</span> <span class="o">&amp;</span> <span class="n">EPOLLIN</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 处理可读事件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="33-信号驱动式套接字">3.3 信号驱动式套接字<a hidden class="anchor" aria-hidden="true" href="#33-信号驱动式套接字">#</a></h3>
+<ul>
+<li><strong>概念</strong>：利用信号机制处理套接字事件，减少阻塞等待。</li>
+<li><strong>设置方法</strong>：使用 <code>fcntl()</code> 设置 <code>O_ASYNC</code> 标志，并指定信号接收者。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">fcntl</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span> <span class="n">F_SETFL</span><span class="p">,</span> <span class="n">flags</span> <span class="o">|</span> <span class="n">O_ASYNC</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">fcntl</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span> <span class="n">F_SETOWN</span><span class="p">,</span> <span class="nf">getpid</span><span class="p">());</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>应用场景</strong>：适用于对实时性要求高的应用，但编程复杂度较大。</li>
+</ul>
+<hr>
+<h2 id="四常见陷阱与问题解析">四、常见陷阱与问题解析<a hidden class="anchor" aria-hidden="true" href="#四常见陷阱与问题解析">#</a></h2>
+<h3 id="41-bind-失败地址已在使用">4.1 <code>bind()</code> 失败：地址已在使用<a hidden class="anchor" aria-hidden="true" href="#41-bind-失败地址已在使用">#</a></h3>
+<ul>
+<li><strong>原因</strong>：套接字在关闭后，操作系统会将其置于 <code>TIME_WAIT</code> 状态，暂时无法重用地址和端口。</li>
+<li><strong>解决方案</strong>：
+<ul>
+<li>设置 <code>SO_REUSEADDR</code> 选项。</li>
+<li>但需注意，这可能导致端口被不正确地重用，带来安全风险。</li>
+</ul>
+</li>
+</ul>
+<h3 id="42-sigpipe-信号导致程序崩溃">4.2 <code>SIGPIPE</code> 信号导致程序崩溃<a hidden class="anchor" aria-hidden="true" href="#42-sigpipe-信号导致程序崩溃">#</a></h3>
+<ul>
+<li><strong>原因</strong>：向已关闭的套接字写入数据，会触发 <code>SIGPIPE</code> 信号，默认行为是终止进程。</li>
+<li><strong>解决方案</strong>：
+<ul>
+<li>捕获并忽略 <code>SIGPIPE</code> 信号。</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">signal</span><span class="p">(</span><span class="n">SIGPIPE</span><span class="p">,</span> <span class="n">SIG_IGN</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>在 <code>send()</code> 时使用 <code>MSG_NOSIGNAL</code> 标志。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">send</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">MSG_NOSIGNAL</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="43-网络字节序与主机字节序">4.3 网络字节序与主机字节序<a hidden class="anchor" aria-hidden="true" href="#43-网络字节序与主机字节序">#</a></h3>
+<ul>
+<li><strong>问题</strong>：不同体系结构的主机可能使用不同的字节序（大端或小端）。</li>
+<li><strong>解决方案</strong>：使用标准函数进行转换。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="nf">htons</span><span class="p">(</span><span class="kt">uint16_t</span> <span class="n">hostshort</span><span class="p">);</span> <span class="c1">// 主机字节序转网络字节序（短整数）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">uint32_t</span> <span class="nf">htonl</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">hostlong</span><span class="p">);</span>  <span class="c1">// 主机字节序转网络字节序（长整数）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">uint16_t</span> <span class="nf">ntohs</span><span class="p">(</span><span class="kt">uint16_t</span> <span class="n">netshort</span><span class="p">);</span>  <span class="c1">// 网络字节序转主机字节序（短整数）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">uint32_t</span> <span class="nf">ntohl</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">netlong</span><span class="p">);</span>   <span class="c1">// 网络字节序转主机字节序（长整数）
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="44-粘包与拆包问题">4.4 粘包与拆包问题<a hidden class="anchor" aria-hidden="true" href="#44-粘包与拆包问题">#</a></h3>
+<ul>
+<li><strong>现象</strong>：在 TCP 协议中，由于流式传输，数据可能会出现粘包或拆包，需要自行处理消息边界。</li>
+<li><strong>解决方案</strong>：
+<ul>
+<li>定义应用层协议，添加消息头，指定数据长度。</li>
+<li>使用定界符（如 <code>\n</code>）标识消息结束。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="五实践经验与独到见解">五、实践经验与独到见解<a hidden class="anchor" aria-hidden="true" href="#五实践经验与独到见解">#</a></h2>
+<h3 id="51-深刻理解阻塞与非阻塞模式">5.1 深刻理解阻塞与非阻塞模式<a hidden class="anchor" aria-hidden="true" href="#51-深刻理解阻塞与非阻塞模式">#</a></h3>
+<ul>
+<li><strong>阻塞模式</strong>：编程简单，但在高并发场景下性能有限，可能导致线程或进程数量过多。</li>
+<li><strong>非阻塞模式</strong>：需要配合多路复用，编程复杂度较高，但能显著提升性能。</li>
+</ul>
+<p><strong>建议</strong>：根据应用需求选择合适的模式，小型应用可采用阻塞模式，追求高性能时应使用非阻塞模式并结合 <code>epoll</code> 等机制。</p>
+<h3 id="52-合理设置套接字选项提升性能">5.2 合理设置套接字选项，提升性能<a hidden class="anchor" aria-hidden="true" href="#52-合理设置套接字选项提升性能">#</a></h3>
+<ul>
+<li><strong>发送缓冲区与接收缓冲区</strong>：根据网络状况和应用需求，适当调整缓冲区大小，避免过小导致频繁的系统调用，过大则浪费内存。</li>
+<li><strong>TCP_NODELAY</strong>：在需要低延迟的小数据传输时，禁用 Nagle 算法，防止数据延迟发送。</li>
+</ul>
+<h3 id="53-充分考虑异常和错误处理">5.3 充分考虑异常和错误处理<a hidden class="anchor" aria-hidden="true" href="#53-充分考虑异常和错误处理">#</a></h3>
+<ul>
+<li><strong>网络编程中的异常情况多样</strong>：对方关闭连接、网络波动、超时等。</li>
+<li><strong>健壮的错误处理</strong>：检查每个系统调用的返回值，处理可能的错误，确保程序的稳定性。</li>
+</ul>
+<h3 id="54-安全性考虑">5.4 安全性考虑<a hidden class="anchor" aria-hidden="true" href="#54-安全性考虑">#</a></h3>
+<ul>
+<li><strong>防止资源泄漏</strong>：及时关闭未使用的套接字，防止文件描述符耗尽。</li>
+<li><strong>防御性编程</strong>：验证输入数据的合法性，防止缓冲区溢出和其他安全漏洞。</li>
+</ul>
+<h3 id="55-学习和使用高效的网络库">5.5 学习和使用高效的网络库<a hidden class="anchor" aria-hidden="true" href="#55-学习和使用高效的网络库">#</a></h3>
+<ul>
+<li><strong>Boost.Asio</strong>：跨平台的 C++ 网络库，支持同步和异步 I/O，封装了复杂的细节。</li>
+<li><strong>libevent / libev / libuv</strong>：高性能事件驱动库，可用于构建高并发网络应用。</li>
+</ul>
+<p><strong>建议</strong>：在理解底层原理的基础上，合理使用成熟的网络库，加快开发速度，提高代码质量。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/linux/">Linux</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/hostent%E7%BB%93%E6%9E%84%E4%BD%93/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>Hostent结构体</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E4%B9%8Bunique_ptr/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>智能指针之unique_ptr</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

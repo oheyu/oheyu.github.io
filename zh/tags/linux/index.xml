@@ -16,6 +16,27 @@
       <description>std::function 是一种通用的模板类，用于封装不同类型的可调用对象并通过统一的接口调用它们，使得处理这些可调用对象变得更加简洁、灵活。 一、什么是 std::f</description>
     </item>
     <item>
+      <title>Sockaddr_in结构体</title>
+      <link>https://oheyu.github.io/zh/posts/tech/sockaddr_in%E7%BB%93%E6%9E%84%E4%BD%93/</link>
+      <pubDate>Mon, 11 Dec 2023 22:18:58 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/sockaddr_in%E7%BB%93%E6%9E%84%E4%BD%93/</guid>
+      <description>这些个结构体哟！！！ 一、sockaddr_in 结构体概述 1.1 定义与作用 sockaddr_in 是用于 IPv4 网络编程的地址结构体，包含了 IP 地址和端口号等信息。在使用套接字</description>
+    </item>
+    <item>
+      <title>Hostent结构体</title>
+      <link>https://oheyu.github.io/zh/posts/tech/hostent%E7%BB%93%E6%9E%84%E4%BD%93/</link>
+      <pubDate>Thu, 07 Dec 2023 22:09:50 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/hostent%E7%BB%93%E6%9E%84%E4%BD%93/</guid>
+      <description>这万恶的结构体啊！！！ 一、hostent 结构体概述 1.1 定义与作用 hostent 结构体用于描述主机的信息，包括主机名、别名、地址类型、地址长度和地址列表等。</description>
+    </item>
+    <item>
+      <title>Socket函数剖析</title>
+      <link>https://oheyu.github.io/zh/posts/tech/socket%E5%87%BD%E6%95%B0%E5%89%96%E6%9E%90/</link>
+      <pubDate>Sat, 25 Nov 2023 21:39:21 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/socket%E5%87%BD%E6%95%B0%E5%89%96%E6%9E%90/</guid>
+      <description>之前也断断续续接触过Linux下的网络编程，相关内容一放下就很难记起来，还是用得太少。今天开始，准备系统地、持续地学习一下相关内容。今天，就</description>
+    </item>
+    <item>
       <title>再探信号量：互斥锁与生产者 消费者模型</title>
       <link>https://oheyu.github.io/zh/posts/tech/%E5%86%8D%E6%8E%A2%E4%BF%A1%E5%8F%B7%E9%87%8F%E4%BA%92%E6%96%A5%E9%94%81%E4%B8%8E%E7%94%9F%E4%BA%A7%E8%80%85-%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%9E%8B/</link>
       <pubDate>Tue, 31 Oct 2023 10:48:51 +0800</pubDate>
