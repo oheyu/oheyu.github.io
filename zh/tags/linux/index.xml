@@ -16,6 +16,55 @@
       <description>std::function 是一种通用的模板类，用于封装不同类型的可调用对象并通过统一的接口调用它们，使得处理这些可调用对象变得更加简洁、灵活。 一、什么是 std::f</description>
     </item>
     <item>
+      <title>Inet_pton与inet_ntop</title>
+      <link>https://oheyu.github.io/zh/posts/tech/inet_pton%E4%B8%8Einet_ntop/</link>
+      <pubDate>Thu, 18 Jan 2024 20:47:35 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/inet_pton%E4%B8%8Einet_ntop/</guid>
+      <description>在网络编程中，IP 地址的转换和表示是一个常见且重要的任务。为了在程序中处理网络地址，需要将人类可读的字符串形式的 IP 地址转换为计算机可处理的二</description>
+    </item>
+    <item>
+      <title>服务端的accept函数</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84accept%E5%87%BD%E6%95%B0/</link>
+      <pubDate>Sat, 13 Jan 2024 10:23:06 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84accept%E5%87%BD%E6%95%B0/</guid>
+      <description>一、accept() 函数概述 1.1 定义与作用 accept() 函数用于从监听套接字的已完成连接队列中取出一个已建立的连接，返回一个新的套接字文件描述符，用于与客</description>
+    </item>
+    <item>
+      <title>服务端的listen函数</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84listen%E5%87%BD%E6%95%B0/</link>
+      <pubDate>Thu, 04 Jan 2024 10:13:49 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84listen%E5%87%BD%E6%95%B0/</guid>
+      <description>listen() 函数在网络编程中是服务器端建立连接的关键步骤。它将套接字设置为被动监听模式，等待客户端的连接请求。本文将深入剖析 listen() 函数，从其定义、参数、返</description>
+    </item>
+    <item>
+      <title>Bind函数</title>
+      <link>https://oheyu.github.io/zh/posts/tech/bind%E5%87%BD%E6%95%B0/</link>
+      <pubDate>Tue, 02 Jan 2024 09:42:16 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/bind%E5%87%BD%E6%95%B0/</guid>
+      <description>一、bind() 函数概述 1.1 定义与作用 bind() 函数用于将一个套接字绑定到一个特定的 本地地址 和 端口号。在服务器程序中，这是一个必不可少的步骤，确保服务</description>
+    </item>
+    <item>
+      <title>那recv函数呢</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E9%82%A3recv%E5%87%BD%E6%95%B0%E5%91%A2/</link>
+      <pubDate>Sat, 30 Dec 2023 09:15:37 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E9%82%A3recv%E5%87%BD%E6%95%B0%E5%91%A2/</guid>
+      <description>recv() 函数是从已连接的套接字接收数据的主要方式。 一、recv() 函数概述 1.1 定义与作用 recv() 函数用于从已连接的套接字中接收数据，主要用于 面向连接的套接</description>
+    </item>
+    <item>
+      <title>Send发送函数</title>
+      <link>https://oheyu.github.io/zh/posts/tech/send%E5%8F%91%E9%80%81%E5%87%BD%E6%95%B0/</link>
+      <pubDate>Wed, 27 Dec 2023 09:11:19 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/send%E5%8F%91%E9%80%81%E5%87%BD%E6%95%B0/</guid>
+      <description>一、send() 函数概述 1.1 定义与作用 send() 函数用于将数据发送到已建立连接的套接字上，主要用于 面向连接的套接字（如 TCP）。它提供了比 write() 更丰富的功</description>
+    </item>
+    <item>
+      <title>Connect究竟连接了个什么鬼</title>
+      <link>https://oheyu.github.io/zh/posts/tech/connect%E7%A9%B6%E7%AB%9F%E8%BF%9E%E6%8E%A5%E4%BA%86%E4%B8%AA%E4%BB%80%E4%B9%88%E9%AC%BC/</link>
+      <pubDate>Wed, 13 Dec 2023 08:41:43 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/connect%E7%A9%B6%E7%AB%9F%E8%BF%9E%E6%8E%A5%E4%BA%86%E4%B8%AA%E4%BB%80%E4%B9%88%E9%AC%BC/</guid>
+      <description>深入解析 connect() 函数：理解、用法与实践 在网络编程中，connect() 函数是客户端建立网络连接的关键步骤。无论是开发简单的客户端应用，还是构建复杂</description>
+    </item>
+    <item>
       <title>Sockaddr_in结构体</title>
       <link>https://oheyu.github.io/zh/posts/tech/sockaddr_in%E7%BB%93%E6%9E%84%E4%BD%93/</link>
       <pubDate>Mon, 11 Dec 2023 22:18:58 +0800</pubDate>

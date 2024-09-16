@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Bind函数 | 史玉浩的个人博客</title>
+<meta name="keywords" content="Linux">
+<meta name="description" content="一、bind() 函数概述 1.1 定义与作用 bind() 函数用于将一个套接字绑定到一个特定的 本地地址 和 端口号。在服务器程序中，这是一个必不可少的步骤，确保服务">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/bind%E5%87%BD%E6%95%B0/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/bind%E5%87%BD%E6%95%B0/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="Bind函数" />
+<meta property="og:description" content="一、bind() 函数概述 1.1 定义与作用 bind() 函数用于将一个套接字绑定到一个特定的 本地地址 和 端口号。在服务器程序中，这是一个必不可少的步骤，确保服务" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/bind%E5%87%BD%E6%95%B0/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-01-02T09:42:16+08:00" />
+<meta property="article:modified_time" content="2024-01-02T09:42:16+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Bind函数"/>
+<meta name="twitter:description" content="一、bind() 函数概述 1.1 定义与作用 bind() 函数用于将一个套接字绑定到一个特定的 本地地址 和 端口号。在服务器程序中，这是一个必不可少的步骤，确保服务"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Bind函数",
+      "item": "https://oheyu.github.io/zh/posts/tech/bind%E5%87%BD%E6%95%B0/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Bind函数",
+  "name": "Bind函数",
+  "description": "一、bind() 函数概述 1.1 定义与作用 bind() 函数用于将一个套接字绑定到一个特定的 本地地址 和 端口号。在服务器程序中，这是一个必不可少的步骤，确保服务",
+  "keywords": [
+    "Linux"
+  ],
+  "articleBody": "\r一、bind() 函数概述 1.1 定义与作用 bind() 函数用于将一个套接字绑定到一个特定的 本地地址 和 端口号。在服务器程序中，这是一个必不可少的步骤，确保服务器在指定的地址和端口上监听客户端的连接请求。\n1.2 函数原型 1 2 3 4 #include #include int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen); 二、bind() 函数的参数与返回值 2.1 参数解析 sockfd：套接字文件描述符，由 socket() 函数创建并返回，表示需要绑定的套接字。 addr：指向 struct sockaddr 类型的指针，包含要绑定的本地地址和端口信息。 addrlen：addr 结构体的长度（字节数），可以使用 sizeof(struct sockaddr_in) 获取。 2.2 返回值 成功：返回 0，表示绑定成功。 失败：返回 -1，并设置 errno，指示具体的错误原因。 三、bind() 函数的工作原理 3.1 套接字与地址的关联 在创建套接字后，默认情况下并未指定使用哪个本地地址和端口。通过 bind() 函数，可以明确地指定这些信息，使套接字在特定的网络接口和端口上进行通信。\n3.2 服务器端的必要步骤 对于服务器程序，bind() 是必要的，因为服务器需要在一个 固定的地址和端口 上监听客户端的连接请求，方便客户端找到并连接到服务器。\n3.3 客户端的特殊情况 在客户端程序中，通常不需要调用 bind()，因为操作系统会自动分配一个临时的本地端口和地址。然而，在需要指定特定的本地端口或进行多播、广播时，客户端也可能需要使用 bind()。\n四、bind() 的使用示例 4.1 服务器端绑定示例 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 #include #include #include #include int main() { int sockfd; struct sockaddr_in server_addr; // 创建套接字 sockfd = socket(AF_INET, SOCK_STREAM, 0); if (sockfd \u003c 0) { perror(\"socket creation failed\"); return -1; } // 初始化服务器地址结构体 memset(\u0026server_addr, 0, sizeof(server_addr)); server_addr.sin_family = AF_INET; // IPv4 server_addr.sin_addr.s_addr = INADDR_ANY; // 监听所有本地地址 server_addr.sin_port = htons(8080); // 绑定端口 8080 // 绑定地址和端口 if (bind(sockfd, (struct sockaddr *)\u0026server_addr, sizeof(server_addr)) \u003c 0) { perror(\"bind failed\"); close(sockfd); return -1; } printf(\"Bind successful. Server is ready to accept connections.\\n\"); // 后续的 listen() 和 accept() 操作... close(sockfd); return 0; } 4.2 客户端绑定特定端口示例 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 #include #include #include #include int main() { int sockfd; struct sockaddr_in local_addr; // 创建套接字 sockfd = socket(AF_INET, SOCK_STREAM, 0); if (sockfd \u003c 0) { perror(\"socket creation failed\"); return -1; } // 初始化本地地址结构体 memset(\u0026local_addr, 0, sizeof(local_addr)); local_addr.sin_family = AF_INET; // IPv4 local_addr.sin_addr.s_addr = INADDR_ANY; // 使用任意本地地址 local_addr.sin_port = htons(50000); // 绑定本地端口 50000 // 绑定本地地址和端口 if (bind(sockfd, (struct sockaddr *)\u0026local_addr, sizeof(local_addr)) \u003c 0) { perror(\"bind failed\"); close(sockfd); return -1; } // 连接服务器的操作... close(sockfd); return 0; } 五、注意事项 5.1 地址结构体的正确设置 sin_family：必须设置为 AF_INET（IPv4）或 AF_INET6（IPv6），与套接字的地址族一致。 sin_port：端口号需要使用 htons() 函数转换为网络字节序。 sin_addr：本地 IP 地址，可以使用 INADDR_ANY 监听所有可用接口。 5.2 端口重用 问题：当服务器程序意外退出后，端口可能被占用一段时间（TIME_WAIT 状态），导致重新绑定失败。 解决方案：设置套接字选项 SO_REUSEADDR，允许端口快速重用。 1 2 3 4 5 6 int opt = 1; if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, \u0026opt, sizeof(opt)) \u003c 0) { perror(\"setsockopt failed\"); close(sockfd); return -1; } 5.3 权限问题 问题：绑定 0-1023 范围内的端口（系统保留端口）需要有超级用户权限。 解决方案：避免在非特权程序中使用系统保留端口，或以适当的权限运行程序。 5.4 地址已在使用 现象：调用 bind() 时，出现 EADDRINUSE 错误，表示地址已被占用。 原因：端口被其他程序占用，或未正确关闭的套接字仍在使用该端口。 解决方案：确保端口未被占用，或使用 SO_REUSEADDR 选项。 六、疑难杂症 6.1 忘记将端口号转换为网络字节序 问题：如果未使用 htons() 转换端口号，可能导致绑定到错误的端口。 解决方案：始终使用 htons() 将主机字节序的端口号转换为网络字节序。 1 server_addr.sin_port = htons(8080); 6.2 地址族不匹配 问题：sin_family 设置错误，导致 bind() 失败。 解决方案：确保 sin_family 与套接字的地址族一致。 6.3 未正确处理返回值 问题：未检查 bind() 的返回值，无法及时发现绑定失败的问题。 解决方案：始终检查 bind() 的返回值，处理可能的错误。 6.4 忽略 errno 的信息 问题：在 bind() 失败时，未使用 errno 提供的错误信息，导致调试困难。 解决方案：在错误处理时，使用 perror() 或 strerror(errno) 获取详细的错误描述。 七、bind() 函数的更多用法（稍微介绍一下啦） 7.1 绑定到特定的网络接口 场景：服务器有多个网络接口（多块网卡），需要在特定的接口上监听。 实现：将 sin_addr.s_addr 设置为指定接口的 IP 地址。 1 inet_pton(AF_INET, \"192.168.1.100\", \u0026server_addr.sin_addr); 7.2 IPv6 的支持 注意：使用 struct sockaddr_in6 和 AF_INET6，设置 IPv6 地址。 1 2 3 4 5 6 7 8 struct sockaddr_in6 server_addr6; memset(\u0026server_addr6, 0, sizeof(server_addr6)); server_addr6.sin6_family = AF_INET6; inet_pton(AF_INET6, \"::1\", \u0026server_addr6.sin6_addr); // 绑定到本地 IPv6 地址 server_addr6.sin6_port = htons(8080); // 绑定操作 bind(sockfd, (struct sockaddr *)\u0026server_addr6, sizeof(server_addr6)); 7.3 多播和广播 多播：用于发送数据到一组订阅的主机，需要使用 bind() 来加入多播组。 广播：需要设置套接字选项 SO_BROADCAST，并在 bind() 时指定广播地址。 八、拓展资料：关键概念解释 8.1 套接字地址结构体 8.1.1 struct sockaddr 定义：通用的套接字地址结构体，适用于多种协议族。 1 2 3 4 struct sockaddr { sa_family_t sa_family; // 地址族 char sa_data[14]; // 地址数据 }; 8.1.2 struct sockaddr_in 定义：用于 IPv4 地址的套接字地址结构体。 1 2 3 4 5 6 struct sockaddr_in { sa_family_t sin_family; // 地址族（AF_INET） in_port_t sin_port; // 端口号（网络字节序） struct in_addr sin_addr; // IPv4 地址（网络字节序） unsigned char sin_zero[8];// 填充字节 }; 8.2 网络字节序与主机字节序 字节序： 大端序（Big Endian）：高位字节存储在低地址。 小端序（Little Endian）：低位字节存储在低地址。 网络字节序：TCP/IP 协议规定使用大端序，称为网络字节序。 转换函数： htons()：主机字节序到网络字节序（16 位）。 htonl()：主机字节序到网络字节序（32 位）。 ntohs()、ntohl()：网络字节序到主机字节序。 8.3 端口号 范围： 系统保留端口：0-1023，需要超级用户权限。 用户端口：1024-49151，可供一般程序使用。 动态/私有端口：49152-65535，通常由系统动态分配。 作用：用于标识主机上的特定进程或服务。 8.4 INADDR_ANY 与 INADDR_LOOPBACK INADDR_ANY：表示监听所有可用的本地地址。通常用于服务器程序，值为 0.0.0.0。 INADDR_LOOPBACK：表示本地主机地址，值为 127.0.0.1。 九、示例代码：完整的服务器程序 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 #include #include #include #include #include #define PORT 8080 int main() { int server_fd; struct sockaddr_in address; int opt = 1; int addrlen = sizeof(address); // 创建套接字 if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) { perror(\"socket failed\"); return -1; } // 设置端口重用 if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, \u0026opt, sizeof(opt))) { perror(\"setsockopt failed\"); close(server_fd); return -1; } // 绑定地址 address.sin_family = AF_INET; address.sin_addr.s_addr = INADDR_ANY; address.sin_port = htons(PORT); if (bind(server_fd, (struct sockaddr *)\u0026address, sizeof(address)) \u003c 0) { perror(\"bind failed\"); close(server_fd); return -1; } printf(\"Server is listening on port %d\\n\", PORT); // 开始监听 if (listen(server_fd, 3) \u003c 0) { perror(\"listen failed\"); close(server_fd); return -1; } // 接受连接 int new_socket; if ((new_socket = accept(server_fd, (struct sockaddr *)\u0026address, (socklen_t *)\u0026addrlen)) \u003c 0) { perror(\"accept failed\"); close(server_fd); return -1; } // 处理客户端连接... close(new_socket); close(server_fd); return 0; } ",
+  "wordCount" : "2537",
+  "inLanguage": "zh",
+  "datePublished": "2024-01-02T09:42:16+08:00",
+  "dateModified": "2024-01-02T09:42:16+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/bind%E5%87%BD%E6%95%B0/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Bind函数
+    </h1>
+    <div class="post-meta"><span title='2024-01-02 09:42:16 +0800 CST'>2024-01-02</span>&nbsp;·&nbsp;6 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80bind-%e5%87%bd%e6%95%b0%e6%a6%82%e8%bf%b0" aria-label="一、bind() 函数概述">一、<code>bind()</code> 函数概述</a><ul>
+                            
+                    <li>
+                        <a href="#11-%e5%ae%9a%e4%b9%89%e4%b8%8e%e4%bd%9c%e7%94%a8" aria-label="1.1 定义与作用">1.1 定义与作用</a></li>
+                    <li>
+                        <a href="#12-%e5%87%bd%e6%95%b0%e5%8e%9f%e5%9e%8b" aria-label="1.2 函数原型">1.2 函数原型</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%8cbind-%e5%87%bd%e6%95%b0%e7%9a%84%e5%8f%82%e6%95%b0%e4%b8%8e%e8%bf%94%e5%9b%9e%e5%80%bc" aria-label="二、bind() 函数的参数与返回值">二、<code>bind()</code> 函数的参数与返回值</a><ul>
+                            
+                    <li>
+                        <a href="#21-%e5%8f%82%e6%95%b0%e8%a7%a3%e6%9e%90" aria-label="2.1 参数解析">2.1 参数解析</a></li>
+                    <li>
+                        <a href="#22-%e8%bf%94%e5%9b%9e%e5%80%bc" aria-label="2.2 返回值">2.2 返回值</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%89bind-%e5%87%bd%e6%95%b0%e7%9a%84%e5%b7%a5%e4%bd%9c%e5%8e%9f%e7%90%86" aria-label="三、bind() 函数的工作原理">三、<code>bind()</code> 函数的工作原理</a><ul>
+                            
+                    <li>
+                        <a href="#31-%e5%a5%97%e6%8e%a5%e5%ad%97%e4%b8%8e%e5%9c%b0%e5%9d%80%e7%9a%84%e5%85%b3%e8%81%94" aria-label="3.1 套接字与地址的关联">3.1 套接字与地址的关联</a></li>
+                    <li>
+                        <a href="#32-%e6%9c%8d%e5%8a%a1%e5%99%a8%e7%ab%af%e7%9a%84%e5%bf%85%e8%a6%81%e6%ad%a5%e9%aa%a4" aria-label="3.2 服务器端的必要步骤">3.2 服务器端的必要步骤</a></li>
+                    <li>
+                        <a href="#33-%e5%ae%a2%e6%88%b7%e7%ab%af%e7%9a%84%e7%89%b9%e6%ae%8a%e6%83%85%e5%86%b5" aria-label="3.3 客户端的特殊情况">3.3 客户端的特殊情况</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%9b%9bbind-%e7%9a%84%e4%bd%bf%e7%94%a8%e7%a4%ba%e4%be%8b" aria-label="四、bind() 的使用示例">四、<code>bind()</code> 的使用示例</a><ul>
+                            
+                    <li>
+                        <a href="#41-%e6%9c%8d%e5%8a%a1%e5%99%a8%e7%ab%af%e7%bb%91%e5%ae%9a%e7%a4%ba%e4%be%8b" aria-label="4.1 服务器端绑定示例">4.1 服务器端绑定示例</a></li>
+                    <li>
+                        <a href="#42-%e5%ae%a2%e6%88%b7%e7%ab%af%e7%bb%91%e5%ae%9a%e7%89%b9%e5%ae%9a%e7%ab%af%e5%8f%a3%e7%a4%ba%e4%be%8b" aria-label="4.2 客户端绑定特定端口示例">4.2 客户端绑定特定端口示例</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%94%e6%b3%a8%e6%84%8f%e4%ba%8b%e9%a1%b9" aria-label="五、注意事项">五、注意事项</a><ul>
+                            
+                    <li>
+                        <a href="#51-%e5%9c%b0%e5%9d%80%e7%bb%93%e6%9e%84%e4%bd%93%e7%9a%84%e6%ad%a3%e7%a1%ae%e8%ae%be%e7%bd%ae" aria-label="5.1 地址结构体的正确设置">5.1 地址结构体的正确设置</a></li>
+                    <li>
+                        <a href="#52-%e7%ab%af%e5%8f%a3%e9%87%8d%e7%94%a8" aria-label="5.2 端口重用">5.2 端口重用</a></li>
+                    <li>
+                        <a href="#53-%e6%9d%83%e9%99%90%e9%97%ae%e9%a2%98" aria-label="5.3 权限问题">5.3 权限问题</a></li>
+                    <li>
+                        <a href="#54-%e5%9c%b0%e5%9d%80%e5%b7%b2%e5%9c%a8%e4%bd%bf%e7%94%a8" aria-label="5.4 地址已在使用">5.4 地址已在使用</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%85%ad%e7%96%91%e9%9a%be%e6%9d%82%e7%97%87" aria-label="六、疑难杂症">六、疑难杂症</a><ul>
+                            
+                    <li>
+                        <a href="#61-%e5%bf%98%e8%ae%b0%e5%b0%86%e7%ab%af%e5%8f%a3%e5%8f%b7%e8%bd%ac%e6%8d%a2%e4%b8%ba%e7%bd%91%e7%bb%9c%e5%ad%97%e8%8a%82%e5%ba%8f" aria-label="6.1 忘记将端口号转换为网络字节序">6.1 忘记将端口号转换为网络字节序</a></li>
+                    <li>
+                        <a href="#62-%e5%9c%b0%e5%9d%80%e6%97%8f%e4%b8%8d%e5%8c%b9%e9%85%8d" aria-label="6.2 地址族不匹配">6.2 地址族不匹配</a></li>
+                    <li>
+                        <a href="#63-%e6%9c%aa%e6%ad%a3%e7%a1%ae%e5%a4%84%e7%90%86%e8%bf%94%e5%9b%9e%e5%80%bc" aria-label="6.3 未正确处理返回值">6.3 未正确处理返回值</a></li>
+                    <li>
+                        <a href="#64-%e5%bf%bd%e7%95%a5-errno-%e7%9a%84%e4%bf%a1%e6%81%af" aria-label="6.4 忽略 errno 的信息">6.4 忽略 <code>errno</code> 的信息</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%83bind-%e5%87%bd%e6%95%b0%e7%9a%84%e6%9b%b4%e5%a4%9a%e7%94%a8%e6%b3%95%e7%a8%8d%e5%be%ae%e4%bb%8b%e7%bb%8d%e4%b8%80%e4%b8%8b%e5%95%a6" aria-label="七、bind() 函数的更多用法（稍微介绍一下啦）">七、<code>bind()</code> 函数的更多用法（稍微介绍一下啦）</a><ul>
+                            
+                    <li>
+                        <a href="#71-%e7%bb%91%e5%ae%9a%e5%88%b0%e7%89%b9%e5%ae%9a%e7%9a%84%e7%bd%91%e7%bb%9c%e6%8e%a5%e5%8f%a3" aria-label="7.1 绑定到特定的网络接口">7.1 绑定到特定的网络接口</a></li>
+                    <li>
+                        <a href="#72-ipv6-%e7%9a%84%e6%94%af%e6%8c%81" aria-label="7.2 IPv6 的支持">7.2 IPv6 的支持</a></li>
+                    <li>
+                        <a href="#73-%e5%a4%9a%e6%92%ad%e5%92%8c%e5%b9%bf%e6%92%ad" aria-label="7.3 多播和广播">7.3 多播和广播</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%85%ab%e6%8b%93%e5%b1%95%e8%b5%84%e6%96%99%e5%85%b3%e9%94%ae%e6%a6%82%e5%bf%b5%e8%a7%a3%e9%87%8a" aria-label="八、拓展资料：关键概念解释">八、拓展资料：关键概念解释</a><ul>
+                            
+                    <li>
+                        <a href="#81-%e5%a5%97%e6%8e%a5%e5%ad%97%e5%9c%b0%e5%9d%80%e7%bb%93%e6%9e%84%e4%bd%93" aria-label="8.1 套接字地址结构体">8.1 套接字地址结构体</a><ul>
+                            
+                    <li>
+                        <a href="#811-struct-sockaddr" aria-label="8.1.1 struct sockaddr">8.1.1 <code>struct sockaddr</code></a></li>
+                    <li>
+                        <a href="#812-struct-sockaddr_in" aria-label="8.1.2 struct sockaddr_in">8.1.2 <code>struct sockaddr_in</code></a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#82-%e7%bd%91%e7%bb%9c%e5%ad%97%e8%8a%82%e5%ba%8f%e4%b8%8e%e4%b8%bb%e6%9c%ba%e5%ad%97%e8%8a%82%e5%ba%8f" aria-label="8.2 网络字节序与主机字节序">8.2 网络字节序与主机字节序</a></li>
+                    <li>
+                        <a href="#83-%e7%ab%af%e5%8f%a3%e5%8f%b7" aria-label="8.3 端口号">8.3 端口号</a></li>
+                    <li>
+                        <a href="#84-inaddr_any-%e4%b8%8e-inaddr_loopback" aria-label="8.4 INADDR_ANY 与 INADDR_LOOPBACK">8.4 <code>INADDR_ANY</code> 与 <code>INADDR_LOOPBACK</code></a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b9%9d%e7%a4%ba%e4%be%8b%e4%bb%a3%e7%a0%81%e5%ae%8c%e6%95%b4%e7%9a%84%e6%9c%8d%e5%8a%a1%e5%99%a8%e7%a8%8b%e5%ba%8f" aria-label="九、示例代码：完整的服务器程序">九、示例代码：完整的服务器程序</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<h2 id="一bind-函数概述">一、<code>bind()</code> 函数概述<a hidden class="anchor" aria-hidden="true" href="#一bind-函数概述">#</a></h2>
+<h3 id="11-定义与作用">1.1 定义与作用<a hidden class="anchor" aria-hidden="true" href="#11-定义与作用">#</a></h3>
+<p><code>bind()</code> 函数用于将一个套接字绑定到一个特定的 <strong>本地地址</strong> 和 <strong>端口号</strong>。在服务器程序中，这是一个必不可少的步骤，确保服务器在指定的地址和端口上监听客户端的连接请求。</p>
+<h3 id="12-函数原型">1.2 函数原型<a hidden class="anchor" aria-hidden="true" href="#12-函数原型">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/socket.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">bind</span><span class="p">(</span><span class="kt">int</span> <span class="n">sockfd</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">socklen_t</span> <span class="n">addrlen</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="二bind-函数的参数与返回值">二、<code>bind()</code> 函数的参数与返回值<a hidden class="anchor" aria-hidden="true" href="#二bind-函数的参数与返回值">#</a></h2>
+<h3 id="21-参数解析">2.1 参数解析<a hidden class="anchor" aria-hidden="true" href="#21-参数解析">#</a></h3>
+<ul>
+<li><strong><code>sockfd</code></strong>：套接字文件描述符，由 <code>socket()</code> 函数创建并返回，表示需要绑定的套接字。</li>
+<li><strong><code>addr</code></strong>：指向 <code>struct sockaddr</code> 类型的指针，包含要绑定的本地地址和端口信息。</li>
+<li><strong><code>addrlen</code></strong>：<code>addr</code> 结构体的长度（字节数），可以使用 <code>sizeof(struct sockaddr_in)</code> 获取。</li>
+</ul>
+<h3 id="22-返回值">2.2 返回值<a hidden class="anchor" aria-hidden="true" href="#22-返回值">#</a></h3>
+<ul>
+<li><strong>成功</strong>：返回 <code>0</code>，表示绑定成功。</li>
+<li><strong>失败</strong>：返回 <code>-1</code>，并设置 <code>errno</code>，指示具体的错误原因。</li>
+</ul>
+<hr>
+<h2 id="三bind-函数的工作原理">三、<code>bind()</code> 函数的工作原理<a hidden class="anchor" aria-hidden="true" href="#三bind-函数的工作原理">#</a></h2>
+<h3 id="31-套接字与地址的关联">3.1 套接字与地址的关联<a hidden class="anchor" aria-hidden="true" href="#31-套接字与地址的关联">#</a></h3>
+<p>在创建套接字后，默认情况下并未指定使用哪个本地地址和端口。通过 <code>bind()</code> 函数，可以明确地指定这些信息，使套接字在特定的网络接口和端口上进行通信。</p>
+<h3 id="32-服务器端的必要步骤">3.2 服务器端的必要步骤<a hidden class="anchor" aria-hidden="true" href="#32-服务器端的必要步骤">#</a></h3>
+<p>对于服务器程序，<code>bind()</code> 是必要的，因为服务器需要在一个 <strong>固定的地址和端口</strong> 上监听客户端的连接请求，方便客户端找到并连接到服务器。</p>
+<h3 id="33-客户端的特殊情况">3.3 客户端的特殊情况<a hidden class="anchor" aria-hidden="true" href="#33-客户端的特殊情况">#</a></h3>
+<p>在客户端程序中，通常不需要调用 <code>bind()</code>，因为操作系统会自动分配一个临时的本地端口和地址。然而，在需要指定特定的本地端口或进行多播、广播时，客户端也可能需要使用 <code>bind()</code>。</p>
+<hr>
+<h2 id="四bind-的使用示例">四、<code>bind()</code> 的使用示例<a hidden class="anchor" aria-hidden="true" href="#四bind-的使用示例">#</a></h2>
+<h3 id="41-服务器端绑定示例">4.1 服务器端绑定示例<a hidden class="anchor" aria-hidden="true" href="#41-服务器端绑定示例">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;arpa/inet.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">sockfd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">sockaddr_in</span> <span class="n">server_addr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 创建套接字
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">sockfd</span> <span class="o">=</span> <span class="nf">socket</span><span class="p">(</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">SOCK_STREAM</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">sockfd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">perror</span><span class="p">(</span><span class="s">&#34;socket creation failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 初始化服务器地址结构体
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">server_addr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">server_addr</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">server_addr</span><span class="p">.</span><span class="n">sin_family</span> <span class="o">=</span> <span class="n">AF_INET</span><span class="p">;</span>          <span class="c1">// IPv4
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">server_addr</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">s_addr</span> <span class="o">=</span> <span class="n">INADDR_ANY</span><span class="p">;</span>  <span class="c1">// 监听所有本地地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">server_addr</span><span class="p">.</span><span class="n">sin_port</span> <span class="o">=</span> <span class="nf">htons</span><span class="p">(</span><span class="mi">8080</span><span class="p">);</span>        <span class="c1">// 绑定端口 8080
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 绑定地址和端口
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="nf">bind</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span> <span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">server_addr</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">server_addr</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">perror</span><span class="p">(</span><span class="s">&#34;bind failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">close</span><span class="p">(</span><span class="n">sockfd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Bind successful. Server is ready to accept connections.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 后续的 listen() 和 accept() 操作...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="nf">close</span><span class="p">(</span><span class="n">sockfd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="42-客户端绑定特定端口示例">4.2 客户端绑定特定端口示例<a hidden class="anchor" aria-hidden="true" href="#42-客户端绑定特定端口示例">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;arpa/inet.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">sockfd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">sockaddr_in</span> <span class="n">local_addr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 创建套接字
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">sockfd</span> <span class="o">=</span> <span class="nf">socket</span><span class="p">(</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">SOCK_STREAM</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">sockfd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">perror</span><span class="p">(</span><span class="s">&#34;socket creation failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 初始化本地地址结构体
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">local_addr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">local_addr</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">local_addr</span><span class="p">.</span><span class="n">sin_family</span> <span class="o">=</span> <span class="n">AF_INET</span><span class="p">;</span>         <span class="c1">// IPv4
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">local_addr</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">s_addr</span> <span class="o">=</span> <span class="n">INADDR_ANY</span><span class="p">;</span> <span class="c1">// 使用任意本地地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">local_addr</span><span class="p">.</span><span class="n">sin_port</span> <span class="o">=</span> <span class="nf">htons</span><span class="p">(</span><span class="mi">50000</span><span class="p">);</span>      <span class="c1">// 绑定本地端口 50000
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 绑定本地地址和端口
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="nf">bind</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span> <span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">local_addr</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">local_addr</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">perror</span><span class="p">(</span><span class="s">&#34;bind failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">close</span><span class="p">(</span><span class="n">sockfd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 连接服务器的操作...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="nf">close</span><span class="p">(</span><span class="n">sockfd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="五注意事项">五、注意事项<a hidden class="anchor" aria-hidden="true" href="#五注意事项">#</a></h2>
+<h3 id="51-地址结构体的正确设置">5.1 地址结构体的正确设置<a hidden class="anchor" aria-hidden="true" href="#51-地址结构体的正确设置">#</a></h3>
+<ul>
+<li><strong><code>sin_family</code></strong>：必须设置为 <code>AF_INET</code>（IPv4）或 <code>AF_INET6</code>（IPv6），与套接字的地址族一致。</li>
+<li><strong><code>sin_port</code></strong>：端口号需要使用 <code>htons()</code> 函数转换为网络字节序。</li>
+<li><strong><code>sin_addr</code></strong>：本地 IP 地址，可以使用 <code>INADDR_ANY</code> 监听所有可用接口。</li>
+</ul>
+<h3 id="52-端口重用">5.2 端口重用<a hidden class="anchor" aria-hidden="true" href="#52-端口重用">#</a></h3>
+<ul>
+<li><strong>问题</strong>：当服务器程序意外退出后，端口可能被占用一段时间（<code>TIME_WAIT</code> 状态），导致重新绑定失败。</li>
+<li><strong>解决方案</strong>：设置套接字选项 <code>SO_REUSEADDR</code>，允许端口快速重用。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">opt</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">setsockopt</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span> <span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">SO_REUSEADDR</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">opt</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">opt</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">perror</span><span class="p">(</span><span class="s">&#34;setsockopt failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">close</span><span class="p">(</span><span class="n">sockfd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="53-权限问题">5.3 权限问题<a hidden class="anchor" aria-hidden="true" href="#53-权限问题">#</a></h3>
+<ul>
+<li><strong>问题</strong>：绑定 0-1023 范围内的端口（<strong>系统保留端口</strong>）需要有超级用户权限。</li>
+<li><strong>解决方案</strong>：避免在非特权程序中使用系统保留端口，或以适当的权限运行程序。</li>
+</ul>
+<h3 id="54-地址已在使用">5.4 地址已在使用<a hidden class="anchor" aria-hidden="true" href="#54-地址已在使用">#</a></h3>
+<ul>
+<li><strong>现象</strong>：调用 <code>bind()</code> 时，出现 <code>EADDRINUSE</code> 错误，表示地址已被占用。</li>
+<li><strong>原因</strong>：端口被其他程序占用，或未正确关闭的套接字仍在使用该端口。</li>
+<li><strong>解决方案</strong>：确保端口未被占用，或使用 <code>SO_REUSEADDR</code> 选项。</li>
+</ul>
+<hr>
+<h2 id="六疑难杂症">六、疑难杂症<a hidden class="anchor" aria-hidden="true" href="#六疑难杂症">#</a></h2>
+<h3 id="61-忘记将端口号转换为网络字节序">6.1 忘记将端口号转换为网络字节序<a hidden class="anchor" aria-hidden="true" href="#61-忘记将端口号转换为网络字节序">#</a></h3>
+<ul>
+<li><strong>问题</strong>：如果未使用 <code>htons()</code> 转换端口号，可能导致绑定到错误的端口。</li>
+<li><strong>解决方案</strong>：始终使用 <code>htons()</code> 将主机字节序的端口号转换为网络字节序。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">server_addr</span><span class="p">.</span><span class="n">sin_port</span> <span class="o">=</span> <span class="nf">htons</span><span class="p">(</span><span class="mi">8080</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="62-地址族不匹配">6.2 地址族不匹配<a hidden class="anchor" aria-hidden="true" href="#62-地址族不匹配">#</a></h3>
+<ul>
+<li><strong>问题</strong>：<code>sin_family</code> 设置错误，导致 <code>bind()</code> 失败。</li>
+<li><strong>解决方案</strong>：确保 <code>sin_family</code> 与套接字的地址族一致。</li>
+</ul>
+<h3 id="63-未正确处理返回值">6.3 未正确处理返回值<a hidden class="anchor" aria-hidden="true" href="#63-未正确处理返回值">#</a></h3>
+<ul>
+<li><strong>问题</strong>：未检查 <code>bind()</code> 的返回值，无法及时发现绑定失败的问题。</li>
+<li><strong>解决方案</strong>：始终检查 <code>bind()</code> 的返回值，处理可能的错误。</li>
+</ul>
+<h3 id="64-忽略-errno-的信息">6.4 忽略 <code>errno</code> 的信息<a hidden class="anchor" aria-hidden="true" href="#64-忽略-errno-的信息">#</a></h3>
+<ul>
+<li><strong>问题</strong>：在 <code>bind()</code> 失败时，未使用 <code>errno</code> 提供的错误信息，导致调试困难。</li>
+<li><strong>解决方案</strong>：在错误处理时，使用 <code>perror()</code> 或 <code>strerror(errno)</code> 获取详细的错误描述。</li>
+</ul>
+<hr>
+<h2 id="七bind-函数的更多用法稍微介绍一下啦">七、<code>bind()</code> 函数的更多用法（稍微介绍一下啦）<a hidden class="anchor" aria-hidden="true" href="#七bind-函数的更多用法稍微介绍一下啦">#</a></h2>
+<h3 id="71-绑定到特定的网络接口">7.1 绑定到特定的网络接口<a hidden class="anchor" aria-hidden="true" href="#71-绑定到特定的网络接口">#</a></h3>
+<ul>
+<li><strong>场景</strong>：服务器有多个网络接口（多块网卡），需要在特定的接口上监听。</li>
+<li><strong>实现</strong>：将 <code>sin_addr.s_addr</code> 设置为指定接口的 IP 地址。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">inet_pton</span><span class="p">(</span><span class="n">AF_INET</span><span class="p">,</span> <span class="s">&#34;192.168.1.100&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">server_addr</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="72-ipv6-的支持">7.2 IPv6 的支持<a hidden class="anchor" aria-hidden="true" href="#72-ipv6-的支持">#</a></h3>
+<ul>
+<li><strong>注意</strong>：使用 <code>struct sockaddr_in6</code> 和 <code>AF_INET6</code>，设置 IPv6 地址。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">sockaddr_in6</span> <span class="n">server_addr6</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nf">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">server_addr6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">server_addr6</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="n">server_addr6</span><span class="p">.</span><span class="n">sin6_family</span> <span class="o">=</span> <span class="n">AF_INET6</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nf">inet_pton</span><span class="p">(</span><span class="n">AF_INET6</span><span class="p">,</span> <span class="s">&#34;::1&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">server_addr6</span><span class="p">.</span><span class="n">sin6_addr</span><span class="p">);</span> <span class="c1">// 绑定到本地 IPv6 地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">server_addr6</span><span class="p">.</span><span class="n">sin6_port</span> <span class="o">=</span> <span class="nf">htons</span><span class="p">(</span><span class="mi">8080</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 绑定操作
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">bind</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span> <span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">server_addr6</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">server_addr6</span><span class="p">));</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="73-多播和广播">7.3 多播和广播<a hidden class="anchor" aria-hidden="true" href="#73-多播和广播">#</a></h3>
+<ul>
+<li><strong>多播</strong>：用于发送数据到一组订阅的主机，需要使用 <code>bind()</code> 来加入多播组。</li>
+<li><strong>广播</strong>：需要设置套接字选项 <code>SO_BROADCAST</code>，并在 <code>bind()</code> 时指定广播地址。</li>
+</ul>
+<hr>
+<h2 id="八拓展资料关键概念解释">八、拓展资料：关键概念解释<a hidden class="anchor" aria-hidden="true" href="#八拓展资料关键概念解释">#</a></h2>
+<h3 id="81-套接字地址结构体">8.1 套接字地址结构体<a hidden class="anchor" aria-hidden="true" href="#81-套接字地址结构体">#</a></h3>
+<h4 id="811-struct-sockaddr">8.1.1 <code>struct sockaddr</code><a hidden class="anchor" aria-hidden="true" href="#811-struct-sockaddr">#</a></h4>
+<ul>
+<li><strong>定义</strong>：通用的套接字地址结构体，适用于多种协议族。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">sockaddr</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">sa_family_t</span> <span class="n">sa_family</span><span class="p">;</span>    <span class="c1">// 地址族
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">char</span>        <span class="n">sa_data</span><span class="p">[</span><span class="mi">14</span><span class="p">];</span>  <span class="c1">// 地址数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="812-struct-sockaddr_in">8.1.2 <code>struct sockaddr_in</code><a hidden class="anchor" aria-hidden="true" href="#812-struct-sockaddr_in">#</a></h4>
+<ul>
+<li><strong>定义</strong>：用于 IPv4 地址的套接字地址结构体。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">sockaddr_in</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">sa_family_t</span>    <span class="n">sin_family</span><span class="p">;</span> <span class="c1">// 地址族（AF_INET）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">in_port_t</span>      <span class="n">sin_port</span><span class="p">;</span>   <span class="c1">// 端口号（网络字节序）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">struct</span> <span class="n">in_addr</span> <span class="n">sin_addr</span><span class="p">;</span>   <span class="c1">// IPv4 地址（网络字节序）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">char</span>  <span class="n">sin_zero</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span><span class="c1">// 填充字节
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="82-网络字节序与主机字节序">8.2 网络字节序与主机字节序<a hidden class="anchor" aria-hidden="true" href="#82-网络字节序与主机字节序">#</a></h3>
+<ul>
+<li><strong>字节序</strong>：
+<ul>
+<li><strong>大端序（Big Endian）</strong>：高位字节存储在低地址。</li>
+<li><strong>小端序（Little Endian）</strong>：低位字节存储在低地址。</li>
+</ul>
+</li>
+<li><strong>网络字节序</strong>：TCP/IP 协议规定使用大端序，称为网络字节序。</li>
+<li><strong>转换函数</strong>：
+<ul>
+<li><code>htons()</code>：主机字节序到网络字节序（16 位）。</li>
+<li><code>htonl()</code>：主机字节序到网络字节序（32 位）。</li>
+<li><code>ntohs()</code>、<code>ntohl()</code>：网络字节序到主机字节序。</li>
+</ul>
+</li>
+</ul>
+<h3 id="83-端口号">8.3 端口号<a hidden class="anchor" aria-hidden="true" href="#83-端口号">#</a></h3>
+<ul>
+<li><strong>范围</strong>：
+<ul>
+<li><strong>系统保留端口</strong>：0-1023，需要超级用户权限。</li>
+<li><strong>用户端口</strong>：1024-49151，可供一般程序使用。</li>
+<li><strong>动态/私有端口</strong>：49152-65535，通常由系统动态分配。</li>
+</ul>
+</li>
+<li><strong>作用</strong>：用于标识主机上的特定进程或服务。</li>
+</ul>
+<h3 id="84-inaddr_any-与-inaddr_loopback">8.4 <code>INADDR_ANY</code> 与 <code>INADDR_LOOPBACK</code><a hidden class="anchor" aria-hidden="true" href="#84-inaddr_any-与-inaddr_loopback">#</a></h3>
+<ul>
+<li><strong><code>INADDR_ANY</code></strong>：表示监听所有可用的本地地址。通常用于服务器程序，值为 <code>0.0.0.0</code>。</li>
+<li><strong><code>INADDR_LOOPBACK</code></strong>：表示本地主机地址，值为 <code>127.0.0.1</code>。</li>
+</ul>
+<hr>
+<h2 id="九示例代码完整的服务器程序">九、示例代码：完整的服务器程序<a hidden class="anchor" aria-hidden="true" href="#九示例代码完整的服务器程序">#</a></h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;arpa/inet.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/socket.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define PORT 8080
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">server_fd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">sockaddr_in</span> <span class="n">address</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">opt</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">addrlen</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">address</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 创建套接字
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">((</span><span class="n">server_fd</span> <span class="o">=</span> <span class="nf">socket</span><span class="p">(</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">SOCK_STREAM</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">perror</span><span class="p">(</span><span class="s">&#34;socket failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 设置端口重用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="nf">setsockopt</span><span class="p">(</span><span class="n">server_fd</span><span class="p">,</span> <span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">SO_REUSEADDR</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">opt</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">opt</span><span class="p">)))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">perror</span><span class="p">(</span><span class="s">&#34;setsockopt failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">close</span><span class="p">(</span><span class="n">server_fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 绑定地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">address</span><span class="p">.</span><span class="n">sin_family</span> <span class="o">=</span> <span class="n">AF_INET</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">address</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">s_addr</span> <span class="o">=</span> <span class="n">INADDR_ANY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">address</span><span class="p">.</span><span class="n">sin_port</span> <span class="o">=</span> <span class="nf">htons</span><span class="p">(</span><span class="n">PORT</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">bind</span><span class="p">(</span><span class="n">server_fd</span><span class="p">,</span> <span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">address</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">address</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">perror</span><span class="p">(</span><span class="s">&#34;bind failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">close</span><span class="p">(</span><span class="n">server_fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Server is listening on port %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">PORT</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 开始监听
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="nf">listen</span><span class="p">(</span><span class="n">server_fd</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">perror</span><span class="p">(</span><span class="s">&#34;listen failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">close</span><span class="p">(</span><span class="n">server_fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 接受连接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">new_socket</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">((</span><span class="n">new_socket</span> <span class="o">=</span> <span class="nf">accept</span><span class="p">(</span><span class="n">server_fd</span><span class="p">,</span> <span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">address</span><span class="p">,</span> <span class="p">(</span><span class="kt">socklen_t</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">addrlen</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">perror</span><span class="p">(</span><span class="s">&#34;accept failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">close</span><span class="p">(</span><span class="n">server_fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 处理客户端连接...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="nf">close</span><span class="p">(</span><span class="n">new_socket</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">close</span><span class="p">(</span><span class="n">server_fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/linux/">Linux</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84listen%E5%87%BD%E6%95%B0/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>服务端的listen函数</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/%E9%82%A3recv%E5%87%BD%E6%95%B0%E5%91%A2/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>那recv函数呢</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

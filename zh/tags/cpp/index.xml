@@ -86,6 +86,13 @@
       <description>在 C++11 之前，C++ 没有原生的线程支持，开发者需要依赖于操作系统提供的线程库，不同平台的实现各不相同，这导致了跨平台开发的复杂性。C++11 引入</description>
     </item>
     <item>
+      <title>STL容器之Array</title>
+      <link>https://oheyu.github.io/zh/posts/tech/stl%E5%AE%B9%E5%99%A8%E4%B9%8Barray/</link>
+      <pubDate>Fri, 15 Dec 2023 08:53:50 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/stl%E5%AE%B9%E5%99%A8%E4%B9%8Barray/</guid>
+      <description>std::array 是 C++11 引入的一个容器，提供了定长数组的封装，比传统的 C 风格数组更安全、更具可操作性。本文将详细剖析 std::array，从其定义、特性、用法</description>
+    </item>
+    <item>
       <title>智能指针之unique_ptr</title>
       <link>https://oheyu.github.io/zh/posts/tech/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E4%B9%8Bunique_ptr/</link>
       <pubDate>Thu, 23 Nov 2023 10:49:23 +0800</pubDate>

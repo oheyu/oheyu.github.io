@@ -193,69 +193,69 @@ code.has-jax {
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">进程间同步：信号量
+    <h2 class="entry-hint-parent">那recv函数呢
     </h2>
   </header>
   <div class="entry-content">
-    <p>在多任务操作系统中，进程间同步和共享资源的管理是至关重要的。信号量（Semaphore）作为一种经典的同步机制，为控制对共享资源的访问提供了...</p>
+    <p>recv() 函数是从已连接的套接字接收数据的主要方式。 一、recv() 函数概述 1.1 定义与作用 recv() 函数用于从已连接的套接字中接收数据，主要用于 面向连接的套接...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-10-06 09:45:57 +0800 CST'>2023-10-06</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to 进程间同步：信号量" href="https://oheyu.github.io/zh/posts/tech/%E8%BF%9B%E7%A8%8B%E9%97%B4%E5%90%8C%E6%AD%A5%E4%BF%A1%E5%8F%B7%E9%87%8F/"></a>
+  <footer class="entry-footer"><span title='2023-12-30 09:15:37 +0800 CST'>2023-12-30</span>&nbsp;·&nbsp;6 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to 那recv函数呢" href="https://oheyu.github.io/zh/posts/tech/%E9%82%A3recv%E5%87%BD%E6%95%B0%E5%91%A2/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">Linux的僵尸进程
+    <h2 class="entry-hint-parent">Send发送函数
     </h2>
   </header>
   <div class="entry-content">
-    <p>在 Linux 和其他类 Unix 系统中，进程管理是保证系统稳定性和高效运行的重要组成部分。其中，僵尸进程（Zombie Process）是一个特殊但常见的问题。...</p>
+    <p>一、send() 函数概述 1.1 定义与作用 send() 函数用于将数据发送到已建立连接的套接字上，主要用于 面向连接的套接字（如 TCP）。它提供了比 write() 更丰富的功...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-09-30 08:59:03 +0800 CST'>2023-09-30</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to Linux的僵尸进程" href="https://oheyu.github.io/zh/posts/tech/linux%E7%9A%84%E5%83%B5%E5%B0%B8%E8%BF%9B%E7%A8%8B/"></a>
+  <footer class="entry-footer"><span title='2023-12-27 09:11:19 +0800 CST'>2023-12-27</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to Send发送函数" href="https://oheyu.github.io/zh/posts/tech/send%E5%8F%91%E9%80%81%E5%87%BD%E6%95%B0/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">进程间的通信
+    <h2 class="entry-hint-parent">Connect究竟连接了个什么鬼
     </h2>
   </header>
   <div class="entry-content">
-    <p>进程间通信（IPC，Inter-Process Communication）是 Linux 操作系统中的一个重要组成部分，它允许多个独立进程之间共享数据、...</p>
+    <p>深入解析 connect() 函数：理解、用法与实践 在网络编程中，connect() 函数是客户端建立网络连接的关键步骤。无论是开发简单的客户端应用，还是构建复杂...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-09-29 08:39:02 +0800 CST'>2023-09-29</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to 进程间的通信" href="https://oheyu.github.io/zh/posts/tech/%E8%BF%9B%E7%A8%8B%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1/"></a>
+  <footer class="entry-footer"><span title='2023-12-13 08:41:43 +0800 CST'>2023-12-13</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to Connect究竟连接了个什么鬼" href="https://oheyu.github.io/zh/posts/tech/connect%E7%A9%B6%E7%AB%9F%E8%BF%9E%E6%8E%A5%E4%BA%86%E4%B8%AA%E4%BB%80%E4%B9%88%E9%AC%BC/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">共享内存初探
+    <h2 class="entry-hint-parent">Sockaddr_in结构体
     </h2>
   </header>
   <div class="entry-content">
-    <p>在操作系统中，进程是独立的执行实体，拥有自己的独立地址空间，无法直接访问其他进程的内存。然而，在多进程程序中，有时需要多个进程之间共享数据，...</p>
+    <p>这些个结构体哟！！！ 一、sockaddr_in 结构体概述 1.1 定义与作用 sockaddr_in 是用于 IPv4 网络编程的地址结构体，包含了 IP 地址和端口号等信息。在使用套接字...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-09-27 22:13:57 +0800 CST'>2023-09-27</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to 共享内存初探" href="https://oheyu.github.io/zh/posts/tech/%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E5%88%9D%E6%8E%A2/"></a>
+  <footer class="entry-footer"><span title='2023-12-11 22:18:58 +0800 CST'>2023-12-11</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to Sockaddr_in结构体" href="https://oheyu.github.io/zh/posts/tech/sockaddr_in%E7%BB%93%E6%9E%84%E4%BD%93/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">Fork函数的工作原理
+    <h2 class="entry-hint-parent">Hostent结构体
     </h2>
   </header>
   <div class="entry-content">
-    <p>在 Linux 系统编程中，fork() 函数是创建新进程的基础工具之一。它允许进程在运行时创建自己的副本，即子进程，从而实现并行处理。今天，我们来详细探...</p>
+    <p>这万恶的结构体啊！！！ 一、hostent 结构体概述 1.1 定义与作用 hostent 结构体用于描述主机的信息，包括主机名、别名、地址类型、地址长度和地址列表等。...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-09-25 17:08:06 +0800 CST'>2023-09-25</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;史玉浩</footer>
-  <a class="entry-link" aria-label="post link to Fork函数的工作原理" href="https://oheyu.github.io/zh/posts/tech/fork%E5%87%BD%E6%95%B0%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/"></a>
+  <footer class="entry-footer"><span title='2023-12-07 22:09:50 +0800 CST'>2023-12-07</span>&nbsp;·&nbsp;6 分钟&nbsp;·&nbsp;史玉浩</footer>
+  <a class="entry-link" aria-label="post link to Hostent结构体" href="https://oheyu.github.io/zh/posts/tech/hostent%E7%BB%93%E6%9E%84%E4%BD%93/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">
     <a class="prev" href="https://oheyu.github.io/zh/tags/linux/">
-      «&nbsp;上一页&nbsp;1/4
+      «&nbsp;上一页&nbsp;1/5
     </a>
-    <a class="next" href="https://oheyu.github.io/zh/tags/linux/page/3/">下一页&nbsp;3/4&nbsp;»
+    <a class="next" href="https://oheyu.github.io/zh/tags/linux/page/3/">下一页&nbsp;3/5&nbsp;»
     </a>
   </nav>
 </footer>
