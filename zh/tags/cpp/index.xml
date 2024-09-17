@@ -86,6 +86,27 @@
       <description>在 C++11 之前，C++ 没有原生的线程支持，开发者需要依赖于操作系统提供的线程库，不同平台的实现各不相同，这导致了跨平台开发的复杂性。C++11 引入</description>
     </item>
     <item>
+      <title>Noexcept</title>
+      <link>https://oheyu.github.io/zh/posts/tech/noexcept/</link>
+      <pubDate>Sun, 28 Jan 2024 22:18:43 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/noexcept/</guid>
+      <description>一、引言 在现代 C++ 编程中，异常处理机制是保障程序健壮性的重要手段。然而，异常的传播和捕获可能会带来额外的性能开销。为此，C++11 引入了新的异</description>
+    </item>
+    <item>
+      <title>移动语义的move</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84move/</link>
+      <pubDate>Thu, 25 Jan 2024 22:07:21 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84move/</guid>
+      <description>一、引言 随着现代软件的复杂度和性能需求的不断提高，C++11 引入了移动语义（Move Semantics），为程序员提供了更高效的资源管理方式</description>
+    </item>
+    <item>
+      <title>为啥移动构造函数与移动赋值函数的参数不需要const</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E4%B8%BA%E5%95%A5%E7%A7%BB%E5%8A%A8%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E4%B8%8E%E7%A7%BB%E5%8A%A8%E8%B5%8B%E5%80%BC%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%82%E6%95%B0%E4%B8%8D%E9%9C%80%E8%A6%81const/</link>
+      <pubDate>Mon, 22 Jan 2024 21:43:19 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E4%B8%BA%E5%95%A5%E7%A7%BB%E5%8A%A8%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E4%B8%8E%E7%A7%BB%E5%8A%A8%E8%B5%8B%E5%80%BC%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%82%E6%95%B0%E4%B8%8D%E9%9C%80%E8%A6%81const/</guid>
+      <description>C++编程中，拷贝构造函数和赋值运算符是类设计中的基础组件，它们决定了对象如何被复制和赋值。随着C++11引入移动语义，移动构造函数和移动赋</description>
+    </item>
+    <item>
       <title>STL容器之Array</title>
       <link>https://oheyu.github.io/zh/posts/tech/stl%E5%AE%B9%E5%99%A8%E4%B9%8Barray/</link>
       <pubDate>Fri, 15 Dec 2023 08:53:50 +0800</pubDate>

@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Noexcept | 史玉浩的个人博客</title>
+<meta name="keywords" content="CPP">
+<meta name="description" content="一、引言 在现代 C&#43;&#43; 编程中，异常处理机制是保障程序健壮性的重要手段。然而，异常的传播和捕获可能会带来额外的性能开销。为此，C&#43;&#43;11 引入了新的异">
+<meta name="author" content="史玉浩">
+<link rel="canonical" href="https://oheyu.github.io/zh/posts/tech/noexcept/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.9c78afd72529c14d4d3c0fa583c3e82265e0d8a303d475223d3b37442260ba22.css" integrity="sha256-nHiv1yUpwU1NPA&#43;lg8PoImXg2KMD1HUiPTs3RCJguiI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="https://oheyu.github.io/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://oheyu.github.io/img/logo.svg">
+<link rel="apple-touch-icon" href="https://oheyu.github.io/logo.svg">
+<link rel="mask-icon" href="https://oheyu.github.io/logo.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://oheyu.github.io/zh/posts/tech/noexcept/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
+
+  
+
+<meta property="og:title" content="Noexcept" />
+<meta property="og:description" content="一、引言 在现代 C&#43;&#43; 编程中，异常处理机制是保障程序健壮性的重要手段。然而，异常的传播和捕获可能会带来额外的性能开销。为此，C&#43;&#43;11 引入了新的异" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://oheyu.github.io/zh/posts/tech/noexcept/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-01-28T22:18:43+08:00" />
+<meta property="article:modified_time" content="2024-01-28T22:18:43+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Noexcept"/>
+<meta name="twitter:description" content="一、引言 在现代 C&#43;&#43; 编程中，异常处理机制是保障程序健壮性的重要手段。然而，异常的传播和捕获可能会带来额外的性能开销。为此，C&#43;&#43;11 引入了新的异"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://oheyu.github.io/zh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "👨🏻‍💻 技术",
+      "item": "https://oheyu.github.io/zh/posts/tech/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Noexcept",
+      "item": "https://oheyu.github.io/zh/posts/tech/noexcept/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Noexcept",
+  "name": "Noexcept",
+  "description": "一、引言 在现代 C++ 编程中，异常处理机制是保障程序健壮性的重要手段。然而，异常的传播和捕获可能会带来额外的性能开销。为此，C++11 引入了新的异",
+  "keywords": [
+    "CPP"
+  ],
+  "articleBody": "\r一、引言 在现代 C++ 编程中，异常处理机制是保障程序健壮性的重要手段。然而，异常的传播和捕获可能会带来额外的性能开销。为此，C++11 引入了新的异常规范关键字 noexcept，用于指明函数是否会抛出异常。\n二、noexcept 的基本概念 2.1 什么是 noexcept noexcept 是 C++11 引入的关键字，用于声明函数不会抛出异常。其语法形式为：\n1 2 3 void func() noexcept; // 简单声明 void func() noexcept(true); // 等价于 noexcept void func() noexcept(false); // 表示可能抛出异常 2.2 noexcept 与 throw() 的区别 在 C++98 中，throw() 用于声明函数不抛出异常。然而，throw() 存在一些局限性和问题，如编译器对其优化支持不足。noexcept 作为现代 C++ 的新特性，具有更好的性能和语义支持。\n三、noexcept 的作用与优势 3.1 性能优化 内联优化：编译器可以对 noexcept 函数进行更激进的内联优化，因为可以确定函数不会抛出异常。 代码生成优化：减少了异常处理相关的代码生成，提高了运行时性能。 3.2 程序稳定性 异常安全性：通过明确声明函数不会抛出异常，增强了代码的可预测性。 库设计：在设计库时，标记那些不会抛出异常的函数，可以帮助调用者更好地理解和使用接口。 四、noexcept 的使用场景 4.1 移动构造函数和移动赋值运算符 在标准库中，许多容器的移动操作都要求相关的移动构造函数和移动赋值运算符是 noexcept 的。\n1 2 3 4 5 6 7 class MyClass { public: // 移动构造函数 MyClass(MyClass\u0026\u0026 other) noexcept; // 移动赋值运算符 MyClass\u0026 operator=(MyClass\u0026\u0026 other) noexcept; }; 原因：容器在元素移动时，需要保证操作的异常安全性。如果移动操作抛出异常，可能导致容器处于不一致状态。\n4.2 析构函数 析构函数应该永远不抛出异常，因此默认情况下，析构函数被隐式地标记为 noexcept。\n1 2 3 4 5 6 class MyClass { public: ~MyClass() noexcept { // 析构代码 } }; 注意：如果析构函数可能抛出异常，可能导致程序在栈展开时调用 std::terminate()，使程序异常终止。\n4.3 小型工具函数 对于一些简单的工具函数，如访问器（getter）、比较器等，通常不会抛出异常，可以标记为 noexcept。\n1 2 3 int getValue() const noexcept { return value; } 五、noexcept 与异常安全性的关系 5.1 异常规格保证 标记为 noexcept 的函数，编译器会认为其不会抛出异常。如果函数实际抛出了异常，程序将调用 std::terminate()，导致程序异常终止。\n5.2 提高代码可靠性 通过使用 noexcept，可以在编译期发现异常安全性的问题，防止异常从不应该抛出的地方传播。\n六、noexcept 的推导与条件 6.1 条件 noexcept noexcept 可以接收一个布尔表达式，根据表达式的值决定函数是否为 noexcept。\n1 2 3 4 template\u003ctypename T\u003e void swap(T\u0026 a, T\u0026 b) noexcept(noexcept(T(std::declval\u003cT\u0026\u0026\u003e()))) { // 交换实现 } 解释：上述代码中，swap 函数的 noexcept 性质取决于类型 T 的移动构造函数是否为 noexcept。\n6.2 noexcept 运算符 noexcept 也是一个运算符，用于判断表达式是否为 noexcept。\n1 bool isNoexcept = noexcept(func()); 作用：noexcept 运算符返回一个编译期常量，指示表达式是否不会抛出异常。\n七、代码示例与分析 7.1 移动操作中的 noexcept 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 #include class MyClass { public: MyClass() = default; MyClass(MyClass\u0026\u0026 other) noexcept { // 移动构造实现 } }; int main() { std::vector\u003cMyClass\u003e vec1(10); std::vector\u003cMyClass\u003e vec2 = std::move(vec1); // 使用移动操作 return 0; } 分析：\n性能提升：由于 MyClass 的移动构造函数是 noexcept，std::vector 可以安全地使用移动操作，避免了元素的拷贝。 异常安全：如果移动操作可能抛出异常，std::vector 可能会选择使用拷贝构造函数，导致性能下降。 7.2 条件 noexcept 的应用 1 2 3 4 5 6 7 8 9 #include template\u003ctypename T\u003e void mySwap(T\u0026 a, T\u0026 b) noexcept(std::is_nothrow_move_constructible\u003cT\u003e::value \u0026\u0026 std::is_nothrow_move_assignable\u003cT\u003e::value) { T temp = std::move(a); a = std::move(b); b = std::move(temp); } 分析：\n条件判断：noexcept 的条件取决于类型 T 是否具有 noexcept 的移动构造和移动赋值操作。 通用性：确保 mySwap 在处理不同类型时，都能正确地反映其异常安全性。 八、注意事项 8.1 避免误用 noexcept 不确定是否抛出异常时，不要使用 noexcept：如果函数内部调用了可能抛出异常的函数，不应轻易标记为 noexcept。 8.2 noexcept 与异常传播 异常不应被隐藏：标记为 noexcept 的函数内部不应捕获并隐藏异常，这可能导致调试困难。 8.3 一致性 遵循标准库的约定：在自定义类型中，实现与标准库一致的异常规范，有助于代码的可维护性和可移植性。 九、noexcept 对性能的影响 9.1 编译器优化 内联展开：编译器更倾向于内联 noexcept 函数，减少函数调用开销。 寄存器分配：编译器在寄存器分配上可以更加激进，因为无需考虑异常处理的栈展开。 9.2 运行时开销减少 减少异常处理元数据：noexcept 函数可以减少编译器生成的异常处理相关元数据，减小二进制文件的体积。 提高分支预测准确性：减少异常路径，提高 CPU 的分支预测效率。 ",
+  "wordCount" : "1768",
+  "inLanguage": "zh",
+  "datePublished": "2024-01-28T22:18:43+08:00",
+  "dateModified": "2024-01-28T22:18:43+08:00",
+  "author":[{
+    "@type": "Person",
+    "name": "史玉浩"
+  }],
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://oheyu.github.io/zh/posts/tech/noexcept/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "史玉浩的个人博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oheyu.github.io/img/logo.svg"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://oheyu.github.io/zh/" accesskey="h" title="史玉浩的个人博客 (Alt + H)">史玉浩的个人博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://oheyu.github.io/en/" title="English"
+                            aria-label="English">English</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://oheyu.github.io/zh/search" title="🔍搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/" title="🏠主页">
+                    <span>🏠主页</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/posts" title="📚文章">
+                    <span>📚文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/archives" title="⏱时间轴">
+                    <span>⏱时间轴</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/categories" title="🧩分类">
+                    <span>🧩分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://oheyu.github.io/zh/tags" title="🔖标签">
+                    <span>🔖标签</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://oheyu.github.io/zh/">主页</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/">📚 文章</a>&nbsp;»&nbsp;<a href="https://oheyu.github.io/zh/posts/tech/">👨🏻‍💻 技术</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Noexcept
+    </h1>
+    <div class="post-meta"><span title='2024-01-28 22:18:43 +0800 CST'>2024-01-28</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;史玉浩
+
+</div>
+  </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+            <summary accesskey="c" title="(Alt + C)">
+                <span class="details">目录</span>
+            </summary>
+
+            <div class="inner"><ul>
+                    <li>
+                        <a href="#%e4%b8%80%e5%bc%95%e8%a8%80" aria-label="一、引言">一、引言</a></li>
+                    <li>
+                        <a href="#%e4%ba%8cnoexcept-%e7%9a%84%e5%9f%ba%e6%9c%ac%e6%a6%82%e5%bf%b5" aria-label="二、noexcept 的基本概念">二、<code>noexcept</code> 的基本概念</a><ul>
+                            
+                    <li>
+                        <a href="#21-%e4%bb%80%e4%b9%88%e6%98%af-noexcept" aria-label="2.1 什么是 noexcept">2.1 什么是 <code>noexcept</code></a></li>
+                    <li>
+                        <a href="#22-noexcept-%e4%b8%8e-throw-%e7%9a%84%e5%8c%ba%e5%88%ab" aria-label="2.2 noexcept 与 throw() 的区别">2.2 <code>noexcept</code> 与 <code>throw()</code> 的区别</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%89noexcept-%e7%9a%84%e4%bd%9c%e7%94%a8%e4%b8%8e%e4%bc%98%e5%8a%bf" aria-label="三、noexcept 的作用与优势">三、<code>noexcept</code> 的作用与优势</a><ul>
+                            
+                    <li>
+                        <a href="#31-%e6%80%a7%e8%83%bd%e4%bc%98%e5%8c%96" aria-label="3.1 性能优化">3.1 性能优化</a></li>
+                    <li>
+                        <a href="#32-%e7%a8%8b%e5%ba%8f%e7%a8%b3%e5%ae%9a%e6%80%a7" aria-label="3.2 程序稳定性">3.2 程序稳定性</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%9b%9bnoexcept-%e7%9a%84%e4%bd%bf%e7%94%a8%e5%9c%ba%e6%99%af" aria-label="四、noexcept 的使用场景">四、<code>noexcept</code> 的使用场景</a><ul>
+                            
+                    <li>
+                        <a href="#41-%e7%a7%bb%e5%8a%a8%e6%9e%84%e9%80%a0%e5%87%bd%e6%95%b0%e5%92%8c%e7%a7%bb%e5%8a%a8%e8%b5%8b%e5%80%bc%e8%bf%90%e7%ae%97%e7%ac%a6" aria-label="4.1 移动构造函数和移动赋值运算符">4.1 移动构造函数和移动赋值运算符</a></li>
+                    <li>
+                        <a href="#42-%e6%9e%90%e6%9e%84%e5%87%bd%e6%95%b0" aria-label="4.2 析构函数">4.2 析构函数</a></li>
+                    <li>
+                        <a href="#43-%e5%b0%8f%e5%9e%8b%e5%b7%a5%e5%85%b7%e5%87%bd%e6%95%b0" aria-label="4.3 小型工具函数">4.3 小型工具函数</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%ba%94noexcept-%e4%b8%8e%e5%bc%82%e5%b8%b8%e5%ae%89%e5%85%a8%e6%80%a7%e7%9a%84%e5%85%b3%e7%b3%bb" aria-label="五、noexcept 与异常安全性的关系">五、<code>noexcept</code> 与异常安全性的关系</a><ul>
+                            
+                    <li>
+                        <a href="#51-%e5%bc%82%e5%b8%b8%e8%a7%84%e6%a0%bc%e4%bf%9d%e8%af%81" aria-label="5.1 异常规格保证">5.1 异常规格保证</a></li>
+                    <li>
+                        <a href="#52-%e6%8f%90%e9%ab%98%e4%bb%a3%e7%a0%81%e5%8f%af%e9%9d%a0%e6%80%a7" aria-label="5.2 提高代码可靠性">5.2 提高代码可靠性</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%85%adnoexcept-%e7%9a%84%e6%8e%a8%e5%af%bc%e4%b8%8e%e6%9d%a1%e4%bb%b6" aria-label="六、noexcept 的推导与条件">六、<code>noexcept</code> 的推导与条件</a><ul>
+                            
+                    <li>
+                        <a href="#61-%e6%9d%a1%e4%bb%b6-noexcept" aria-label="6.1 条件 noexcept">6.1 条件 <code>noexcept</code></a></li>
+                    <li>
+                        <a href="#62-noexcept-%e8%bf%90%e7%ae%97%e7%ac%a6" aria-label="6.2 noexcept 运算符">6.2 <code>noexcept</code> 运算符</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b8%83%e4%bb%a3%e7%a0%81%e7%a4%ba%e4%be%8b%e4%b8%8e%e5%88%86%e6%9e%90" aria-label="七、代码示例与分析">七、代码示例与分析</a><ul>
+                            
+                    <li>
+                        <a href="#71-%e7%a7%bb%e5%8a%a8%e6%93%8d%e4%bd%9c%e4%b8%ad%e7%9a%84-noexcept" aria-label="7.1 移动操作中的 noexcept">7.1 移动操作中的 <code>noexcept</code></a></li>
+                    <li>
+                        <a href="#72-%e6%9d%a1%e4%bb%b6-noexcept-%e7%9a%84%e5%ba%94%e7%94%a8" aria-label="7.2 条件 noexcept 的应用">7.2 条件 <code>noexcept</code> 的应用</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e5%85%ab%e6%b3%a8%e6%84%8f%e4%ba%8b%e9%a1%b9" aria-label="八、注意事项">八、注意事项</a><ul>
+                            
+                    <li>
+                        <a href="#81-%e9%81%bf%e5%85%8d%e8%af%af%e7%94%a8-noexcept" aria-label="8.1 避免误用 noexcept">8.1 避免误用 <code>noexcept</code></a></li>
+                    <li>
+                        <a href="#82-noexcept-%e4%b8%8e%e5%bc%82%e5%b8%b8%e4%bc%a0%e6%92%ad" aria-label="8.2 noexcept 与异常传播">8.2 <code>noexcept</code> 与异常传播</a></li>
+                    <li>
+                        <a href="#83-%e4%b8%80%e8%87%b4%e6%80%a7" aria-label="8.3 一致性">8.3 一致性</a></li></ul>
+                    </li>
+                    <li>
+                        <a href="#%e4%b9%9dnoexcept-%e5%af%b9%e6%80%a7%e8%83%bd%e7%9a%84%e5%bd%b1%e5%93%8d" aria-label="九、noexcept 对性能的影响">九、<code>noexcept</code> 对性能的影响</a><ul>
+                            
+                    <li>
+                        <a href="#91-%e7%bc%96%e8%af%91%e5%99%a8%e4%bc%98%e5%8c%96" aria-label="9.1 编译器优化">9.1 编译器优化</a></li>
+                    <li>
+                        <a href="#92-%e8%bf%90%e8%a1%8c%e6%97%b6%e5%bc%80%e9%94%80%e5%87%8f%e5%b0%91" aria-label="9.2 运行时开销减少">9.2 运行时开销减少</a>
+                    </li>
+                </ul>
+                </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+         
+         activeElement = elements[0];
+         const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+         document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+     }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+             const id = encodeURI(element.getAttribute('id')).toLowerCase();
+             if (element === activeElement){
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+             } else {
+                 document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+             }
+         })
+     }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+  <div class="post-content"><!-- more -->
+<h2 id="一引言">一、引言<a hidden class="anchor" aria-hidden="true" href="#一引言">#</a></h2>
+<p>在现代 C++ 编程中，异常处理机制是保障程序健壮性的重要手段。然而，异常的传播和捕获可能会带来额外的性能开销。为此，C++11 引入了新的异常规范关键字 <code>noexcept</code>，用于指明函数是否会抛出异常。</p>
+<hr>
+<h2 id="二noexcept-的基本概念">二、<code>noexcept</code> 的基本概念<a hidden class="anchor" aria-hidden="true" href="#二noexcept-的基本概念">#</a></h2>
+<h3 id="21-什么是-noexcept">2.1 什么是 <code>noexcept</code><a hidden class="anchor" aria-hidden="true" href="#21-什么是-noexcept">#</a></h3>
+<p><code>noexcept</code> 是 C++11 引入的关键字，用于声明函数不会抛出异常。其语法形式为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">func</span><span class="p">()</span> <span class="k">noexcept</span><span class="p">;</span>            <span class="c1">// 简单声明
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="nf">func</span><span class="p">()</span> <span class="k">noexcept</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>      <span class="c1">// 等价于 noexcept
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="nf">func</span><span class="p">()</span> <span class="k">noexcept</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>     <span class="c1">// 表示可能抛出异常
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="22-noexcept-与-throw-的区别">2.2 <code>noexcept</code> 与 <code>throw()</code> 的区别<a hidden class="anchor" aria-hidden="true" href="#22-noexcept-与-throw-的区别">#</a></h3>
+<p>在 C++98 中，<code>throw()</code> 用于声明函数不抛出异常。然而，<code>throw()</code> 存在一些局限性和问题，如编译器对其优化支持不足。<code>noexcept</code> 作为现代 C++ 的新特性，具有更好的性能和语义支持。</p>
+<hr>
+<h2 id="三noexcept-的作用与优势">三、<code>noexcept</code> 的作用与优势<a hidden class="anchor" aria-hidden="true" href="#三noexcept-的作用与优势">#</a></h2>
+<h3 id="31-性能优化">3.1 性能优化<a hidden class="anchor" aria-hidden="true" href="#31-性能优化">#</a></h3>
+<ul>
+<li><strong>内联优化</strong>：编译器可以对 <code>noexcept</code> 函数进行更激进的内联优化，因为可以确定函数不会抛出异常。</li>
+<li><strong>代码生成优化</strong>：减少了异常处理相关的代码生成，提高了运行时性能。</li>
+</ul>
+<h3 id="32-程序稳定性">3.2 程序稳定性<a hidden class="anchor" aria-hidden="true" href="#32-程序稳定性">#</a></h3>
+<ul>
+<li><strong>异常安全性</strong>：通过明确声明函数不会抛出异常，增强了代码的可预测性。</li>
+<li><strong>库设计</strong>：在设计库时，标记那些不会抛出异常的函数，可以帮助调用者更好地理解和使用接口。</li>
+</ul>
+<hr>
+<h2 id="四noexcept-的使用场景">四、<code>noexcept</code> 的使用场景<a hidden class="anchor" aria-hidden="true" href="#四noexcept-的使用场景">#</a></h2>
+<h3 id="41-移动构造函数和移动赋值运算符">4.1 移动构造函数和移动赋值运算符<a hidden class="anchor" aria-hidden="true" href="#41-移动构造函数和移动赋值运算符">#</a></h3>
+<p>在标准库中，许多容器的移动操作都要求相关的移动构造函数和移动赋值运算符是 <code>noexcept</code> 的。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyClass</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 移动构造函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">MyClass</span><span class="p">(</span><span class="n">MyClass</span><span class="o">&amp;&amp;</span> <span class="n">other</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 移动赋值运算符
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">MyClass</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">MyClass</span><span class="o">&amp;&amp;</span> <span class="n">other</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>原因</strong>：容器在元素移动时，需要保证操作的异常安全性。如果移动操作抛出异常，可能导致容器处于不一致状态。</p>
+<h3 id="42-析构函数">4.2 析构函数<a hidden class="anchor" aria-hidden="true" href="#42-析构函数">#</a></h3>
+<p>析构函数应该永远不抛出异常，因此默认情况下，析构函数被隐式地标记为 <code>noexcept</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyClass</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="o">~</span><span class="n">MyClass</span><span class="p">()</span> <span class="k">noexcept</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 析构代码
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>注意</strong>：如果析构函数可能抛出异常，可能导致程序在栈展开时调用 <code>std::terminate()</code>，使程序异常终止。</p>
+<h3 id="43-小型工具函数">4.3 小型工具函数<a hidden class="anchor" aria-hidden="true" href="#43-小型工具函数">#</a></h3>
+<p>对于一些简单的工具函数，如访问器（getter）、比较器等，通常不会抛出异常，可以标记为 <code>noexcept</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">getValue</span><span class="p">()</span> <span class="k">const</span> <span class="k">noexcept</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="五noexcept-与异常安全性的关系">五、<code>noexcept</code> 与异常安全性的关系<a hidden class="anchor" aria-hidden="true" href="#五noexcept-与异常安全性的关系">#</a></h2>
+<h3 id="51-异常规格保证">5.1 异常规格保证<a hidden class="anchor" aria-hidden="true" href="#51-异常规格保证">#</a></h3>
+<p>标记为 <code>noexcept</code> 的函数，编译器会认为其不会抛出异常。如果函数实际抛出了异常，程序将调用 <code>std::terminate()</code>，导致程序异常终止。</p>
+<h3 id="52-提高代码可靠性">5.2 提高代码可靠性<a hidden class="anchor" aria-hidden="true" href="#52-提高代码可靠性">#</a></h3>
+<p>通过使用 <code>noexcept</code>，可以在编译期发现异常安全性的问题，防止异常从不应该抛出的地方传播。</p>
+<hr>
+<h2 id="六noexcept-的推导与条件">六、<code>noexcept</code> 的推导与条件<a hidden class="anchor" aria-hidden="true" href="#六noexcept-的推导与条件">#</a></h2>
+<h3 id="61-条件-noexcept">6.1 条件 <code>noexcept</code><a hidden class="anchor" aria-hidden="true" href="#61-条件-noexcept">#</a></h3>
+<p><code>noexcept</code> 可以接收一个布尔表达式，根据表达式的值决定函数是否为 <code>noexcept</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">swap</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">(</span><span class="k">noexcept</span><span class="p">(</span><span class="n">T</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">declval</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&amp;&amp;&gt;</span><span class="p">())))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 交换实现
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>解释</strong>：上述代码中，<code>swap</code> 函数的 <code>noexcept</code> 性质取决于类型 <code>T</code> 的移动构造函数是否为 <code>noexcept</code>。</p>
+<h3 id="62-noexcept-运算符">6.2 <code>noexcept</code> 运算符<a hidden class="anchor" aria-hidden="true" href="#62-noexcept-运算符">#</a></h3>
+<p><code>noexcept</code> 也是一个运算符，用于判断表达式是否为 <code>noexcept</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">bool</span> <span class="n">isNoexcept</span> <span class="o">=</span> <span class="k">noexcept</span><span class="p">(</span><span class="n">func</span><span class="p">());</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>作用</strong>：<code>noexcept</code> 运算符返回一个编译期常量，指示表达式是否不会抛出异常。</p>
+<hr>
+<h2 id="七代码示例与分析">七、代码示例与分析<a hidden class="anchor" aria-hidden="true" href="#七代码示例与分析">#</a></h2>
+<h3 id="71-移动操作中的-noexcept">7.1 移动操作中的 <code>noexcept</code><a hidden class="anchor" aria-hidden="true" href="#71-移动操作中的-noexcept">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyClass</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MyClass</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MyClass</span><span class="p">(</span><span class="n">MyClass</span><span class="o">&amp;&amp;</span> <span class="n">other</span><span class="p">)</span> <span class="k">noexcept</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 移动构造实现
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">MyClass</span><span class="o">&gt;</span> <span class="n">vec1</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">MyClass</span><span class="o">&gt;</span> <span class="n">vec2</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">vec1</span><span class="p">);</span> <span class="c1">// 使用移动操作
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>分析</strong>：</p>
+<ul>
+<li><strong>性能提升</strong>：由于 <code>MyClass</code> 的移动构造函数是 <code>noexcept</code>，<code>std::vector</code> 可以安全地使用移动操作，避免了元素的拷贝。</li>
+<li><strong>异常安全</strong>：如果移动操作可能抛出异常，<code>std::vector</code> 可能会选择使用拷贝构造函数，导致性能下降。</li>
+</ul>
+<h3 id="72-条件-noexcept-的应用">7.2 条件 <code>noexcept</code> 的应用<a hidden class="anchor" aria-hidden="true" href="#72-条件-noexcept-的应用">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;type_traits&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">mySwap</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_nothrow_move_constructible</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">value</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">                                 <span class="n">std</span><span class="o">::</span><span class="n">is_nothrow_move_assignable</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">T</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">a</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">b</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">temp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>分析</strong>：</p>
+<ul>
+<li><strong>条件判断</strong>：<code>noexcept</code> 的条件取决于类型 <code>T</code> 是否具有 <code>noexcept</code> 的移动构造和移动赋值操作。</li>
+<li><strong>通用性</strong>：确保 <code>mySwap</code> 在处理不同类型时，都能正确地反映其异常安全性。</li>
+</ul>
+<hr>
+<h2 id="八注意事项">八、注意事项<a hidden class="anchor" aria-hidden="true" href="#八注意事项">#</a></h2>
+<h3 id="81-避免误用-noexcept">8.1 避免误用 <code>noexcept</code><a hidden class="anchor" aria-hidden="true" href="#81-避免误用-noexcept">#</a></h3>
+<ul>
+<li><strong>不确定是否抛出异常时，不要使用 <code>noexcept</code></strong>：如果函数内部调用了可能抛出异常的函数，不应轻易标记为 <code>noexcept</code>。</li>
+</ul>
+<h3 id="82-noexcept-与异常传播">8.2 <code>noexcept</code> 与异常传播<a hidden class="anchor" aria-hidden="true" href="#82-noexcept-与异常传播">#</a></h3>
+<ul>
+<li><strong>异常不应被隐藏</strong>：标记为 <code>noexcept</code> 的函数内部不应捕获并隐藏异常，这可能导致调试困难。</li>
+</ul>
+<h3 id="83-一致性">8.3 一致性<a hidden class="anchor" aria-hidden="true" href="#83-一致性">#</a></h3>
+<ul>
+<li><strong>遵循标准库的约定</strong>：在自定义类型中，实现与标准库一致的异常规范，有助于代码的可维护性和可移植性。</li>
+</ul>
+<hr>
+<h2 id="九noexcept-对性能的影响">九、<code>noexcept</code> 对性能的影响<a hidden class="anchor" aria-hidden="true" href="#九noexcept-对性能的影响">#</a></h2>
+<h3 id="91-编译器优化">9.1 编译器优化<a hidden class="anchor" aria-hidden="true" href="#91-编译器优化">#</a></h3>
+<ul>
+<li><strong>内联展开</strong>：编译器更倾向于内联 <code>noexcept</code> 函数，减少函数调用开销。</li>
+<li><strong>寄存器分配</strong>：编译器在寄存器分配上可以更加激进，因为无需考虑异常处理的栈展开。</li>
+</ul>
+<h3 id="92-运行时开销减少">9.2 运行时开销减少<a hidden class="anchor" aria-hidden="true" href="#92-运行时开销减少">#</a></h3>
+<ul>
+<li><strong>减少异常处理元数据</strong>：<code>noexcept</code> 函数可以减少编译器生成的异常处理相关元数据，减小二进制文件的体积。</li>
+<li><strong>提高分支预测准确性</strong>：减少异常路径，提高 CPU 的分支预测效率。</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://oheyu.github.io/zh/tags/cpp/">CPP</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://oheyu.github.io/zh/posts/tech/memcpy%E5%87%BD%E6%95%B0%E8%AF%A6%E8%A7%A3/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>memcpy()函数详解</span>
+  </a>
+  <a class="next" href="https://oheyu.github.io/zh/posts/tech/%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84move/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>移动语义的move</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://oheyu.github.io/zh/">史玉浩的个人博客</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

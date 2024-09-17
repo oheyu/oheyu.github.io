@@ -107,6 +107,27 @@
       <description>memcpy() 函数是 C 标准库中用于内存操作的一个重要函数，它被广泛用于在内存中复制数据块。在系统编程和低级数据操作中，memcpy() 是一个常用且高效的</description>
     </item>
     <item>
+      <title>Noexcept</title>
+      <link>https://oheyu.github.io/zh/posts/tech/noexcept/</link>
+      <pubDate>Sun, 28 Jan 2024 22:18:43 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/noexcept/</guid>
+      <description>一、引言 在现代 C++ 编程中，异常处理机制是保障程序健壮性的重要手段。然而，异常的传播和捕获可能会带来额外的性能开销。为此，C++11 引入了新的异</description>
+    </item>
+    <item>
+      <title>移动语义的move</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84move/</link>
+      <pubDate>Thu, 25 Jan 2024 22:07:21 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89%E7%9A%84move/</guid>
+      <description>一、引言 随着现代软件的复杂度和性能需求的不断提高，C++11 引入了移动语义（Move Semantics），为程序员提供了更高效的资源管理方式</description>
+    </item>
+    <item>
+      <title>为啥移动构造函数与移动赋值函数的参数不需要const</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E4%B8%BA%E5%95%A5%E7%A7%BB%E5%8A%A8%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E4%B8%8E%E7%A7%BB%E5%8A%A8%E8%B5%8B%E5%80%BC%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%82%E6%95%B0%E4%B8%8D%E9%9C%80%E8%A6%81const/</link>
+      <pubDate>Mon, 22 Jan 2024 21:43:19 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E4%B8%BA%E5%95%A5%E7%A7%BB%E5%8A%A8%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E4%B8%8E%E7%A7%BB%E5%8A%A8%E8%B5%8B%E5%80%BC%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%82%E6%95%B0%E4%B8%8D%E9%9C%80%E8%A6%81const/</guid>
+      <description>C++编程中，拷贝构造函数和赋值运算符是类设计中的基础组件，它们决定了对象如何被复制和赋值。随着C++11引入移动语义，移动构造函数和移动赋</description>
+    </item>
+    <item>
       <title>Inet_pton与inet_ntop</title>
       <link>https://oheyu.github.io/zh/posts/tech/inet_pton%E4%B8%8Einet_ntop/</link>
       <pubDate>Thu, 18 Jan 2024 20:47:35 +0800</pubDate>
