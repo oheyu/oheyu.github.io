@@ -107,6 +107,20 @@
       <description>memcpy() 函数是 C 标准库中用于内存操作的一个重要函数，它被广泛用于在内存中复制数据块。在系统编程和低级数据操作中，memcpy() 是一个常用且高效的</description>
     </item>
     <item>
+      <title>Linux的IO复用之select</title>
+      <link>https://oheyu.github.io/zh/posts/tech/linux%E7%9A%84io%E5%A4%8D%E7%94%A8%E4%B9%8Bselect/</link>
+      <pubDate>Tue, 19 Mar 2024 20:19:02 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/linux%E7%9A%84io%E5%A4%8D%E7%94%A8%E4%B9%8Bselect/</guid>
+      <description>select() 函数作为一种经典的多路复用机制，在处理多个文件描述符（如套接字）时扮演着重要角色。虽然已经过时，但对于我们进一步了解其他复用有极大的帮助。</description>
+    </item>
+    <item>
+      <title>网络通信中的读事件与写事件</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E4%B8%AD%E7%9A%84%E8%AF%BB%E4%BA%8B%E4%BB%B6%E4%B8%8E%E5%86%99%E4%BA%8B%E4%BB%B6/</link>
+      <pubDate>Tue, 30 Jan 2024 11:35:31 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E4%B8%AD%E7%9A%84%E8%AF%BB%E4%BA%8B%E4%BB%B6%E4%B8%8E%E5%86%99%E4%BA%8B%E4%BB%B6/</guid>
+      <description>理解网络通信中的读事件（Read Event）和写事件（Write Event）对于编写高性能、高可靠性的网络应用程序至关重要。 一、网络事件驱动</description>
+    </item>
+    <item>
       <title>Noexcept</title>
       <link>https://oheyu.github.io/zh/posts/tech/noexcept/</link>
       <pubDate>Sun, 28 Jan 2024 22:18:43 +0800</pubDate>

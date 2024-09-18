@@ -16,6 +16,13 @@
       <description>std::function 是一种通用的模板类，用于封装不同类型的可调用对象并通过统一的接口调用它们，使得处理这些可调用对象变得更加简洁、灵活。 一、什么是 std::f</description>
     </item>
     <item>
+      <title>Linux的IO复用之select</title>
+      <link>https://oheyu.github.io/zh/posts/tech/linux%E7%9A%84io%E5%A4%8D%E7%94%A8%E4%B9%8Bselect/</link>
+      <pubDate>Tue, 19 Mar 2024 20:19:02 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/linux%E7%9A%84io%E5%A4%8D%E7%94%A8%E4%B9%8Bselect/</guid>
+      <description>select() 函数作为一种经典的多路复用机制，在处理多个文件描述符（如套接字）时扮演着重要角色。虽然已经过时，但对于我们进一步了解其他复用有极大的帮助。</description>
+    </item>
+    <item>
       <title>Inet_pton与inet_ntop</title>
       <link>https://oheyu.github.io/zh/posts/tech/inet_pton%E4%B8%8Einet_ntop/</link>
       <pubDate>Thu, 18 Jan 2024 20:47:35 +0800</pubDate>
