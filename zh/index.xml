@@ -107,6 +107,20 @@
       <description>memcpy() 函数是 C 标准库中用于内存操作的一个重要函数，它被广泛用于在内存中复制数据块。在系统编程和低级数据操作中，memcpy() 是一个常用且高效的</description>
     </item>
     <item>
+      <title>一些常用的Linux套接字选项</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E4%B8%80%E4%BA%9B%E5%B8%B8%E7%94%A8%E7%9A%84linux%E5%A5%97%E6%8E%A5%E5%AD%97%E9%80%89%E9%A1%B9/</link>
+      <pubDate>Sat, 23 Mar 2024 21:50:55 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E4%B8%80%E4%BA%9B%E5%B8%B8%E7%94%A8%E7%9A%84linux%E5%A5%97%E6%8E%A5%E5%AD%97%E9%80%89%E9%A1%B9/</guid>
+      <description>前言 套接字选项是通过 setsockopt() 和 getsockopt() 函数设置和获取的，用于控制套接字的行为和特性。这些选项可以影响网络连接的性能、可靠性和安全性。合理配置套接字选项，</description>
+    </item>
+    <item>
+      <title>事件循环被阻塞时，为什么客户端与服务端仍能建立连接</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF%E8%A2%AB%E9%98%BB%E5%A1%9E%E6%97%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8E%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BB%8D%E8%83%BD%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5/</link>
+      <pubDate>Wed, 20 Mar 2024 09:10:27 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF%E8%A2%AB%E9%98%BB%E5%A1%9E%E6%97%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8E%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BB%8D%E8%83%BD%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5/</guid>
+      <description>一、事件驱动模型与事件循环 1.1 什么是事件驱动模型？ 事件驱动模型是一种程序设计范式，程序的流程由事件的发生和事件的处理来驱动。在网络服务器中，这</description>
+    </item>
+    <item>
       <title>Linux的IO复用之select</title>
       <link>https://oheyu.github.io/zh/posts/tech/linux%E7%9A%84io%E5%A4%8D%E7%94%A8%E4%B9%8Bselect/</link>
       <pubDate>Tue, 19 Mar 2024 20:19:02 +0800</pubDate>

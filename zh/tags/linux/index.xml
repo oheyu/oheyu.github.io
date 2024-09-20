@@ -16,6 +16,13 @@
       <description>std::function 是一种通用的模板类，用于封装不同类型的可调用对象并通过统一的接口调用它们，使得处理这些可调用对象变得更加简洁、灵活。 一、什么是 std::f</description>
     </item>
     <item>
+      <title>一些常用的Linux套接字选项</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E4%B8%80%E4%BA%9B%E5%B8%B8%E7%94%A8%E7%9A%84linux%E5%A5%97%E6%8E%A5%E5%AD%97%E9%80%89%E9%A1%B9/</link>
+      <pubDate>Sat, 23 Mar 2024 21:50:55 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E4%B8%80%E4%BA%9B%E5%B8%B8%E7%94%A8%E7%9A%84linux%E5%A5%97%E6%8E%A5%E5%AD%97%E9%80%89%E9%A1%B9/</guid>
+      <description>前言 套接字选项是通过 setsockopt() 和 getsockopt() 函数设置和获取的，用于控制套接字的行为和特性。这些选项可以影响网络连接的性能、可靠性和安全性。合理配置套接字选项，</description>
+    </item>
+    <item>
       <title>Linux的IO复用之select</title>
       <link>https://oheyu.github.io/zh/posts/tech/linux%E7%9A%84io%E5%A4%8D%E7%94%A8%E4%B9%8Bselect/</link>
       <pubDate>Tue, 19 Mar 2024 20:19:02 +0800</pubDate>
