@@ -107,6 +107,13 @@
       <description>memcpy() 函数是 C 标准库中用于内存操作的一个重要函数，它被广泛用于在内存中复制数据块。在系统编程和低级数据操作中，memcpy() 是一个常用且高效的</description>
     </item>
     <item>
+      <title>Ubuntu上命令行操作U盘内容</title>
+      <link>https://oheyu.github.io/zh/posts/tech/ubuntu%E4%B8%8A%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%93%8D%E4%BD%9Cu%E7%9B%98%E5%86%85%E5%AE%B9/</link>
+      <pubDate>Sun, 24 Mar 2024 09:41:05 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/ubuntu%E4%B8%8A%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%93%8D%E4%BD%9Cu%E7%9B%98%E5%86%85%E5%AE%B9/</guid>
+      <description>一. 引言 在 Ubuntu 等 Linux 系统中，使用命令行工具进行文件管理是一项基本且重要的技能。相比图形界面，命令行提供了更高的灵活性和自动化能力，尤其在处理大量</description>
+    </item>
+    <item>
       <title>一些常用的Linux套接字选项</title>
       <link>https://oheyu.github.io/zh/posts/tech/%E4%B8%80%E4%BA%9B%E5%B8%B8%E7%94%A8%E7%9A%84linux%E5%A5%97%E6%8E%A5%E5%AD%97%E9%80%89%E9%A1%B9/</link>
       <pubDate>Sat, 23 Mar 2024 21:50:55 +0800</pubDate>
