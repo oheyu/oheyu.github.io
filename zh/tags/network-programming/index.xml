@@ -6,8 +6,15 @@
     <description>Recent content in Network Programming on 史玉浩的个人博客</description>
     <generator>Hugo -- 0.127.0</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 20 Mar 2024 09:10:27 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 24 Mar 2024 08:25:15 +0800</lastBuildDate>
     <atom:link href="https://oheyu.github.io/zh/tags/network-programming/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>浅析epoll_event中的data成员</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E6%B5%85%E6%9E%90epoll_event%E4%B8%AD%E7%9A%84data%E6%88%90%E5%91%98/</link>
+      <pubDate>Sun, 24 Mar 2024 08:25:15 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E6%B5%85%E6%9E%90epoll_event%E4%B8%AD%E7%9A%84data%E6%88%90%E5%91%98/</guid>
+      <description>在 epoll 中，epoll_event 结构体负责存储每个 I/O 事件的相关信息，其中 data 成员是一个设计灵活的关键部分，它允许我们将任意类型的数据与特定的文件</description>
+    </item>
     <item>
       <title>事件循环被阻塞时，为什么客户端与服务端仍能建立连接</title>
       <link>https://oheyu.github.io/zh/posts/tech/%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF%E8%A2%AB%E9%98%BB%E5%A1%9E%E6%97%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8E%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BB%8D%E8%83%BD%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5/</link>

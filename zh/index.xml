@@ -114,6 +114,13 @@
       <description>一. 引言 在 Ubuntu 等 Linux 系统中，使用命令行工具进行文件管理是一项基本且重要的技能。相比图形界面，命令行提供了更高的灵活性和自动化能力，尤其在处理大量</description>
     </item>
     <item>
+      <title>浅析epoll_event中的data成员</title>
+      <link>https://oheyu.github.io/zh/posts/tech/%E6%B5%85%E6%9E%90epoll_event%E4%B8%AD%E7%9A%84data%E6%88%90%E5%91%98/</link>
+      <pubDate>Sun, 24 Mar 2024 08:25:15 +0800</pubDate>
+      <guid>https://oheyu.github.io/zh/posts/tech/%E6%B5%85%E6%9E%90epoll_event%E4%B8%AD%E7%9A%84data%E6%88%90%E5%91%98/</guid>
+      <description>在 epoll 中，epoll_event 结构体负责存储每个 I/O 事件的相关信息，其中 data 成员是一个设计灵活的关键部分，它允许我们将任意类型的数据与特定的文件</description>
+    </item>
+    <item>
       <title>一些常用的Linux套接字选项</title>
       <link>https://oheyu.github.io/zh/posts/tech/%E4%B8%80%E4%BA%9B%E5%B8%B8%E7%94%A8%E7%9A%84linux%E5%A5%97%E6%8E%A5%E5%AD%97%E9%80%89%E9%A1%B9/</link>
       <pubDate>Sat, 23 Mar 2024 21:50:55 +0800</pubDate>
